@@ -84,13 +84,15 @@ export function CreateLinkForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border-primary/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b border-primary/10">
+        <CardTitle className="flex items-center gap-2 text-primary">
           <Plus className="w-5 h-5" />
           Create Payment Link
         </CardTitle>
-        <CardDescription>Generate a compliant payment link with optional KYC and sanctions checking</CardDescription>
+        <CardDescription className="text-muted-foreground">
+          Generate trusted crypto payment links with built-in compliance and security
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
@@ -133,7 +135,11 @@ export function CreateLinkForm() {
           </div>
         </div>
 
-        <Button onClick={handleCreateLink} className="w-full" disabled={isCreating}>
+        <Button 
+          onClick={handleCreateLink} 
+          className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transition-all duration-300" 
+          disabled={isCreating}
+        >
           {isCreating ? "Creating Link..." : "Create Payment Link"}
         </Button>
 
