@@ -3,6 +3,9 @@ import { CreateLinkForm } from "@/components/create-link-form"
 import { PaymentLinksTable } from "@/components/payment-links-table"
 import { PaymentsTable } from "@/components/payments-table"
 import { StatsCards } from "@/components/stats-cards"
+import { Button } from "@/components/ui/button"
+import { Play, ExternalLink } from "lucide-react"
+import Link from "next/link"
 
 export default function DashboardPage() {
   return (
@@ -17,6 +20,25 @@ export default function DashboardPage() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Crypto Payments You Can Trust - Built with compliance and security at the core
           </p>
+          <div className="flex justify-center gap-4 mt-6">
+            <Link href="/demo">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Play className="w-5 h-5 mr-2" />
+                Live Demo
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+            >
+              <ExternalLink className="w-5 h-5 mr-2" />
+              View Docs
+            </Button>
+          </div>
         </div>
 
         <StatsCards />
