@@ -1,0 +1,225 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum KycLevel {
+  NONE
+  LOW
+  FULL
+}
+
+enum PolicyStatus {
+  DRAFT
+  ACTIVE
+  DISABLED
+}
+
+enum PaymentLinkStatus {
+  DRAFT
+  ACTIVE
+  DISABLED
+}
+
+enum LinkTxnStatus {
+  INIT
+  BLOCKED
+  ROUTING
+  SETTLED
+  FAILED
+}
+
+enum PayrollBatchStatus {
+  DRAFT
+  READY
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum PayrollItemStatus {
+  PENDING
+  BLOCKED
+  QUEUED
+  SENT
+  FAILED
+}
+
+enum ReceiptEntityType {
+  LINK
+  PAYROLL
+  VAULT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  wallet    String?  @unique
+  kycLevel  KycLevel @default(NONE)
+  createdAt DateTime @default(now())
+
+  // Relations
+  policies        Policy[]
+  vaults          Vault[]
+  paymentLinks    PaymentLink[]
+  payrollBatches  PayrollBatch[]
+  receipts        Receipt[]
+
+  @@map("users")
+}
+
+model Policy {
+  id           String       @id @default(cuid())
+  name         String
+  rules        Json
+  status       PolicyStatus @default(DRAFT)
+  createdByUserId String
+  createdAt    DateTime     @default(now())
+
+  // Relations
+  creator      User           @relation(fields: [createdByUserId], references: [id])
+  vaults       Vault[]
+  paymentLinks PaymentLink[]
+  payrollBatches PayrollBatch[]
+
+  @@map("policies")
+}
+
+model Vault {
+  id        String   @id @default(cuid())
+  ownerUserId String
+  policyId   String
+  chainId    Int
+  createdAt  DateTime @default(now())
+
+  // Relations
+  owner    User   @relation(fields: [ownerUserId], references: [id])
+  policy   Policy @relation(fields: [policyId], references: [id])
+  receipts Receipt[]
+
+  @@map("vaults")
+}
+
+model Allowlist {
+  id        String   @id @default(cuid())
+  vaultId   String
+  wallet    String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@map("allowlists")
+}
+
+model RiskProfile {
+  id        String   @id @default(cuid())
+  wallet    String   @unique
+  score     Int      // 0-100
+  reasons   String[]
+  updatedAt DateTime @updatedAt
+
+  @@map("risk_profiles")
+}
+
+model PaymentLink {
+  id             String            @id @default(cuid())
+  code           String            @unique
+  creatorUserId  String
+  sourceToken    String
+  destStable     String
+  amountMin      Float
+  amountMax      Float
+  requiresKyc    Boolean           @default(false)
+  policyId       String?
+  status         PaymentLinkStatus @default(DRAFT)
+  qrSvg          String?
+  createdAt      DateTime          @default(now())
+
+  // Relations
+  creator   User      @relation(fields: [creatorUserId], references: [id])
+  policy    Policy?   @relation(fields: [policyId], references: [id])
+  txns      LinkTxn[]
+  receipts  Receipt[]
+
+  @@map("payment_links")
+}
+
+model LinkTxn {
+  id            String        @id @default(cuid())
+  paymentLinkId String
+  txHash        String?
+  srcWallet     String
+  amountIn      Float
+  destStable    String
+  amountOut     Float?
+  status        LinkTxnStatus @default(INIT)
+  reasons       String[]
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  paymentLink PaymentLink @relation(fields: [paymentLinkId], references: [id])
+
+  @@map("link_txns")
+}
+
+model PayrollBatch {
+  id           String             @id @default(cuid())
+  creatorUserId String
+  chainId      Int
+  status       PayrollBatchStatus @default(DRAFT)
+  rules        Json
+  createdAt    DateTime           @default(now())
+
+  // Relations
+  creator User          @relation(fields: [creatorUserId], references: [id])
+  policy  Policy?       @relation(fields: [id], references: [id])
+  items   PayrollItem[]
+  receipts Receipt[]
+
+  @@map("payroll_batches")
+}
+
+model PayrollItem {
+  id                  String             @id @default(cuid())
+  batchId             String
+  recipientWallet     String
+  amount              Float
+  currency            String
+  kycLevelRequired    KycLevel
+  status              PayrollItemStatus  @default(PENDING)
+  reasons             String[]
+  createdAt           DateTime           @default(now())
+
+  // Relations
+  batch PayrollBatch @relation(fields: [batchId], references: [id])
+
+  @@map("payroll_items")
+}
+
+model Receipt {
+  id         String           @id @default(cuid())
+  entityType ReceiptEntityType
+  entityId   String
+  pdfPath    String
+  json       Json
+  createdAt  DateTime         @default(now())
+
+  // Relations
+  user   User?         @relation(fields: [userId], references: [id])
+  userId String?
+  vault  Vault?        @relation(fields: [vaultId], references: [id])
+  vaultId String?
+  paymentLink PaymentLink? @relation(fields: [paymentLinkId], references: [id])
+  paymentLinkId String?
+  payrollBatch PayrollBatch? @relation(fields: [payrollBatchId], references: [id])
+  payrollBatchId String?
+
+  @@map("receipts")
+}
+
