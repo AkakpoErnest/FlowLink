@@ -33,6 +33,12 @@ export default function LoginPage() {
         description: `Connected to ${address.slice(0, 6)}...${address.slice(-4)}`,
       })
       router.push('/dashboard')
+    } else {
+      toast({
+        title: "Connect Your Wallet",
+        description: "Please connect your wallet first using the Connect Wallet button above",
+        variant: "destructive"
+      })
     }
   }
 
@@ -281,15 +287,30 @@ export default function LoginPage() {
                     <ConnectButton />
                   </div>
                   
-                  {isConnected && (
-                    <Button 
-                      onClick={handleWalletConnect}
-                      className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
-                    >
-                      <Wallet className="mr-2 h-4 w-4" />
-                      Continue to Dashboard
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
+                  {isConnected ? (
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                        <p className="text-emerald-800 font-medium">✅ Wallet Connected!</p>
+                        <p className="text-sm text-emerald-600">
+                          {address?.slice(0, 6)}...{address?.slice(-4)}
+                        </p>
+                      </div>
+                      <Button 
+                        onClick={handleWalletConnect}
+                        className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                      >
+                        <Wallet className="mr-2 h-4 w-4" />
+                        Continue to Dashboard
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-blue-800 font-medium">🔗 Click "Connect Wallet" above</p>
+                      <p className="text-sm text-blue-600">
+                        Then click "Continue to Dashboard" to proceed
+                      </p>
+                    </div>
                   )}
 
                   <div className="text-center text-sm text-muted-foreground">

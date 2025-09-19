@@ -7,7 +7,7 @@ import { DashboardOverview } from "@/components/dashboard-overview"
 import { PaymentLinksModule } from "@/components/payment-links-module"
 import { ComplianceVaultsModule } from "@/components/compliance-vaults-module"
 import { PayrollRailsModule } from "@/components/payroll-rails-module"
-import { RwaSubscriptionsModule } from "@/components/rwa-subscriptions-module"
+import { RWASubscriptionsModule } from "@/components/rwa-subscriptions-module"
 import { ThemeProvider } from "@/components/theme-provider"
 import { useAuthStore } from '@/lib/auth'
 
@@ -70,7 +70,7 @@ export default function DashboardPage() {
             <PayrollRailsModule />
             
             {/* RWA Subscriptions Module */}
-            <RwaSubscriptionsModule />
+            <RWASubscriptionsModule />
           </div>
         </div>
       </DashboardLayout>

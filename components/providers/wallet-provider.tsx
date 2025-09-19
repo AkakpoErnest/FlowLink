@@ -10,7 +10,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 
 const config = getDefaultConfig({
   appName: 'FlowLink',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo-project-id',
   chains: [mainnet, polygon, arbitrum, optimism],
   transports: {
     [mainnet.id]: http(),
