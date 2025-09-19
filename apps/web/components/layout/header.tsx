@@ -10,10 +10,10 @@ export function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">FL</span>
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+              <img src="/flowlink-logo.png" alt="FlowLink" className="w-6 h-6" />
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
               FlowLink
             </span>
           </Link>
@@ -40,9 +40,11 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Wallet className="h-4 w-4 mr-2" />
-            Connect Wallet
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/login">
+              <Wallet className="h-4 w-4 mr-2" />
+              Sign In
+            </Link>
           </Button>
           <Button variant="ghost" size="icon">
             <Bell className="h-4 w-4" />
@@ -50,7 +52,7 @@ export function Header() {
           <Button variant="ghost" size="icon">
             <Settings className="h-4 w-4" />
           </Button>
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
             <User className="h-4 w-4 text-white" />
           </div>
         </div>

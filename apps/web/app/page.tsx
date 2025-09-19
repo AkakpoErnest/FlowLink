@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { StatsCards } from '@/components/stats-cards'
 import { 
   Shield, 
   Zap, 
@@ -20,37 +19,37 @@ export default function LandingPage() {
       icon: Shield,
       title: "Compliance First",
       description: "Built-in KYC verification and sanctions screening for every transaction",
-      link: "/policies",
+      link: "/login",
       linkText: "Build Policy",
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-100",
     },
     {
       icon: Zap,
       title: "Instant Payments",
       description: "Create payment links with QR codes for instant cross-chain settlements",
-      link: "/links",
+      link: "/login",
       linkText: "Create Link",
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      color: "text-green-600",
+      bgColor: "bg-green-100",
     },
     {
       icon: Building2,
       title: "Smart Vaults",
       description: "Deploy compliant vaults with customizable policy rules and allowlists",
-      link: "/vaults",
+      link: "/login",
       linkText: "Deploy Vault",
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      color: "text-teal-600",
+      bgColor: "bg-teal-100",
     },
     {
       icon: Briefcase,
       title: "Payroll Automation",
       description: "Upload CSV files and automatically process compliant payroll batches",
-      link: "/payroll",
+      link: "/login",
       linkText: "Process Payroll",
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-100",
     },
   ]
 
@@ -73,15 +72,29 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-background via-slate-900/50 to-emerald-900/30 relative overflow-hidden">
+      {/* Background Image */}
+      <div className="absolute inset-0 opacity-10">
+        <img 
+          src="/hero-bg.jpeg" 
+          alt="FlowLink Background" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="relative z-10">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="space-y-4">
-            <Badge variant="outline" className="mb-4">
-              🚀 Production Ready • Trusted by 500+ Companies
-            </Badge>
-            <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 bg-clip-text text-transparent leading-tight">
+            {/* Flow Identity Image */}
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/flow-identity.jpeg" 
+                alt="FlowLink Visual Identity" 
+                className="w-32 h-32 rounded-2xl shadow-2xl border-2 border-emerald-500/20"
+              />
+            </div>
+            <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600 bg-clip-text text-transparent leading-tight">
               Flow across chains.<br />Link the future.
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
@@ -90,8 +103,8 @@ export default function LandingPage() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg">
-              <Link href="/links">
+            <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg">
+              <Link href="/login">
                 Get Started Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -120,10 +133,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="container mx-auto px-4 py-16">
-        <StatsCards />
-      </div>
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-20">
@@ -136,7 +145,15 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-shadow duration-300">
+            <Card key={index} className="group hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+              <div className="relative">
+                <img 
+                  src={index === 0 ? "/image5.jpeg" : index === 1 ? "/image6.jpeg" : index === 2 ? "/image7.jpeg" : "/crypto-emotions.jpeg"}
+                  alt={feature.title}
+                  className="w-full h-32 object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
+                />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
+              </div>
               <CardHeader>
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-lg ${feature.bgColor} group-hover:scale-110 transition-transform duration-300`}>
@@ -167,6 +184,13 @@ export default function LandingPage() {
       <div className="bg-muted/50 py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/image6.jpeg" 
+                alt="Enterprise Security" 
+                className="w-24 h-24 rounded-full border-4 border-emerald-500/30 shadow-lg object-cover"
+              />
+            </div>
             <h2 className="text-4xl font-bold mb-4">Why choose FlowLink?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Built for enterprises that demand compliance, security, and reliability.
@@ -190,13 +214,23 @@ export default function LandingPage() {
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-2xl mx-auto space-y-8">
+          <div className="flex justify-center mb-8">
+            <div className="relative">
+              <img 
+                src="/image7.jpeg" 
+                alt="Get Started" 
+                className="w-32 h-32 rounded-2xl shadow-2xl border border-emerald-500/20 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-2xl"></div>
+            </div>
+          </div>
           <h2 className="text-4xl font-bold">Ready to get started?</h2>
           <p className="text-xl text-muted-foreground">
             Join thousands of businesses already using FlowLink for compliant crypto payments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              <Link href="/links">
+            <Button asChild size="lg" className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+              <Link href="/login">
                 Create Your First Payment Link
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -208,6 +242,7 @@ export default function LandingPage() {
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
