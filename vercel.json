@@ -1,7 +1,7 @@
 {
-  "buildCommand": "cd ../.. && pnpm install && pnpm build --filter=@flowlink/web",
+  "buildCommand": "npm install && npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "pnpm install",
-  "devCommand": "pnpm dev"
+  "installCommand": "npm install",
+  "devCommand": "npm run dev"
 }
