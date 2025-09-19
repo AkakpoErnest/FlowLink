@@ -1,400 +1,330 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import { Wallet, Shield, AlertTriangle, CheckCircle, Download, ExternalLink } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-
-interface PaymentLink {
-  id: string
-  amount: string
-  memo: string
-  requireKYC: boolean
-  checkSanctions: boolean
-  merchant: string
-  token: string
-  status: string
-}
-
-interface ComplianceStatus {
-  kycOk: boolean
-  sanctionsOk: boolean
-  loading: boolean
-}
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { 
+  Wallet, 
+  QrCode, 
+  Shield, 
+  CheckCircle, 
+  XCircle, 
+  Clock,
+  ArrowRight,
+  ExternalLink
+} from "lucide-react"
 
 interface PaymentFlowProps {
-  paymentLink: PaymentLink
+  paymentLink: {
+    id: string
+    code: string
+    sourceToken: string
+    destStable: string
+    amountMin: number
+    amountMax: number
+    requiresKyc: boolean
+  }
 }
 
 export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
-  const [walletConnected, setWalletConnected] = useState(false)
-  const [walletAddress, setWalletAddress] = useState("")
-  const [compliance, setCompliance] = useState<ComplianceStatus>({
-    kycOk: false,
-    sanctionsOk: false,
-    loading: false,
-  })
-  const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle")
-  const [txHash, setTxHash] = useState("")
-  const { toast } = useToast()
+  const [step, setStep] = useState<'form' | 'compliance' | 'route' | 'settle' | 'complete'>('form')
+  const [amount, setAmount] = useState('')
+  const [wallet, setWallet] = useState('')
+  const [countryCode, setCountryCode] = useState('SG')
+  const [complianceResult, setComplianceResult] = useState<any>(null)
+  const [routeQuote, setRouteQuote] = useState<any>(null)
+  const [loading, setLoading] = useState(false)
 
-  const connectWallet = async () => {
-    // Mock wallet connection - in production, use Web3 library
-    const mockAddress = "0x1234567890123456789012345678901234567890"
-    setWalletAddress(mockAddress)
-    setWalletConnected(true)
+  const steps = [
+    { id: 'form', title: 'Payment Details', icon: Wallet },
+    { id: 'compliance', title: 'Compliance Check', icon: Shield },
+    { id: 'route', title: 'Route Quote', icon: ArrowRight },
+    { id: 'settle', title: 'Settle', icon: CheckCircle },
+    { id: 'complete', title: 'Complete', icon: CheckCircle },
+  ]
 
-    toast({
-      title: "Wallet Connected",
-      description: "Successfully connected to your wallet",
-    })
-
-    // Trigger compliance check
-    checkCompliance(mockAddress)
-  }
-
-  const checkCompliance = async (address: string) => {
-    setCompliance((prev) => ({ ...prev, loading: true }))
-
-    try {
-      const response = await fetch(
-        `/api/compliance/preflight?addr=${encodeURIComponent(address)}&linkId=${encodeURIComponent(paymentLink.id)}`,
-      )
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to check compliance")
+  const handleComplianceCheck = async () => {
+    setLoading(true)
+    setStep('compliance')
+    
+    // Simulate compliance check
+    setTimeout(() => {
+      const result = {
+        allowed: Math.random() > 0.2, // 80% success rate
+        riskScore: Math.floor(Math.random() * 40) + 60, // 60-100
+        reasons: Math.random() > 0.2 ? ['KYC verified', 'Sanctions clear', 'Geofencing passed'] : ['High risk detected'],
+        kycRequired: paymentLink.requiresKyc && Math.random() > 0.5,
       }
+      setComplianceResult(result)
+      setStep('route')
+      setLoading(false)
+    }, 2000)
+  }
 
-      setCompliance({
-        kycOk: data.compliance.kycOk,
-        sanctionsOk: data.compliance.sanctionsOk,
-        loading: false,
-      })
-
-      if (!data.compliance.kycOk || !data.compliance.sanctionsOk) {
-        toast({
-          title: "Compliance Check Failed",
-          description: "Please resolve compliance issues before proceeding",
-          variant: "destructive",
-        })
-      } else {
-        toast({
-          title: "Compliance Check Passed",
-          description: "All compliance requirements met",
-        })
+  const handleGetRoute = async () => {
+    setLoading(true)
+    
+    // Simulate route quote
+    setTimeout(() => {
+      const quote = {
+        amountOut: (parseFloat(amount) * 0.998).toString(),
+        dex: '1inch',
+        steps: [
+          {
+            dex: '1inch',
+            tokenIn: paymentLink.sourceToken,
+            tokenOut: paymentLink.destStable,
+            amountIn: amount,
+            amountOut: (parseFloat(amount) * 0.998).toString(),
+          }
+        ]
       }
-    } catch (error) {
-      console.error("Error checking compliance:", error)
-      setCompliance((prev) => ({ ...prev, loading: false }))
-      toast({
-        title: "Compliance Check Error",
-        description: error instanceof Error ? error.message : "Failed to check compliance",
-        variant: "destructive",
-      })
-    }
+      setRouteQuote(quote)
+      setStep('settle')
+      setLoading(false)
+    }, 1500)
   }
 
-  const processPayment = async () => {
-    setPaymentStatus("processing")
-
-    try {
-      // Mock payment processing - in production, interact with smart contract
-      const mockTxHash = "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"
-
-      // Record payment in backend
-      const response = await fetch("/api/payments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          linkId: paymentLink.id,
-          payer: walletAddress,
-          txHash: mockTxHash,
-          kycPassed: compliance.kycOk,
-          sanctionsChecked: compliance.sanctionsOk,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to record payment")
-      }
-
-      setTxHash(mockTxHash)
-      setPaymentStatus("success")
-
-      toast({
-        title: "Payment Successful",
-        description: "Your payment has been processed successfully",
-      })
-    } catch (error) {
-      console.error("Error processing payment:", error)
-      setPaymentStatus("error")
-      toast({
-        title: "Payment Failed",
-        description: error instanceof Error ? error.message : "Failed to process payment",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const downloadReceipt = async () => {
-    try {
-      const response = await fetch("/api/receipts/pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          txHash,
-          linkId: paymentLink.id,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to generate receipt")
-      }
-
-      // Open download URL
-      window.open(data.receipt.downloadUrl, "_blank")
-
-      toast({
-        title: "Receipt Generated",
-        description: "Your payment receipt is ready for download",
-      })
-    } catch (error) {
-      console.error("Error generating receipt:", error)
-      toast({
-        title: "Receipt Error",
-        description: error instanceof Error ? error.message : "Failed to generate receipt",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const canPay =
-    walletConnected &&
-    !compliance.loading &&
-    (!paymentLink.requireKYC || compliance.kycOk) &&
-    (!paymentLink.checkSanctions || compliance.sanctionsOk) &&
-    paymentStatus === "idle"
-
-  if (paymentStatus === "success") {
-    return (
-      <div className="max-w-md mx-auto">
-        <Card>
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <CheckCircle className="w-16 h-16 text-green-500" />
-            </div>
-            <CardTitle className="text-green-600">Payment Successful!</CardTitle>
-            <CardDescription>Your payment has been processed and recorded on the blockchain</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Amount:</span>
-                <span className="font-medium">
-                  ${paymentLink.amount} {paymentLink.token}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Transaction:</span>
-                <span className="font-mono text-xs">
-                  {txHash.slice(0, 10)}...{txHash.slice(-8)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Status:</span>
-                <Badge variant="default">Confirmed</Badge>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="flex gap-2">
-              <Button className="flex-1" onClick={downloadReceipt}>
-                <Download className="w-4 h-4 mr-2" />
-                Download Receipt
-              </Button>
-              <Button variant="outline" size="icon">
-                <ExternalLink className="w-4 h-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  if (paymentStatus === "error") {
-    return (
-      <div className="max-w-md mx-auto">
-        <Card>
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <AlertTriangle className="w-16 h-16 text-destructive" />
-            </div>
-            <CardTitle className="text-destructive">Payment Failed</CardTitle>
-            <CardDescription>There was an error processing your payment</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => setPaymentStatus("idle")} className="w-full">
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  const handleSettle = async () => {
+    setLoading(true)
+    
+    // Simulate settlement
+    setTimeout(() => {
+      setStep('complete')
+      setLoading(false)
+    }, 2000)
   }
 
   return (
-    <div className="max-w-md mx-auto space-y-6">
-      {/* Payment Details Card */}
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Progress Steps */}
       <Card>
-        <CardHeader>
-          <CardTitle>Payment Request</CardTitle>
-          <CardDescription>Complete your secure payment below</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Amount:</span>
-              <span className="text-2xl font-bold">${paymentLink.amount}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Token:</span>
-              <span className="font-medium">{paymentLink.token}</span>
-            </div>
-            {paymentLink.memo && (
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Memo:</span>
-                <span className="font-medium">{paymentLink.memo}</span>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            {steps.map((stepItem, index) => (
+              <div key={stepItem.id} className="flex items-center">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
+                  steps.indexOf(step) >= index 
+                    ? 'bg-primary border-primary text-primary-foreground' 
+                    : 'border-muted-foreground text-muted-foreground'
+                }`}>
+                  <stepItem.icon className="h-5 w-5" />
+                </div>
+                <div className="ml-3 hidden sm:block">
+                  <p className={`text-sm font-medium ${
+                    steps.indexOf(step) >= index ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
+                    {stepItem.title}
+                  </p>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className="w-16 h-0.5 bg-muted mx-4 hidden sm:block" />
+                )}
               </div>
-            )}
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <h4 className="font-medium">Compliance Requirements</h4>
-            <div className="flex gap-2">
-              {paymentLink.requireKYC && <Badge variant="secondary">KYC Required</Badge>}
-              {paymentLink.checkSanctions && <Badge variant="secondary">Sanctions Check</Badge>}
-              {!paymentLink.requireKYC && !paymentLink.checkSanctions && (
-                <Badge variant="outline">No Requirements</Badge>
-              )}
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* Wallet Connection */}
-      {!walletConnected ? (
+      {/* Payment Form */}
+      {step === 'form' && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wallet className="w-5 h-5" />
-              Connect Wallet
+              <QrCode className="h-5 w-5" />
+              Payment Link: {paymentLink.code}
             </CardTitle>
-            <CardDescription>Connect your wallet to proceed with the payment</CardDescription>
+            <p className="text-sm text-muted-foreground">
+              {paymentLink.sourceToken} → {paymentLink.destStable}
+              {paymentLink.requiresKyc && ' • KYC Required'}
+            </p>
           </CardHeader>
-          <CardContent>
-            <Button onClick={connectWallet} className="w-full">
-              Connect Wallet
+          <CardContent className="space-y-6">
+            <div>
+              <Label htmlFor="amount">Amount ({paymentLink.sourceToken})</Label>
+              <Input
+                id="amount"
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder={`${paymentLink.amountMin} - ${paymentLink.amountMax}`}
+                min={paymentLink.amountMin}
+                max={paymentLink.amountMax}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="wallet">Wallet Address</Label>
+              <Input
+                id="wallet"
+                type="text"
+                value={wallet}
+                onChange={(e) => setWallet(e.target.value)}
+                placeholder="0x..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="country">Country Code</Label>
+              <select
+                id="country"
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+              >
+                <option value="SG">Singapore (SG)</option>
+                <option value="HK">Hong Kong (HK)</option>
+                <option value="MY">Malaysia (MY)</option>
+                <option value="TH">Thailand (TH)</option>
+              </select>
+            </div>
+
+            <Button 
+              onClick={handleComplianceCheck}
+              disabled={!amount || !wallet}
+              className="w-full"
+              size="lg"
+            >
+              {loading ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  Checking Compliance...
+                </>
+              ) : (
+                <>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Verify & Continue
+                </>
+              )}
             </Button>
           </CardContent>
         </Card>
-      ) : (
-        <>
-          {/* Compliance Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Compliance Check
-              </CardTitle>
-              <CardDescription>Verifying compliance requirements</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-sm">
-                <span className="text-muted-foreground">Wallet: </span>
-                <span className="font-mono">
-                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+      )}
+
+      {/* Compliance Results */}
+      {step === 'compliance' && complianceResult && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Compliance Check Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className={`p-4 rounded-lg border ${
+              complianceResult.allowed ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+            }`}>
+              <div className="flex items-center gap-2 mb-2">
+                {complianceResult.allowed ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-red-600" />
+                )}
+                <span className={`font-medium ${
+                  complianceResult.allowed ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {complianceResult.allowed ? 'Compliance Check Passed' : 'Compliance Check Failed'}
                 </span>
               </div>
-
-              {compliance.loading ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  Checking compliance...
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm">Risk Score:</span>
+                  <Badge variant={complianceResult.riskScore > 80 ? 'success' : 'warning'}>
+                    {complianceResult.riskScore}/100
+                  </Badge>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {paymentLink.requireKYC && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">KYC Verification</span>
-                      <Badge variant={compliance.kycOk ? "default" : "destructive"}>
-                        {compliance.kycOk ? "Passed" : "Failed"}
-                      </Badge>
-                    </div>
-                  )}
-                  {paymentLink.checkSanctions && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Sanctions Check</span>
-                      <Badge variant={compliance.sanctionsOk ? "default" : "destructive"}>
-                        {compliance.sanctionsOk ? "Clear" : "Blocked"}
-                      </Badge>
-                    </div>
-                  )}
+                <div>
+                  <span className="text-sm font-medium">Reasons:</span>
+                  <ul className="text-sm text-muted-foreground ml-4">
+                    {complianceResult.reasons.map((reason: string, index: number) => (
+                      <li key={index}>• {reason}</li>
+                    ))}
+                  </ul>
                 </div>
-              )}
+              </div>
+            </div>
 
-              {!compliance.loading && (!compliance.kycOk || !compliance.sanctionsOk) && (
-                <Alert>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    {!compliance.kycOk && "KYC verification required. "}
-                    {!compliance.sanctionsOk && "Address appears on sanctions list. "}
-                    Please resolve these issues before proceeding.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Action */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Complete Payment</CardTitle>
-              <CardDescription>
-                {canPay ? "Ready to process your payment" : "Resolve compliance issues to continue"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={processPayment} disabled={!canPay || paymentStatus === "processing"} className="w-full">
-                {paymentStatus === "processing" ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin mr-2" />
-                    Processing Payment...
-                  </>
-                ) : (
-                  `Pay $${paymentLink.amount} ${paymentLink.token}`
-                )}
+            {complianceResult.allowed && (
+              <Button onClick={handleGetRoute} className="w-full" size="lg">
+                <ArrowRight className="h-4 w-4 mr-2" />
+                Get Route Quote
               </Button>
-            </CardContent>
-          </Card>
-        </>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Route Quote */}
+      {step === 'route' && routeQuote && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ArrowRight className="h-5 w-5" />
+              Route Quote
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
+              <div>
+                <span className="text-sm font-medium">Input:</span>
+                <p className="text-lg">{amount} {paymentLink.sourceToken}</p>
+              </div>
+              <div>
+                <span className="text-sm font-medium">Output:</span>
+                <p className="text-lg">{routeQuote.amountOut} {paymentLink.destStable}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <span className="text-sm font-medium">Route Details:</span>
+              {routeQuote.steps.map((step: any, index: number) => (
+                <div key={index} className="p-3 border rounded-lg">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{step.dex}</span>
+                    <Badge variant="outline">{step.amountOut} {step.tokenOut}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button onClick={handleSettle} className="w-full" size="lg">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Settle Payment
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Settlement Complete */}
+      {step === 'complete' && (
+        <Card>
+          <CardContent className="pt-6 text-center space-y-6">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-8 w-8 text-green-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-green-600 mb-2">Payment Successful!</h3>
+              <p className="text-muted-foreground">
+                Your payment has been processed and settled successfully.
+              </p>
+            </div>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm">
+                Transaction Hash: 0x{Math.random().toString(16).substr(2, 64)}
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <Button variant="outline" className="flex-1">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Receipt
+              </Button>
+              <Button className="flex-1" onClick={() => window.location.reload()}>
+                Make Another Payment
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
