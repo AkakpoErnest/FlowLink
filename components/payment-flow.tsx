@@ -107,7 +107,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             {steps.map((stepItem, index) => (
               <div key={stepItem.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                  steps.indexOf(step) >= index 
+                  steps.findIndex(s => s.id === step) >= index 
                     ? 'bg-primary border-primary text-primary-foreground' 
                     : 'border-muted-foreground text-muted-foreground'
                 }`}>
@@ -115,7 +115,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
                 </div>
                 <div className="ml-3 hidden sm:block">
                   <p className={`text-sm font-medium ${
-                    steps.indexOf(step) >= index ? 'text-primary' : 'text-muted-foreground'
+                    steps.findIndex(s => s.id === step) >= index ? 'text-primary' : 'text-muted-foreground'
                   }`}>
                     {stepItem.title}
                   </p>

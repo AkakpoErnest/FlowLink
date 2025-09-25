@@ -82,10 +82,10 @@ export function PaymentLinksTable() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVE': return 'success'
-      case 'DRAFT': return 'warning'
-      case 'DISABLED': return 'destructive'
-      default: return 'outline'
+      case 'ACTIVE': return 'success' as const
+      case 'DRAFT': return 'warning' as const
+      case 'DISABLED': return 'destructive' as const
+      default: return 'outline' as const
     }
   }
 
