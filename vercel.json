@@ -2,5 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "your-project-id-here"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "your-project-id-here"
+    }
+  }
 }
