@@ -52,8 +52,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">FL</span>
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center p-1">
+                <img 
+                  src="/flowlink-logo-new.png" 
+                  alt="FlowLink Logo" 
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-card-foreground">FlowLink</h1>

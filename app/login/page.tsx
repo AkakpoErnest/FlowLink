@@ -121,11 +121,13 @@ export default function LoginPage() {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <img 
-                src="/image5.jpeg" 
-                alt="FlowLink Visual Identity" 
-                className="w-20 h-20 rounded-2xl shadow-2xl border-2 border-emerald-500/20 object-cover"
-              />
+              <div className="w-20 h-20 rounded-2xl shadow-2xl border-2 border-emerald-500/20 bg-white/10 backdrop-blur-sm flex items-center justify-center p-3">
+                <img 
+                  src="/flowlink-logo-new.png" 
+                  alt="FlowLink Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
               FlowLink
