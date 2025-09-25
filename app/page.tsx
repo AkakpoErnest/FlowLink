@@ -139,6 +139,33 @@ export default function LandingPage() {
       </div>
 
 
+      {/* Animation Showcase Section */}
+      <div className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4">Experience the Future of Payments</h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Watch how FlowLink transforms crypto payments with seamless, secure transactions.
+          </p>
+        </div>
+        
+        <div className="flex justify-center mb-16">
+          <div className="relative">
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
+              <iframe 
+                src="https://assets.pinterest.com/ext/embed.html?id=908882768553734677" 
+                height="714" 
+                width="345" 
+                frameBorder="0" 
+                scrolling="no"
+                className="rounded-2xl shadow-xl"
+                title="FlowLink Payment Animation"
+              />
+            </div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+          </div>
+        </div>
+      </div>
+
       {/* Features Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-16">
@@ -220,15 +247,21 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <div className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <img 
-                src="/image7.jpeg" 
-                alt="Get Started" 
-                className="w-32 h-32 rounded-2xl shadow-2xl border border-emerald-500/20 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-2xl"></div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-emerald-500/20 shadow-2xl">
+                <iframe 
+                  src="https://assets.pinterest.com/ext/embed.html?id=908882768553734677" 
+                  height="357" 
+                  width="172" 
+                  frameBorder="0" 
+                  scrolling="no"
+                  className="rounded-2xl shadow-xl"
+                  title="FlowLink Payment Demo"
+                />
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
             </div>
           </div>
           <h2 className="text-4xl font-bold">Ready to get started?</h2>
