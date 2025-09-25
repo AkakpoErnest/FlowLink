@@ -86,13 +86,18 @@ export default function LandingPage() {
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="space-y-4">
-            {/* Flow Identity Image */}
+            {/* FlowLink Logo Section */}
             <div className="flex justify-center mb-8">
-              <img 
-                src="/flow-identity.jpeg" 
-                alt="FlowLink Visual Identity" 
-                className="w-32 h-32 rounded-2xl shadow-2xl border-2 border-emerald-500/20"
-              />
+              <div className="relative">
+                <div className="w-40 h-40 rounded-3xl shadow-2xl border-4 border-emerald-500/30 bg-white/10 backdrop-blur-sm flex items-center justify-center p-6 hover:scale-105 transition-transform duration-300">
+                  <img 
+                    src="/flowlink-logo-new.png" 
+                    alt="FlowLink Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+              </div>
             </div>
             <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600 bg-clip-text text-transparent leading-tight">
               Flow across chains.<br />Link the future.
@@ -185,11 +190,13 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <div className="flex justify-center mb-8">
-              <img 
-                src="/image6.jpeg" 
-                alt="Enterprise Security" 
-                className="w-24 h-24 rounded-full border-4 border-emerald-500/30 shadow-lg object-cover"
-              />
+              <div className="w-24 h-24 rounded-full border-4 border-emerald-500/30 shadow-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
+                <img 
+                  src="/flowlink-logo-new.png" 
+                  alt="FlowLink Logo" 
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
             <h2 className="text-4xl font-bold mb-4">Why choose FlowLink?</h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
