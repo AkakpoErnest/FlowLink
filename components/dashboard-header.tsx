@@ -10,7 +10,7 @@ export function DashboardHeader() {
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 p-2">
               <Image 
-                src="/flowlink-logo.png" 
+                src="/flowlink-logo-new.png" 
                 alt="FlowLink Logo" 
                 width={32} 
                 height={32}
