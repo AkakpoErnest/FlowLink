@@ -148,7 +148,8 @@ export default function LandingPage() {
           </p>
         </div>
         
-        <div className="flex justify-center mb-16">
+        <div className="flex flex-col lg:flex-row justify-center items-center gap-8 mb-16">
+          {/* First Animation */}
           <div className="relative">
             <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
               <iframe 
@@ -158,10 +159,26 @@ export default function LandingPage() {
                 frameBorder="0" 
                 scrolling="no"
                 className="rounded-2xl shadow-xl"
-                title="FlowLink Payment Animation"
+                title="FlowLink Payment Animation 1"
               />
             </div>
             <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+          </div>
+          
+          {/* Second Animation */}
+          <div className="relative">
+            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
+              <iframe 
+                src="https://assets.pinterest.com/ext/embed.html?id=9710955442580080" 
+                height="1167" 
+                width="600" 
+                frameBorder="0" 
+                scrolling="no"
+                className="rounded-2xl shadow-xl"
+                title="FlowLink Payment Animation 2"
+              />
+            </div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-green-500/20 to-teal-500/20 rounded-3xl blur-xl -z-10"></div>
           </div>
         </div>
       </div>
