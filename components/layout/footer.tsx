@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <div className="h-6 w-6 rounded bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-                <span className="text-white font-bold text-xs">FL</span>
+                <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-4 h-4" />
               </div>
               <span className="font-bold text-lg">FlowLink</span>
             </div>

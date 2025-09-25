@@ -11,7 +11,7 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <Link href="/" className="flex items-center space-x-2">
             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-              <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-6 h-6" />
+              <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-8 h-8" />
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
               FlowLink
