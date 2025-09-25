@@ -72,36 +72,75 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-slate-900/50 to-emerald-900/30 relative overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0 opacity-10">
-        <img 
-          src="/hero-bg.jpeg" 
-          alt="FlowLink Background" 
-          className="w-full h-full object-cover"
-        />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950/20 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Floating geometric shapes */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-32 h-32 bg-green-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        <div className="absolute bottom-40 left-20 w-24 h-24 bg-teal-500/10 rounded-full blur-xl animate-pulse delay-2000"></div>
+        <div className="absolute bottom-20 right-10 w-16 h-16 bg-emerald-400/10 rounded-full blur-lg animate-pulse delay-3000"></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        
+        {/* Gradient orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-emerald-500/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-l from-green-500/5 to-transparent rounded-full blur-3xl"></div>
       </div>
       <div className="relative z-10">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="space-y-4">
-            {/* FlowLink Logo Section */}
-            <div className="flex justify-center mb-8">
-              <div className="relative">
-                <div className="w-40 h-40 rounded-3xl shadow-2xl border-4 border-emerald-500/30 bg-white/10 backdrop-blur-sm flex items-center justify-center p-6 hover:scale-105 transition-transform duration-300">
+            {/* FlowLink Logo Section with Unique Design */}
+            <div className="flex justify-center mb-12">
+              <div className="relative group">
+                {/* Outer rotating ring */}
+                <div className="absolute -inset-8 w-56 h-56 rounded-full border-2 border-emerald-500/20 animate-spin-slow">
+                  <div className="absolute top-0 left-1/2 w-3 h-3 bg-emerald-400 rounded-full transform -translate-x-1/2"></div>
+                </div>
+                
+                {/* Main logo container */}
+                <div className="w-40 h-40 rounded-3xl shadow-2xl border-2 border-emerald-500/40 bg-gradient-to-br from-slate-900/80 via-emerald-950/60 to-slate-800/80 backdrop-blur-xl flex items-center justify-center p-6 group-hover:scale-105 transition-all duration-500 relative overflow-hidden">
+                  {/* Animated background pattern */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0%,transparent_70%)]"></div>
                   <img 
                     src="/flowlink-logo-new.png" 
                     alt="FlowLink Logo" 
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-contain relative z-10"
                   />
                 </div>
-                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+                
+                {/* Glow effects */}
+                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-3xl blur-2xl -z-10 group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="absolute -inset-10 bg-gradient-to-r from-emerald-400/5 via-green-400/5 to-teal-400/5 rounded-3xl blur-3xl -z-20"></div>
               </div>
             </div>
-            <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-emerald-400 via-green-500 to-teal-600 bg-clip-text text-transparent leading-tight">
-              Flow across chains.<br />Link the future.
-            </h1>
+            
+            {/* Unique Typography */}
+            <div className="relative">
+              <h1 className="text-6xl md:text-7xl font-black bg-gradient-to-r from-emerald-300 via-green-400 to-teal-500 bg-clip-text text-transparent leading-tight tracking-tight">
+                <span className="inline-block hover:scale-105 transition-transform duration-300">Flow</span>{" "}
+                <span className="inline-block hover:scale-105 transition-transform duration-300 delay-100">across</span>{" "}
+                <span className="inline-block hover:scale-105 transition-transform duration-300 delay-200">chains.</span>
+                <br />
+                <span className="inline-block hover:scale-105 transition-transform duration-300 delay-300">Link</span>{" "}
+                <span className="inline-block hover:scale-105 transition-transform duration-300 delay-400">the</span>{" "}
+                <span className="inline-block hover:scale-105 transition-transform duration-300 delay-500">future.</span>
+              </h1>
+              
+              {/* Text glow effect */}
+              <div className="absolute inset-0 text-6xl md:text-7xl font-black text-emerald-500/20 blur-sm -z-10">
+                <span className="inline-block">Flow</span>{" "}
+                <span className="inline-block">across</span>{" "}
+                <span className="inline-block">chains.</span>
+                <br />
+                <span className="inline-block">Link</span>{" "}
+                <span className="inline-block">the</span>{" "}
+                <span className="inline-block">future.</span>
+              </div>
+            </div>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Crypto Payments You Can Trust - Create compliant payment links with built-in KYC, sanctions screening, and enterprise-grade security.
             </p>
@@ -139,49 +178,6 @@ export default function LandingPage() {
       </div>
 
 
-      {/* Animation Showcase Section */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Experience the Future of Payments</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Watch how FlowLink transforms crypto payments with seamless, secure transactions.
-          </p>
-        </div>
-        
-        <div className="flex flex-col lg:flex-row justify-center items-center gap-8 mb-16">
-          {/* First Animation */}
-          <div className="relative">
-            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
-              <iframe 
-                src="https://assets.pinterest.com/ext/embed.html?id=908882768553734677" 
-                height="714" 
-                width="345" 
-                frameBorder="0" 
-                scrolling="no"
-                className="rounded-2xl shadow-xl"
-                title="FlowLink Payment Animation 1"
-              />
-            </div>
-            <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
-          </div>
-          
-          {/* Second Animation */}
-          <div className="relative">
-            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 border border-emerald-500/20 shadow-2xl">
-              <iframe 
-                src="https://assets.pinterest.com/ext/embed.html?id=9710955442580080" 
-                height="1167" 
-                width="600" 
-                frameBorder="0" 
-                scrolling="no"
-                className="rounded-2xl shadow-xl"
-                title="FlowLink Payment Animation 2"
-              />
-            </div>
-            <div className="absolute -inset-4 bg-gradient-to-r from-green-500/20 to-teal-500/20 rounded-3xl blur-xl -z-10"></div>
-          </div>
-        </div>
-      </div>
 
       {/* Features Section */}
       <div className="container mx-auto px-4 py-20">
@@ -267,18 +263,12 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="flex justify-center mb-8">
             <div className="relative">
-              <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-emerald-500/20 shadow-2xl">
-                <iframe 
-                  src="https://assets.pinterest.com/ext/embed.html?id=908882768553734677" 
-                  height="357" 
-                  width="172" 
-                  frameBorder="0" 
-                  scrolling="no"
-                  className="rounded-2xl shadow-xl"
-                  title="FlowLink Payment Demo"
-                />
-              </div>
-              <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl -z-10"></div>
+              <img 
+                src="/image7.jpeg" 
+                alt="Get Started" 
+                className="w-32 h-32 rounded-2xl shadow-2xl border border-emerald-500/20 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-transparent rounded-2xl"></div>
             </div>
           </div>
           <h2 className="text-4xl font-bold">Ready to get started?</h2>
