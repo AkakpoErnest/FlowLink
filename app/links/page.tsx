@@ -9,12 +9,12 @@ import { CreateLinkForm } from '@/components/create-link-form'
 import { PaymentLinksTable } from '@/components/payment-links-table'
 import { Plus, Link2, QrCode, Eye, Copy, ExternalLink, DollarSign, Users, TrendingUp } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
-import { useAccount } from 'wagmi'
 
 export default function PaymentLinksPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const { user, isAuthenticated } = useAuthStore()
-  const { address, isConnected } = useAccount()
+  // Mock wallet connection status for now
+  const isConnected = false
 
   // Mock data for demonstration
   const stats = [
