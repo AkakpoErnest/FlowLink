@@ -1,7 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import Header from '@/components/layout/header'
+import Footer from '@/components/layout/footer'
+import { WorkingAIChat } from '@/components/ai/working-ai-chat'
 import { 
   Shield, 
   Zap, 
@@ -10,10 +16,14 @@ import {
   ArrowRight,
   CheckCircle,
   Globe,
-  Lock
+  Lock,
+  Bot,
+  MessageCircle,
+  Sparkles
 } from 'lucide-react'
 
 export default function LandingPage() {
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false)
   const features = [
     {
       icon: Shield,
@@ -73,6 +83,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950/20 to-slate-900 relative overflow-hidden">
+      <Header />
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Floating geometric shapes */}
@@ -89,8 +100,8 @@ export default function LandingPage() {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-l from-green-500/5 to-transparent rounded-full blur-3xl"></div>
       </div>
       <div className="relative z-10">
-      {/* Hero Section */}
-      <div className="container mx-auto px-4 py-20 text-center">
+       {/* Hero Section */}
+       <div className="container mx-auto px-4 pt-32 pb-20 text-center">
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="space-y-4">
             {/* FlowLink Logo Section with Unique Design */}
@@ -180,78 +191,127 @@ export default function LandingPage() {
 
 
       {/* Features Section */}
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4">Everything you need for compliant crypto payments</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      <div id="features" className="container mx-auto px-4 py-16 relative">
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-emerald-500/5 to-transparent rounded-full blur-2xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-l from-green-500/5 to-transparent rounded-full blur-2xl"></div>
+        </div>
+
+        <div className="text-center mb-12 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
+            <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span className="text-emerald-400 text-sm font-medium">Features</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-300 via-green-400 to-teal-500 bg-clip-text text-transparent">
+            Everything you need for compliant crypto payments
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             From individual payment links to enterprise payroll automation, FlowLink scales with your needs.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
           {features.map((feature, index) => (
-            <Card key={index} className="group hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-              <div className="relative">
-                <img 
-                  src={index === 0 ? "/image5.jpeg" : index === 1 ? "/image6.jpeg" : index === 2 ? "/image7.jpeg" : "/crypto-emotions.jpeg"}
-                  alt={feature.title}
-                  className="w-full h-32 object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent"></div>
-              </div>
-              <CardHeader>
-                <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${feature.bgColor} group-hover:scale-110 transition-transform duration-300`}>
-                    <feature.icon className={`h-6 w-6 ${feature.color}`} />
+            <div key={index} className="group relative">
+              <Card className="relative overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-slate-900/60 via-emerald-950/30 to-slate-800/60 backdrop-blur-sm group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-emerald-500/10">
+                {/* Subtle background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/3 via-transparent to-green-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <CardContent className="p-6 relative z-10">
+                  {/* Icon */}
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      <div className={`p-3 rounded-xl ${feature.bgColor} group-hover:scale-110 transition-all duration-300 shadow-md`}>
+                        <feature.icon className={`h-6 w-6 ${feature.color}`} />
+                      </div>
+                      {/* Subtle glow */}
+                      <div className={`absolute inset-0 p-3 rounded-xl ${feature.bgColor} blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <CardDescription className="text-base leading-relaxed">
-                  {feature.description}
-                </CardDescription>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={feature.link}>
-                    {feature.linkText}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+                  
+                  {/* Title */}
+                  <h3 className="text-lg font-semibold text-white text-center mb-3 group-hover:text-emerald-300 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed group-hover:text-emerald-100 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </CardContent>
+                
+                {/* Hover glow effect */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+              </Card>
+            </div>
           ))}
         </div>
       </div>
 
       {/* Benefits Section */}
-      <div className="bg-muted/50 py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
+      <div className="relative py-24 overflow-hidden">
+        {/* Background with gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-950/50 via-emerald-950/30 to-slate-900/50"></div>
+        
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/3 left-1/3 w-64 h-64 bg-gradient-to-r from-emerald-500/10 to-transparent rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-80 h-80 bg-gradient-to-l from-green-500/10 to-transparent rounded-full blur-2xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-gradient-to-r from-teal-500/10 to-transparent rounded-full blur-xl animate-pulse delay-2000"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-20">
             <div className="flex justify-center mb-8">
-              <div className="w-24 h-24 rounded-full border-4 border-emerald-500/30 shadow-lg bg-white/10 backdrop-blur-sm flex items-center justify-center p-4">
-                <img 
-                  src="/flowlink-logo-new.png" 
-                  alt="FlowLink Logo" 
-                  className="w-full h-full object-contain"
-                />
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-full border-4 border-emerald-500/30 shadow-2xl bg-gradient-to-br from-slate-900/80 via-emerald-950/60 to-slate-800/80 backdrop-blur-xl flex items-center justify-center p-6 group-hover:scale-105 transition-all duration-500">
+                  <img 
+                    src="/flowlink-logo-new.png" 
+                    alt="FlowLink Logo" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-full blur-xl -z-10 group-hover:blur-2xl transition-all duration-500"></div>
               </div>
             </div>
-            <h2 className="text-4xl font-bold mb-4">Why choose FlowLink?</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span className="text-emerald-400 text-sm font-medium">Why Choose Us</span>
+            </div>
+            
+            <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-emerald-300 via-green-400 to-teal-500 bg-clip-text text-transparent">
+              Why choose FlowLink?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Built for enterprises that demand compliance, security, and reliability.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {benefits.map((benefit, index) => (
-              <div key={index} className="text-center space-y-4">
-                <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <benefit.icon className="h-8 w-8 text-primary" />
+              <div key={index} className="group text-center space-y-6 relative">
+                <div className="relative">
+                  <div className="mx-auto w-20 h-20 bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-teal-500/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg backdrop-blur-sm border border-emerald-500/20">
+                    <benefit.icon className="h-10 w-10 text-emerald-400 group-hover:text-emerald-300 transition-colors duration-300" />
+                  </div>
+                  {/* Icon glow effect */}
+                  <div className="absolute inset-0 mx-auto w-20 h-20 bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-300"></div>
                 </div>
-                <h3 className="text-xl font-semibold">{benefit.title}</h3>
-                <p className="text-muted-foreground">{benefit.description}</p>
+                
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold text-white group-hover:text-emerald-300 transition-colors duration-300">
+                    {benefit.title}
+                  </h3>
+                  <p className="text-lg text-muted-foreground group-hover:text-emerald-100 transition-colors duration-300 leading-relaxed">
+                    {benefit.description}
+                  </p>
+                </div>
+                
+                {/* Floating particles */}
+                <div className="absolute top-2 right-2 w-1 h-1 bg-emerald-400/60 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-green-400/40 rounded-full animate-pulse delay-1000"></div>
               </div>
             ))}
           </div>
@@ -287,10 +347,61 @@ export default function LandingPage() {
                 Talk to Sales
               </Link>
             </Button>
+           </div>
+         </div>
+       </div>
+
+
+      {/* Floating AI Assistant */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="group relative">
+          {/* Main AI Button */}
+          <button 
+            onClick={() => setIsAIChatOpen(true)}
+            className="w-16 h-16 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 group-hover:scale-110 relative overflow-hidden flex items-center justify-center"
+          >
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-green-500/20 rounded-full animate-pulse"></div>
+            
+            {/* Main AI Icon */}
+            <Bot className="h-8 w-8 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            
+            {/* Sparkle animations */}
+            <div className="absolute top-1 right-1 w-2 h-2 bg-white rounded-full animate-ping opacity-75"></div>
+            <div className="absolute bottom-1 left-1 w-1.5 h-1.5 bg-emerald-200 rounded-full animate-pulse delay-1000"></div>
+          </button>
+          
+          {/* Animated rings */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/30 to-green-600/30 animate-ping"></div>
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500/20 to-green-600/20 animate-pulse delay-1000"></div>
+          
+          {/* Floating particles around the button */}
+          <div className="absolute -top-2 -left-2 w-1 h-1 bg-emerald-400 rounded-full animate-ping delay-500"></div>
+          <div className="absolute -bottom-2 -right-2 w-1 h-1 bg-green-400 rounded-full animate-ping delay-700"></div>
+          <div className="absolute top-1/2 -left-4 w-1.5 h-1.5 bg-teal-400 rounded-full animate-ping delay-1000"></div>
+          
+          {/* Tooltip on hover */}
+          <div className="absolute bottom-full right-0 mb-4 opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none transform translate-y-2 group-hover:translate-y-0">
+            <div className="bg-gradient-to-r from-slate-900/95 to-emerald-950/95 text-white px-4 py-3 rounded-xl shadow-2xl border border-emerald-500/20 backdrop-blur-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse" />
+                <div className="text-sm font-semibold">AI Assistant</div>
+              </div>
+              <div className="text-xs text-emerald-300">Click to chat with FlowLink AI!</div>
+              <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900/95"></div>
+            </div>
           </div>
         </div>
       </div>
-      </div>
+
+      <Footer />
+      
+      {/* AI Chat Modal */}
+      <WorkingAIChat 
+        isOpen={isAIChatOpen} 
+        onClose={() => setIsAIChatOpen(false)} 
+      />
+       </div>
     </div>
   )
 }

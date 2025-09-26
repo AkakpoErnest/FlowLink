@@ -7,8 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { useAccount, useConnect } from 'wagmi'
 import { useAuthStore } from '@/lib/auth'
 import { Wallet, Shield, ArrowRight, Mail, Lock, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
@@ -21,25 +19,14 @@ export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   
-  const { login, signup, isLoading, connectWallet } = useAuthStore()
-  const { address, isConnected } = useAccount()
+  const { login, signup, isLoading } = useAuthStore()
 
   // Handle wallet connection
   const handleWalletConnect = () => {
-    if (isConnected && address) {
-      connectWallet(address)
-      toast({
-        title: "Wallet Connected!",
-        description: `Connected to ${address.slice(0, 6)}...${address.slice(-4)}`,
-      })
-      router.push('/dashboard')
-    } else {
-      toast({
-        title: "Connect Your Wallet",
-        description: "Please connect your wallet first using the Connect Wallet button above",
-        variant: "destructive"
-      })
-    }
+    toast({
+      title: "Wallet Connect",
+      description: "Wallet connection will be available soon!",
+    })
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -121,18 +108,46 @@ export default function LoginPage() {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 rounded-2xl shadow-2xl border-2 border-emerald-500/20 bg-white/10 backdrop-blur-sm flex items-center justify-center p-3">
-                <img 
-                  src="/flowlink-logo-new.png" 
-                  alt="FlowLink Logo" 
-                  className="w-full h-full object-contain"
-                />
+              <div className="relative group">
+                {/* Outer rotating ring */}
+                <div className="absolute -inset-4 w-28 h-28 rounded-full border-2 border-emerald-500/30 animate-spin-slow">
+                  <div className="absolute top-0 left-1/2 w-2 h-2 bg-emerald-400 rounded-full transform -translate-x-1/2"></div>
+                </div>
+                
+                {/* Main logo container */}
+                <div className="w-20 h-20 rounded-2xl shadow-2xl border-2 border-emerald-500/20 bg-gradient-to-br from-slate-900/80 via-emerald-950/60 to-slate-800/80 backdrop-blur-xl flex items-center justify-center p-3 group-hover:scale-105 transition-all duration-500 relative overflow-hidden">
+                  {/* Animated background pattern */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.1)_0%,transparent_70%)]"></div>
+                  <img 
+                    src="/flowlink-logo-new.png" 
+                    alt="FlowLink Logo" 
+                    className="w-full h-full object-contain relative z-10 group-hover:rotate-12 transition-transform duration-300"
+                  />
+                </div>
+                
+                {/* Glow effects */}
+                <div className="absolute -inset-6 bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-2xl blur-2xl -z-10 group-hover:blur-3xl transition-all duration-500"></div>
+                <div className="absolute -inset-8 bg-gradient-to-r from-emerald-400/5 via-green-400/5 to-teal-400/5 rounded-2xl blur-3xl -z-20"></div>
+                
+                {/* Floating particles around the logo */}
+                <div className="absolute -top-2 -left-2 w-1 h-1 bg-emerald-400 rounded-full animate-ping delay-500"></div>
+                <div className="absolute -bottom-2 -right-2 w-1 h-1 bg-green-400 rounded-full animate-ping delay-700"></div>
+                <div className="absolute top-1/2 -left-3 w-1.5 h-1.5 bg-teal-400 rounded-full animate-ping delay-1000"></div>
               </div>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-              FlowLink
-            </h1>
-            <p className="text-muted-foreground mt-2">Crypto Payments You Can Trust</p>
+            
+            {/* Animated title */}
+            <div className="relative">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent group-hover:from-green-400 group-hover:to-emerald-500 transition-all duration-300">
+                FlowLink
+              </h1>
+              {/* Text glow effect */}
+              <div className="absolute inset-0 text-3xl font-bold text-emerald-500/20 blur-sm -z-10">
+                FlowLink
+              </div>
+            </div>
+            
+            <p className="text-muted-foreground mt-2 animate-pulse">Crypto Payments You Can Trust</p>
           </div>
 
           {/* Auth Tabs */}
@@ -285,35 +300,21 @@ export default function LoginPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="text-center">
-                    <ConnectButton />
+                  <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-blue-800 font-medium">🔗 Wallet Connection</p>
+                    <p className="text-sm text-blue-600">
+                      Wallet connection feature will be available soon!
+                    </p>
                   </div>
                   
-                  {isConnected ? (
-                    <div className="space-y-4">
-                      <div className="text-center p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                        <p className="text-emerald-800 font-medium">✅ Wallet Connected!</p>
-                        <p className="text-sm text-emerald-600">
-                          {address?.slice(0, 6)}...{address?.slice(-4)}
-                        </p>
-                      </div>
-                      <Button 
-                        onClick={handleWalletConnect}
-                        className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
-                      >
-                        <Wallet className="mr-2 h-4 w-4" />
-                        Continue to Dashboard
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <p className="text-blue-800 font-medium">🔗 Click "Connect Wallet" above</p>
-                      <p className="text-sm text-blue-600">
-                        Then click "Continue to Dashboard" to proceed
-                      </p>
-                    </div>
-                  )}
+                  <Button 
+                    onClick={handleWalletConnect}
+                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Coming Soon
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
 
                   <div className="text-center text-sm text-muted-foreground">
                     Supported wallets: MetaMask, WalletConnect, Coinbase Wallet, and more

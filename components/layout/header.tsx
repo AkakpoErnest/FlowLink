@@ -1,61 +1,110 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Wallet, Settings, User, Bell } from "lucide-react"
+'use client'
 
-export function Header() {
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Menu, X } from 'lucide-react'
+import { useState } from 'react'
+
+export default function Header() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-              <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-8 h-8" />
+    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-emerald-500/20">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-3 group">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-6 h-6" />
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
+            <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent group-hover:from-green-400 group-hover:to-emerald-500 transition-all duration-300">
               FlowLink
             </span>
           </Link>
-          <Badge variant="outline" className="hidden sm:flex">
-            Crypto Payments You Can Trust
-          </Badge>
-        </div>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <Link href="/links" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Payment Links
-          </Link>
-          <Link href="/vaults" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Vaults
-          </Link>
-          <Link href="/policies" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Policies
-          </Link>
-          <Link href="/payroll" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            Payroll
-          </Link>
-        </nav>
+          {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link 
+                href="/#features" 
+                className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+              >
+                Features
+              </Link>
+              <Link 
+                href="/#android-app" 
+                className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+              >
+                Android App
+              </Link>
+              <Link 
+                href="https://card3.ai/profile?card_code=qXIOdwGUB" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+              >
+                Contact
+              </Link>
+            </nav>
 
-        {/* Actions */}
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/login">
-              <Wallet className="h-4 w-4 mr-2" />
-              Sign In
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Bell className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon">
-            <Settings className="h-4 w-4" />
-          </Button>
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-            <User className="h-4 w-4 text-white" />
+          {/* Desktop CTA Buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Button asChild variant="ghost" className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10">
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button asChild className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+              <Link href="/login">Get Started</Link>
+            </Button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="md:hidden text-muted-foreground hover:text-emerald-400"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
         </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-emerald-500/20 bg-slate-950/95 backdrop-blur-xl">
+            <nav className="py-4 space-y-4">
+              <Link 
+                href="/#features" 
+                className="block text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Features
+              </Link>
+              <Link 
+                href="/#android-app" 
+                className="block text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Android App
+              </Link>
+              <Link 
+                href="https://card3.ai/profile?card_code=qXIOdwGUB" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-muted-foreground hover:text-emerald-400 transition-colors duration-300 font-medium"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Contact
+              </Link>
+              <div className="pt-4 border-t border-emerald-500/20 space-y-3">
+                <Button asChild variant="ghost" className="w-full text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10">
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
+                </Button>
+                <Button asChild className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700">
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)}>Get Started</Link>
+                </Button>
+              </div>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   )
