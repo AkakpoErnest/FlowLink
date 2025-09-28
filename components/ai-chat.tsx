@@ -15,7 +15,9 @@ import {
   MessageCircle,
   Sparkles,
   X,
-  Move
+  Move,
+  Brain,
+  Zap
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +35,7 @@ interface AiChatProps {
 export default function AiChat({ className }: AiChatProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false)
   const [position, setPosition] = useState({ x: 24, y: 300 })
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [messages, setMessages] = useState<Message[]>([
@@ -67,6 +70,19 @@ export default function AiChat({ className }: AiChatProps) {
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
+      // Show welcome popup after a short delay
+      setTimeout(() => {
+        setShowWelcomePopup(true)
+      }, 500)
+      
+      // Auto-hide popup after 4 seconds
+      const hideTimer = setTimeout(() => {
+        setShowWelcomePopup(false)
+      }, 4000)
+      
+      return () => clearTimeout(hideTimer)
+    } else {
+      setShowWelcomePopup(false)
     }
   }, [isOpen])
 
@@ -208,11 +224,24 @@ export default function AiChat({ className }: AiChatProps) {
               {/* Animated background */}
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-green-400/20 animate-pulse"></div>
               
-              {/* Icon with bounce animation */}
-              <MessageCircle className={cn(
-                "h-6 w-6 relative z-10 transition-transform duration-300",
-                "group-hover:scale-110 group-hover:rotate-12"
-              )} />
+              {/* AI Assistant Icon */}
+              <div className="relative z-10 flex items-center justify-center">
+                {/* Brain icon as main AI symbol */}
+                <Brain className={cn(
+                  "h-5 w-5 text-white transition-transform duration-300",
+                  "group-hover:scale-110 group-hover:rotate-12"
+                )} />
+                
+                {/* Sparkles around the brain */}
+                <Sparkles className={cn(
+                  "absolute -top-1 -right-1 h-3 w-3 text-emerald-200 animate-pulse",
+                  "group-hover:animate-spin"
+                )} />
+                <Sparkles className={cn(
+                  "absolute -bottom-1 -left-1 h-2 w-2 text-green-200 animate-pulse delay-500",
+                  "group-hover:animate-bounce"
+                )} />
+              </div>
               
               {/* Drag indicator */}
               <div className="absolute -bottom-1 -right-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -241,13 +270,16 @@ export default function AiChat({ className }: AiChatProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-green-500/20 animate-pulse">
-                    <Bot className="h-4 w-4 text-emerald-400 animate-bounce" />
+                    <div className="relative">
+                      <Brain className="h-4 w-4 text-emerald-400 animate-bounce" />
+                      <Sparkles className="absolute -top-1 -right-1 h-2 w-2 text-emerald-300 animate-pulse" />
+                    </div>
                   </div>
                   <CardTitle className="text-sm font-semibold text-white animate-fade-in">
                     FlowLink AI Assistant
                   </CardTitle>
                   <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse">
-                    <Sparkles className="h-3 w-3 mr-1 animate-spin" />
+                    <Zap className="h-3 w-3 mr-1 animate-pulse" />
                     AI
                   </Badge>
                 </div>
@@ -276,7 +308,10 @@ export default function AiChat({ className }: AiChatProps) {
                   >
                     {message.role === 'assistant' && (
                       <div className="p-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-green-500/20 flex-shrink-0 animate-pulse">
-                        <Bot className="h-3 w-3 text-emerald-400" />
+                        <div className="relative">
+                          <Brain className="h-3 w-3 text-emerald-400" />
+                          <Sparkles className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 text-emerald-300 animate-pulse" />
+                        </div>
                       </div>
                     )}
                     
@@ -308,12 +343,15 @@ export default function AiChat({ className }: AiChatProps) {
                 {isLoading && (
                   <div className="flex gap-3 justify-start animate-in slide-in-from-bottom duration-300">
                     <div className="p-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-green-500/20 flex-shrink-0 animate-pulse">
-                      <Bot className="h-3 w-3 text-emerald-400" />
+                      <div className="relative">
+                        <Brain className="h-3 w-3 text-emerald-400" />
+                        <Sparkles className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 text-emerald-300 animate-pulse" />
+                      </div>
                     </div>
                     <div className="bg-slate-800/50 text-slate-200 border border-slate-700/50 rounded-lg px-3 py-2 text-sm animate-pulse">
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-3 w-3 animate-spin" />
-                        <span>Thinking...</span>
+                        <span>AI is thinking...</span>
                       </div>
                     </div>
                   </div>
@@ -346,6 +384,45 @@ export default function AiChat({ className }: AiChatProps) {
               </div>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Welcome Popup */}
+      {showWelcomePopup && (
+        <div 
+          className="fixed z-50 animate-bounce-in cursor-pointer"
+          style={{
+            left: `${position.x + 80}px`,
+            top: `${position.y - 50}px`
+          }}
+          onClick={() => setShowWelcomePopup(false)}
+        >
+          <div className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-4 py-3 rounded-lg shadow-lg border border-emerald-400/30 max-w-xs hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="relative">
+                <Brain className="h-4 w-4 animate-pulse" />
+                <Sparkles className="absolute -top-1 -right-1 h-2 w-2 text-emerald-200 animate-bounce" />
+              </div>
+              <span className="font-semibold text-sm">Hi! I'm your AI Assistant</span>
+            </div>
+            <p className="text-xs text-emerald-100">
+              I can help you with FlowLink features, crypto payments, and compliance questions. Ask me anything!
+            </p>
+            {/* Arrow pointing to chat */}
+            <div className="absolute -left-2 top-1/2 transform -translate-y-1/2">
+              <div className="w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-emerald-500"></div>
+            </div>
+            {/* Close button */}
+            <button 
+              className="absolute -top-1 -right-1 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowWelcomePopup(false)
+              }}
+            >
+              <X className="h-3 w-3 text-white" />
+            </button>
+          </div>
         </div>
       )}
     </>
