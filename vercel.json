@@ -4,11 +4,13 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "env": {
-    "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "demo-project-id"
+    "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "demo-project-id",
+    "ANTHROPIC_API_KEY": "@anthropic_api_key"
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "demo-project-id"
+      "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "demo-project-id",
+      "ANTHROPIC_API_KEY": "@anthropic_api_key"
     }
   }
 }

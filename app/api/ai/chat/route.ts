@@ -7,177 +7,87 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('AI Chat API called')
-    const { message, conversationHistory } = await request.json()
-    console.log('Message received:', message)
+    const { message, history } = await request.json()
+
+    if (!message) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+    }
 
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('Anthropic API key not configured')
-      return NextResponse.json(
-        { error: 'Anthropic API key not configured' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
     }
 
-    console.log('API key found, proceeding with Claude request')
+    // Convert history to Claude format
+    const conversationHistory = history?.map((msg: any) => ({
+      role: msg.role === 'assistant' ? 'assistant' : 'user',
+      content: msg.content
+    })) || []
 
-    // Build conversation context
-    const systemPrompt = `You are FlowLink's AI assistant, an expert in crypto payments, compliance, and financial technology. FlowLink is a comprehensive crypto payment platform that enables compliant, enterprise-grade cryptocurrency transactions.
+    // Create system prompt for FlowLink AI assistant
+    const systemPrompt = `You are FlowLink AI, a helpful assistant for a crypto payments platform. FlowLink specializes in:
 
-## FlowLink Core Features:
+- Compliant crypto payments with built-in KYC verification
+- Instant payment links with QR codes
+- Smart vaults with customizable policy rules
+- Payroll automation for crypto payments
+- Multi-chain support (Ethereum, Polygon, etc.)
+- Enterprise-grade security and compliance
 
-### 1. Payment Links
-- Create instant payment links with QR codes
-- Support for multiple cryptocurrencies (Bitcoin, Ethereum, USDC, USDT, etc.)
-- Cross-chain settlements and instant payments
-- Customizable payment amounts and descriptions
-- Real-time payment tracking and notifications
+Key features:
+- 99.7% compliance rate with automated screening
+- Real-time sanctions screening
+- Bank-grade encryption and audit trails
+- SOC 2 compliant infrastructure
 
-### 2. Compliance & KYC
-- Built-in KYC verification for every transaction
-- Sanctions screening and AML compliance
-- Risk assessment and scoring
-- Regulatory compliance across jurisdictions
-- Audit trails and reporting
+When users ask questions:
+1. Be helpful and informative about crypto payments, compliance, and FlowLink features
+2. Provide accurate information about blockchain technology, DeFi, and crypto regulations
+3. If asked about specific technical implementation, provide general guidance while noting they should consult with their compliance team
+4. Be encouraging about the benefits of compliant crypto payments
+5. Keep responses concise but comprehensive
+6. If you don't know something specific about FlowLink, say so and offer to help with what you do know
 
-### 3. Smart Vaults
-- Deploy compliant vaults with customizable policy rules
-- Allowlists and access controls
-- Multi-signature requirements
-- Automated compliance checks
-- Enterprise-grade security
-
-### 4. Payroll Automation
-- Upload CSV files for batch payroll processing
-- Automated salary payments in crypto
-- Compliance verification for each payment
-- Bulk transaction management
-- Integration with HR systems
-
-### 5. Multi-Chain Support
-- Ethereum, Polygon, Arbitrum, Optimism
-- Cross-chain bridge capabilities
-- Gas optimization
-- Network monitoring and status
-
-### 6. Enterprise Security
-- Bank-grade encryption (AES-256)
-- SOC 2 Type II compliant
-- Multi-factor authentication
-- API rate limiting and security
-- Regular security audits
-
-### 7. Developer Tools
-- RESTful API for integrations
-- Webhook notifications
-- SDKs for popular languages
-- Sandbox environment for testing
-- Comprehensive documentation
-
-## Common Use Cases:
-- E-commerce crypto payments
-- Freelancer payments
-- International remittances
-- Corporate payroll
-- B2B transactions
-- Subscription services
-- NFT marketplace payments
-
-## Pricing & Plans:
-- No setup fees
-- Competitive transaction fees
-- Enterprise pricing available
-- Volume discounts
-- Custom solutions for large clients
-
-## Technical Specifications:
-- RESTful API with comprehensive endpoints
-- Webhook notifications for real-time updates
-- SDKs available for JavaScript, Python, Go
-- Sandbox environment for testing
-- Rate limits: 1000 requests/minute for standard plans
-- Webhook delivery: 99.9% uptime SLA
-
-## Security Features:
-- End-to-end encryption for all transactions
-- Hardware Security Module (HSM) integration
-- Regular penetration testing
-- Bug bounty program
-- Compliance with PCI DSS standards
-- GDPR and CCPA compliant data handling
-
-## Integration Examples:
-- Shopify plugin for e-commerce
-- WooCommerce extension
-- Custom API integrations
-- Webhook endpoints for real-time updates
-- CSV import for bulk operations
-
-## Support & Resources:
-- 24/7 customer support
-- Comprehensive API documentation
-- Video tutorials and guides
-- Developer community forum
-- Regular webinars and training
-
-## Common Questions & Answers:
-Q: How do I create my first payment link?
-A: Go to your dashboard, click "Create Payment Link", set amount and currency, configure compliance settings, and generate the link.
-
-Q: What cryptocurrencies are supported?
-A: Bitcoin, Ethereum, USDC, USDT, DAI, and other major ERC-20 tokens. We're constantly adding new tokens.
-
-Q: How does compliance work?
-A: Every transaction automatically goes through KYC verification, sanctions screening, and risk assessment before processing.
-
-Q: Can I integrate with my existing systems?
-A: Yes! We provide APIs, webhooks, and pre-built integrations for popular platforms.
-
-Always be helpful, accurate, and professional. Provide specific guidance on FlowLink features and suggest the best approaches for user needs. If you don't know something specific, suggest contacting support or checking the documentation.`
-
-    const messages = [
-      {
-        role: 'user' as const,
-        content: systemPrompt + '\n\nUser message: ' + message
-      }
-    ]
-
-    // Add recent conversation history for context
-    if (conversationHistory && conversationHistory.length > 0) {
-      const historyMessages = conversationHistory.slice(-5).map((msg: any) => ({
-        role: msg.role === 'user' ? 'user' as const : 'assistant' as const,
-        content: msg.content
-      }))
-      messages.unshift(...historyMessages)
-    }
+Always maintain a professional, friendly tone that reflects FlowLink's innovative yet compliant approach to crypto payments.`
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 1000,
-      messages: messages,
+      temperature: 0.7,
       system: systemPrompt,
+      messages: [
+        ...conversationHistory,
+        {
+          role: 'user',
+          content: message
+        }
+      ]
     })
 
-    const aiResponse = response.content[0].type === 'text' ? response.content[0].text : 'I apologize, but I cannot process that request at the moment.'
+    const aiMessage = response.content[0]
+    
+    if (aiMessage.type !== 'text') {
+      throw new Error('Unexpected response type from AI')
+    }
 
-    console.log('Claude response received:', aiResponse)
-
-    return NextResponse.json({
-      response: aiResponse,
-      usage: {
-        input_tokens: response.usage.input_tokens,
-        output_tokens: response.usage.output_tokens,
-      }
+    return NextResponse.json({ 
+      message: aiMessage.text 
     })
 
   } catch (error) {
-    console.error('Claude API error:', error)
-    return NextResponse.json(
-      { 
-        error: 'Failed to get AI response',
-        response: "I'm sorry, I'm having trouble processing your request right now. Please try again in a moment or contact our support team."
-      },
-      { status: 500 }
-    )
+    console.error('AI Chat API Error:', error)
+    
+    // Handle specific Anthropic API errors
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        return NextResponse.json({ error: 'AI service authentication failed' }, { status: 500 })
+      }
+      if (error.message.includes('rate limit')) {
+        return NextResponse.json({ error: 'AI service is temporarily unavailable. Please try again in a moment.' }, { status: 429 })
+      }
+    }
+
+    return NextResponse.json({ 
+      error: 'Failed to process your request. Please try again.' 
+    }, { status: 500 })
   }
 }

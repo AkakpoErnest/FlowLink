@@ -5,6 +5,7 @@ import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { mainnet, polygon, arbitrum, optimism } from 'wagmi/chains'
 import { http } from 'viem'
+import { hashkeyChain, hashkeyTestnet } from '@/lib/hashkey'
 
 import '@rainbow-me/rainbowkit/styles.css'
 

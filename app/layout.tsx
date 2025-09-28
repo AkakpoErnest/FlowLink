@@ -2,6 +2,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import AiChat from '@/components/ai-chat'
 import './globals.css'
 
 export default function RootLayout({
@@ -21,6 +22,7 @@ export default function RootLayout({
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         {children}
+        <AiChat />
         <Toaster />
         <Analytics />
       </body>
