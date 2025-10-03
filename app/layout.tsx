@@ -2,6 +2,7 @@ import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import { WalletProvider } from '@/components/providers/wallet-provider'
 import AiChat from '@/components/ai-chat'
 import './globals.css'
 
@@ -21,10 +22,12 @@ export default function RootLayout({
         <title>FlowLink - Crypto Payments Platform</title>
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        {children}
-        <AiChat />
-        <Toaster />
-        <Analytics />
+        <WalletProvider>
+          {children}
+          <AiChat />
+          <Toaster />
+          <Analytics />
+        </WalletProvider>
       </body>
     </html>
   )

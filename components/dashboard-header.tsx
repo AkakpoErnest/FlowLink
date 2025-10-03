@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button"
-import { Wallet } from "lucide-react"
+import { WalletConnect } from "@/components/wallet-connect"
 import Image from "next/image"
 
 export function DashboardHeader() {
@@ -10,7 +9,7 @@ export function DashboardHeader() {
           <div className="flex items-center gap-4">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10 p-2">
               <Image 
-                src="/flowlink-logo-new.png" 
+                src="/flowlink-logo.png" 
                 alt="FlowLink Logo" 
                 width={32} 
                 height={32}
@@ -28,14 +27,7 @@ export function DashboardHeader() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
-            >
-              <Wallet className="w-4 h-4 mr-2" />
-              Connect Wallet
-            </Button>
+            <WalletConnect variant="dropdown" />
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-sm font-semibold text-primary-foreground">M</span>
             </div>

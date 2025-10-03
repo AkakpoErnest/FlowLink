@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useAuthStore } from '@/lib/auth'
 import { Wallet, Shield, ArrowRight, Mail, Lock, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { WalletConnect } from "@/components/wallet-connect"
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -292,35 +293,7 @@ export default function LoginPage() {
 
             {/* Wallet Tab */}
             <TabsContent value="wallet">
-              <Card className="border-emerald-500/20 shadow-2xl">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">Connect Wallet</CardTitle>
-                  <CardDescription>
-                    Connect your crypto wallet to access FlowLink
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="text-center p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-blue-800 font-medium">🔗 Wallet Connection</p>
-                    <p className="text-sm text-blue-600">
-                      Wallet connection feature will be available soon!
-                    </p>
-                  </div>
-                  
-                  <Button 
-                    onClick={handleWalletConnect}
-                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
-                  >
-                    <Wallet className="mr-2 h-4 w-4" />
-                    Coming Soon
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-
-                  <div className="text-center text-sm text-muted-foreground">
-                    Supported wallets: MetaMask, WalletConnect, Coinbase Wallet, and more
-                  </div>
-                </CardContent>
-              </Card>
+              <WalletConnect variant="card" />
             </TabsContent>
           </Tabs>
 
