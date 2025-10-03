@@ -15,8 +15,11 @@ import {
   Copy,
   QrCode,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Loader2
 } from "lucide-react"
+import { usePaymentLinks } from "@/hooks/use-api"
+import { useToast } from "@/hooks/use-toast"
 
 interface PaymentLink {
   id: string
@@ -33,46 +36,10 @@ interface PaymentLink {
 
 export function PaymentLinksTable() {
   const [searchTerm, setSearchTerm] = useState("")
+  const { data: paymentLinksData, loading, error, refetch } = usePaymentLinks()
+  const { toast } = useToast()
   
-  // Mock data
-  const paymentLinks: PaymentLink[] = [
-    {
-      id: "1",
-      code: "pay-alice-100",
-      sourceToken: "USDC",
-      destStable: "USDC",
-      amountMin: 100,
-      amountMax: 1000,
-      status: "ACTIVE",
-      createdAt: "2024-01-15T10:30:00Z",
-      transactions: 23,
-      volume: 15420
-    },
-    {
-      id: "2", 
-      code: "pay-bob-500",
-      sourceToken: "ETH",
-      destStable: "USDC",
-      amountMin: 0.5,
-      amountMax: 2.0,
-      status: "ACTIVE",
-      createdAt: "2024-01-14T15:45:00Z",
-      transactions: 8,
-      volume: 12400
-    },
-    {
-      id: "3",
-      code: "pay-charlie-250",
-      sourceToken: "MATIC",
-      destStable: "USDC",
-      amountMin: 1000,
-      amountMax: 5000,
-      status: "DRAFT",
-      createdAt: "2024-01-13T09:20:00Z",
-      transactions: 0,
-      volume: 0
-    },
-  ]
+  const paymentLinks: PaymentLink[] = paymentLinksData || []
 
   const filteredLinks = paymentLinks.filter(link =>
     link.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,7 +125,39 @@ export function PaymentLinksTable() {
                 </tr>
               </thead>
               <tbody>
-                {filteredLinks.map((link) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="text-center p-8">
+                      <div className="flex items-center justify-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Loading payment links...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={8} className="text-center p-8">
+                      <div className="text-red-500">
+                        <p>Error loading payment links: {error.message}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => refetch()}
+                          className="mt-2"
+                        >
+                          Retry
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredLinks.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center p-8 text-muted-foreground">
+                      No payment links found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredLinks.map((link) => (
                   <tr key={link.id} className="border-t hover:bg-muted/25 transition-colors">
                     <td className="p-4">
                       <div className="font-medium">{link.code}</div>
@@ -211,7 +210,8 @@ export function PaymentLinksTable() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
