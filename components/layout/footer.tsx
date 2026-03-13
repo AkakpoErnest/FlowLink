@@ -1,229 +1,110 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Github, Twitter, Linkedin, Mail, ArrowRight } from 'lucide-react'
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-slate-950 via-emerald-950/20 to-slate-900 border-t border-emerald-500/20">
-      <div className="container mx-auto px-4 py-16">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
-                <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-6 h-6" />
+    <footer className="bg-slate-950 border-t border-slate-900">
+      <div className="container mx-auto px-6 py-16">
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+
+          {/* Brand col — spans 2 */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-teal-600 flex items-center justify-center">
+                <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-5 h-5" />
               </div>
-              <span className="font-bold text-xl bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-                FlowLink
-              </span>
-            </div>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              The most trusted platform for compliant crypto payments. Flow across chains. Link the future.
+              <span className="font-bold text-lg text-white">FlowLink</span>
+            </Link>
+            <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
+              Enterprise-grade compliant crypto payments, powered by HashKey Chain. Built for businesses that can't afford non-compliance.
             </p>
-            <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 p-2">
-                <Github className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 p-2">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 p-2">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10 p-2">
-                <Mail className="h-4 w-4" />
-              </Button>
+            <div className="flex gap-2">
+              {[Github, Twitter, Linkedin, Mail].map((Icon, i) => (
+                <button key={i} className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                  <Icon className="h-3.5 w-3.5" />
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Product */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-white">Product</h3>
+            <h3 className="text-sm font-semibold text-white">Product</h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/features" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Pricing
-                </Link>
-              </li>
-              <li>
-                <Link href="/security" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Security
-                </Link>
-              </li>
-              <li>
-                <Link href="/compliance" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Compliance
-                </Link>
-              </li>
-              <li>
-                <Link href="/api" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  API
-                </Link>
-              </li>
+              {['Features', 'Payment Links', 'Invoicing', 'Payroll', 'Vaults', 'API'].map((l) => (
+                <li key={l}>
+                  <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">{l}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Compliance */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-white">Resources</h3>
+            <h3 className="text-sm font-semibold text-white">Compliance</h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/docs" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Documentation
-                </Link>
-              </li>
-              <li>
-                <Link href="/guides" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Guides
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Support
-                </Link>
-              </li>
-              <li>
-                <Link href="/status" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Status
-                </Link>
-              </li>
+              {['KYC / AML', 'Sanctions Screening', 'HashKey Chain', 'Audit Logs', 'Security', 'SOC 2'].map((l) => (
+                <li key={l}>
+                  <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">{l}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Company */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-white">Company</h3>
+            <h3 className="text-sm font-semibold text-white">Company</h3>
             <ul className="space-y-3">
-              <li>
-                <Link href="/about" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/careers" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link href="https://card3.ai/profile?card_code=qXIOdwGUB" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Privacy
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300 text-sm">
-                  Terms
-                </Link>
-              </li>
+              {[
+                { label: 'About', href: '#' },
+                { label: 'Blog', href: '#' },
+                { label: 'Careers', href: '#' },
+                { label: 'Contact', href: 'https://card3.ai/profile?card_code=qXIOdwGUB', external: true },
+                { label: 'Privacy', href: '/privacy' },
+                { label: 'Terms', href: '/terms' },
+              ].map((item) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    target={item.external ? '_blank' : undefined}
+                    rel={item.external ? 'noopener noreferrer' : undefined}
+                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
 
-        {/* Android App Download Section */}
-        <div id="android-app" className="border-t border-emerald-500/20 pt-12 mb-8">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4">
-              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-              <span className="text-emerald-400 text-sm font-medium">Mobile App</span>
+        {/* Android app download */}
+        <div id="android-app" className="border border-slate-800 rounded-2xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-white font-semibold text-sm">Beta Android App</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400">Beta</span>
             </div>
-            <h3 className="text-2xl md:text-3xl font-bold mb-4 bg-gradient-to-r from-emerald-300 via-green-400 to-teal-500 bg-clip-text text-transparent">
-              Try Our Beta Android App
-            </h3>
-            <p className="text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Experience FlowLink on your mobile device with our beta Android application. Get early access to mobile crypto payments.
-            </p>
-            
-            <div className="flex justify-center">
-              <div className="group relative">
-                <a 
-                  href="/flowlink-android-app.apk" 
-                  download="FlowLink-Android-App.apk"
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-2xl hover:shadow-emerald-500/25 transition-all duration-300 group-hover:scale-105"
-                >
-                  <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                    <span className="text-lg">📱</span>
-                  </div>
-                  <div className="text-left">
-                    <div className="text-sm opacity-90">Download</div>
-                    <div className="text-lg font-bold">Android Beta App</div>
-                  </div>
-                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-sm">↓</span>
-                  </div>
-                </a>
-                
-                {/* Hover glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-green-500/20 to-teal-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-              </div>
-            </div>
-
-            <div className="text-center mt-6">
-              <p className="text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-medium">
-                  <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></span>
-                  Beta Version
-                </span>
-                <span className="mx-2">•</span>
-                Requires Android 7.0 or higher
-                <span className="mx-2">•</span>
-                Free to download
-              </p>
-            </div>
+            <p className="text-sm text-slate-400">Try FlowLink on mobile — early access to compliant crypto payments on the go.</p>
           </div>
+          <a
+            href="/flowlink-android-app.apk"
+            download="FlowLink-Android-App.apk"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          >
+            📱 Download APK
+          </a>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="border-t border-emerald-500/20 pt-8 mb-8">
-          <div className="max-w-md mx-auto text-center">
-            <h3 className="font-semibold text-white mb-2">Stay Updated</h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Get the latest updates on crypto compliance and FlowLink features.
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-2 bg-slate-800 border border-emerald-500/20 rounded-lg text-white placeholder-muted-foreground focus:outline-none focus:border-emerald-500/50 transition-colors duration-300"
-              />
-              <Button className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 px-4">
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t border-emerald-500/20 pt-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-muted-foreground text-sm">
-              © 2024 FlowLink. All rights reserved.
-            </div>
-            <div className="flex items-center gap-6 text-sm">
-              <Link href="/privacy" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-muted-foreground hover:text-emerald-400 transition-colors duration-300">
-                Cookie Policy
-              </Link>
-            </div>
+        {/* Bottom bar */}
+        <div className="border-t border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-slate-500">© 2025 FlowLink. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((l) => (
+              <Link key={l} href="#" className="text-sm text-slate-500 hover:text-slate-300 transition-colors">{l}</Link>
+            ))}
           </div>
         </div>
       </div>
