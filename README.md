@@ -4,253 +4,139 @@
 
 FlowLink is a production-ready platform for creating compliant crypto payment links with built-in KYC verification, sanctions screening, and enterprise-grade security. Built for businesses that demand compliance, security, and reliability.
 
-## 🚀 Features
+Live demo: deployed on Vercel.
 
-- **🔐 Compliance First**: Built-in KYC verification and sanctions screening for every transaction
-- **⚡ Instant Payments**: Create payment links with QR codes for instant cross-chain settlements  
-- **🏦 Smart Vaults**: Deploy compliant vaults with customizable policy rules and allowlists
-- **💼 Payroll Automation**: Upload CSV files and automatically process compliant payroll batches
-- **🌐 Multi-Chain Support**: Ethereum, Polygon, and more networks
-- **🛡️ Enterprise Security**: Bank-grade encryption and audit trails
-- **📊 Real-time Analytics**: Comprehensive dashboards and reporting
+## Features
 
-## 🏗️ Project Structure
+- **Compliance First** — Built-in KYC verification and sanctions screening for every transaction
+- **Payment Links** — Create shareable payment links with QR codes for instant cross-chain settlements
+- **Smart Vaults** — Deploy compliant vaults with customizable policy rules and allowlists
+- **Payroll Automation** — Upload CSV files and automatically process compliant payroll batches
+- **RWA Subscriptions** — Real-world asset subscription management
+- **AI Assistant** — Integrated Claude-powered chat for compliance guidance
+- **Wallet Connectivity** — Connect via MetaMask, WalletConnect, Coinbase Wallet, and more
+- **Multi-Chain Support** — Ethereum, Polygon, and additional networks
+- **Real-time Analytics** — Comprehensive dashboards and reporting
 
-This is a modern monorepo built with pnpm workspaces and TurboRepo for optimal development experience.
+## Project Structure
 
 ```
 FlowLink/
-├── apps/                          # Applications
-│   ├── web/                       # Next.js 14 Frontend Application
-│   │   ├── app/                   # App Router pages
-│   │   │   ├── layout.tsx         # Root layout with header/footer
-│   │   │   ├── page.tsx           # Landing page with hero & features
-│   │   │   ├── links/             # Payment links management
-│   │   │   └── l/[code]/          # Public payment link pages
-│   │   ├── components/            # React components
-│   │   │   ├── ui/                # shadcn/ui component library
-│   │   │   ├── layout/            # Header, Footer, navigation
-│   │   │   ├── payment-flow.tsx   # Complete payment flow component
-│   │   │   ├── payment-links-table.tsx # CRUD table for payment links
-│   │   │   └── stats-cards.tsx    # Dashboard metrics
-│   │   ├── lib/                   # Utilities and API client
-│   │   └── public/                # Static assets
-│   └── api/                       # NestJS Backend API
-│       ├── src/                   # Source code
-│       │   ├── app.module.ts      # Main application module
-│       │   ├── main.ts           # Application entry point
-│       │   ├── common/           # Shared services & utilities
-│       │   ├── providers/        # External service adapters
-│       │   │   ├── interfaces.ts # TypeScript interfaces
-│       │   │   ├── risk/         # Risk scoring adapters
-│       │   │   ├── kyc/          # KYC verification adapters
-│       │   │   └── ...
-│       │   ├── payment-links/    # Payment links module
-│       │   ├── payroll/          # Payroll automation
-│       │   ├── policy/           # Policy management
-│       │   └── vaults/           # Smart vaults
-│       └── prisma/               # Database schema & migrations
-├── packages/                      # Shared packages
-│   ├── shared/                   # Common types, schemas, utilities
-│   └── contracts/                # Solidity smart contracts
-├── scripts/                      # Deployment & utility scripts
-├── docker-compose.yml            # Local development environment
-├── turbo.json                    # TurboRepo configuration
-└── pnpm-workspace.yaml          # pnpm workspace configuration
+├── app/                         # Next.js App Router
+│   ├── page.tsx                 # Landing page
+│   ├── login/                   # Authentication
+│   ├── dashboard/               # Main dashboard (all modules)
+│   ├── links/                   # Payment links management
+│   ├── l/[code]/                # Public payment link pages
+│   ├── android/                 # Android deep link handler
+│   └── api/                     # Next.js API routes
+│       ├── ai/chat/             # Claude AI chat endpoint
+│       ├── payment-links/       # Payment links CRUD
+│       ├── payments/            # Payment processing
+│       ├── payroll/             # Payroll batch processing
+│       ├── rwa/                 # RWA subscription management
+│       └── vaults/              # Vault operations
+├── components/                  # React components
+│   ├── ui/                      # shadcn/ui component library
+│   ├── layout/                  # Header, footer, navigation
+│   ├── providers/               # Wallet & query providers
+│   ├── dashboard-layout.tsx     # Dashboard shell
+│   ├── dashboard-overview.tsx   # Overview module
+│   ├── payment-links-module.tsx # Payment links module
+│   ├── compliance-vaults-module.tsx  # Vaults module
+│   ├── payroll-rails-module.tsx # Payroll module
+│   ├── rwa-subscriptions-module.tsx  # RWA module
+│   ├── ai-chat.tsx              # AI assistant component
+│   └── wallet-connect.tsx       # Wallet connection UI
+├── lib/                         # Utilities and state
+├── hooks/                       # Custom React hooks
+├── styles/                      # Global styles
+├── public/                      # Static assets
+├── next.config.js
+├── tailwind.config.js
+└── tsconfig.json
 ```
 
-## 🛠️ Technology Stack
+## Technology Stack
 
-### Frontend (apps/web)
-- **Next.js 14** - React framework with App Router
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first CSS framework
-- **shadcn/ui** - Modern component library
-- **Lucide React** - Beautiful icons
-- **Radix UI** - Accessible component primitives
-- **Class Variance Authority** - Component variant management
+- **Next.js 14** — React framework with App Router
+- **TypeScript** — Type-safe development
+- **Tailwind CSS** — Utility-first CSS framework
+- **shadcn/ui** — Modern accessible component library
+- **RainbowKit** — Wallet connection UI
+- **wagmi + viem** — Ethereum interactions
+- **@anthropic-ai/sdk** — Claude AI integration
+- **Zustand** — Client state management
+- **TanStack Query** — Server state and data fetching
+- **Recharts** — Data visualization
+- **Zod** — Schema validation
+- **next-themes** — Dark/light mode support
 
-### Backend (apps/api)
-- **NestJS** - Enterprise Node.js framework
-- **TypeScript** - Type-safe development
-- **Prisma** - Database ORM with PostgreSQL
-- **Zod** - Schema validation
-- **Swagger** - API documentation
-- **Redis** - Caching and job queues
-- **BullMQ** - Background job processing
-- **JWT** - Authentication with jose library
-
-### Smart Contracts (packages/contracts)
-- **Foundry** - Solidity development framework
-- **Solidity** - Smart contract language
-- **viem** - TypeScript interface for Ethereum
-- **TypeChain** - Type-safe contract bindings
-
-### Infrastructure
-- **Docker & Docker Compose** - Containerization
-- **PostgreSQL** - Primary database
-- **Redis** - Caching and sessions
-- **MinIO** - S3-compatible object storage
-- **pnpm** - Fast, disk space efficient package manager
-- **TurboRepo** - Monorepo build system
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- pnpm
-- Docker & Docker Compose
-- PostgreSQL (or use Docker)
+- Node.js 18+
+- npm
 
 ### 1. Clone and Install
 ```bash
 git clone https://github.com/AkakpoErnest/FlowLink.git
 cd FlowLink
-pnpm install
+npm install
 ```
 
 ### 2. Environment Setup
 ```bash
-# Copy environment files
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-
-# Update with your configuration
+cp .env.example .env.local
 ```
 
-### 3. Start Development Environment
+Add your environment variables:
+```
+ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+### 3. Run Development Server
 ```bash
-# Start infrastructure (PostgreSQL, Redis, MinIO)
-docker-compose up -d
-
-# Generate Prisma client
-cd apps/api && pnpm prisma generate
-
-# Run database migrations
-pnpm prisma migrate dev
-
-# Start all applications
-pnpm dev
+npm run dev
 ```
 
-### 4. Access Applications
-- **Frontend**: http://localhost:3000
-- **API**: http://localhost:3001
-- **API Docs**: http://localhost:3001/api
-- **Database**: localhost:5432
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📱 Frontend Design System
+## Available Scripts
 
-### Modern UI Components
-The frontend features a comprehensive design system built with:
-
-- **shadcn/ui Components**: Button, Card, Input, Label, Badge, Separator
-- **Responsive Layout**: Mobile-first design with Tailwind CSS
-- **Dark Mode Support**: Built-in theme switching
-- **Accessibility**: ARIA-compliant components with Radix UI
-- **Modern Color Scheme**: Blue and purple gradient theme
-- **Interactive Elements**: Hover states, animations, and transitions
-
-### Key Pages & Components
-
-#### Landing Page (`app/page.tsx`)
-- Hero section with gradient text and call-to-action
-- Feature cards with icons and descriptions
-- Statistics dashboard with real-time metrics
-- Benefits section highlighting enterprise features
-- Responsive design for all screen sizes
-
-#### Payment Flow (`components/payment-flow.tsx`)
-- Step-by-step payment process
-- Real-time compliance checking
-- Route quote integration
-- Settlement confirmation
-- Progress indicators and status updates
-
-#### Payment Links Management (`app/links/page.tsx`)
-- Data table with search and filtering
-- CRUD operations for payment links
-- Status badges and metrics
-- Bulk actions and export functionality
-
-### Design Principles
-- **Clean & Modern**: Minimalist design with focus on usability
-- **Professional**: Enterprise-ready appearance
-- **Responsive**: Works perfectly on desktop, tablet, and mobile
-- **Accessible**: WCAG compliant with keyboard navigation
-- **Performance**: Optimized for fast loading and smooth interactions
-
-## 🔧 API Architecture
-
-### Provider Abstractions
-The backend uses a provider pattern for external services:
-
-#### Risk Assessment Providers
-- **MockRiskAdapter**: Development/testing
-- **TrmRiskAdapter**: TRM Labs integration
-- **ChainalysisRiskAdapter**: Chainalysis integration
-
-#### KYC Providers  
-- **MockKycAdapter**: Development/testing
-- **SumsubKycAdapter**: Sumsub integration
-- **VeriffKycAdapter**: Veriff integration
-
-#### Other Providers
-- **TravelRuleAdapter**: Travel rule compliance
-- **DexRouterAdapter**: DEX routing (1inch, etc.)
-- **StablecoinRegistryAdapter**: Stablecoin management
-
-### Database Schema
-- **User**: User accounts and wallet addresses
-- **Policy**: Compliance rules and configurations
-- **Vault**: Smart vault deployments
-- **PaymentLink**: Payment link configurations
-- **LinkTxn**: Transaction records
-- **PayrollBatch**: Payroll processing batches
-- **Receipt**: Transaction receipts and PDFs
-
-## 🔒 Security Features
-
-- **AES-GCM Encryption**: Sensitive data encryption
-- **JWT Authentication**: Secure API access
-- **Rate Limiting**: API abuse prevention
-- **CORS Configuration**: Cross-origin security
-- **Input Validation**: Zod schema validation
-- **Audit Logging**: Complete transaction trails
-- **PII Protection**: Encrypted personal information
-
-## 📊 Monitoring & Observability
-
-- **Health Endpoints**: Service health monitoring
-- **OpenTelemetry**: Distributed tracing
-- **Error Tracking**: Comprehensive error logging
-- **Performance Metrics**: Response time monitoring
-- **Business Metrics**: Transaction and user analytics
-
-## 🚀 Deployment
-
-### Production Environment
 ```bash
-# Build all applications
-pnpm build
-
-# Start production services
-docker-compose -f docker-compose.prod.yml up -d
-
-# Run database migrations
-pnpm prisma migrate deploy
+npm run dev        # Start development server
+npm run build      # Build for production
+npm run start      # Start production server
+npm run lint       # Run ESLint
+npm run typecheck  # Run TypeScript type checking
 ```
 
-### Environment Variables
-Key environment variables for production:
-- `DATABASE_URL`: PostgreSQL connection string
-- `REDIS_URL`: Redis connection string
-- `JWT_SECRET`: JWT signing secret
-- `ENCRYPTION_KEY`: AES encryption key
-- `API_BASE_URL`: API endpoint URL
-- `WEB_URL`: Frontend URL
+## Deployment
 
-## 🤝 Contributing
+This project is configured for Vercel deployment.
+
+1. Push to your GitHub repository
+2. Import the project in [Vercel](https://vercel.com)
+3. Add environment variables (`ANTHROPIC_API_KEY`)
+4. Deploy
+
+Vercel will automatically detect Next.js and run `npm install && npm run build`.
+
+## Environment Variables
+
+| Variable | Description | Required |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Claude API key for AI chat | Yes (for AI features) |
+
+## Security Features
+
+- Input validation with Zod schemas
+- Wallet signature authentication
+- CORS and CSP protection via Next.js headers
+- Compliance screening built into payment flows
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -258,51 +144,10 @@ Key environment variables for production:
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-### Development Guidelines
-- Follow TypeScript best practices
-- Write comprehensive tests
-- Update documentation
-- Follow conventional commits
-- Ensure accessibility compliance
+## License
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- **Documentation**: [docs.flowlink.com](https://docs.flowlink.com)
-- **API Reference**: [api.flowlink.com](https://api.flowlink.com)
-- **Status Page**: [status.flowlink.com](https://status.flowlink.com)
-- **Support**: [support@flowlink.com](mailto:support@flowlink.com)
-
-## 🔄 Recent Changes
-
-### Frontend Design System (Latest)
-- ✅ Implemented modern UI component library with shadcn/ui
-- ✅ Created responsive landing page with hero section and feature cards
-- ✅ Built comprehensive payment flow with step-by-step process
-- ✅ Added payment links management table with search and filtering
-- ✅ Implemented responsive layout with header and footer
-- ✅ Updated global styles with modern blue/purple color scheme
-- ✅ Added stats dashboard with real-time metrics and activity feed
-- ✅ Enhanced TypeScript interfaces and error handling
-
-### Backend Architecture
-- ✅ Implemented provider abstractions for external services
-- ✅ Created comprehensive database schema with Prisma
-- ✅ Added NestJS modules for all major features
-- ✅ Implemented JWT authentication and authorization
-- ✅ Added Zod validation and Swagger documentation
-- ✅ Created mock providers for development and testing
-
-### Infrastructure
-- ✅ Set up monorepo structure with pnpm workspaces
-- ✅ Configured TurboRepo for optimal build performance
-- ✅ Added Docker Compose for local development
-- ✅ Implemented PostgreSQL and Redis integration
-- ✅ Created deployment scripts and configurations
+This project is licensed under the MIT License.
 
 ---
 
-**Built with ❤️ by the FlowLink Team**
+**Built with by the FlowLink Team**
