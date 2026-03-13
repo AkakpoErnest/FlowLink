@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Header from '@/components/layout/header'
 import Footer from '@/components/layout/footer'
+<<<<<<< HEAD
 import {
   Shield,
   Zap,
@@ -18,6 +19,17 @@ import {
   Lock,
   Bot,
   Layers
+=======
+import { 
+  Shield, 
+  Zap, 
+  Building2, 
+  Briefcase, 
+  ArrowRight,
+  CheckCircle,
+  Globe,
+  Lock
+>>>>>>> fix-vercel-build
 } from 'lucide-react'
 
 export default function LandingPage() {
@@ -26,13 +38,21 @@ export default function LandingPage() {
       icon: Shield,
       title: "Compliance First",
       description: "Built-in KYC verification and sanctions screening for every transaction",
+<<<<<<< HEAD
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
+=======
+      link: "/login",
+      linkText: "Build Policy",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-100",
+>>>>>>> fix-vercel-build
     },
     {
       icon: Zap,
       title: "Instant Payments",
       description: "Create payment links with QR codes for instant cross-chain settlements",
+<<<<<<< HEAD
       color: "text-green-400",
       bgColor: "bg-green-500/10",
     },
@@ -51,20 +71,40 @@ export default function LandingPage() {
       color: "text-indigo-400",
       bgColor: "bg-indigo-500/10",
       badge: "HSK",
+=======
+      link: "/login",
+      linkText: "Create Link",
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+>>>>>>> fix-vercel-build
     },
     {
       icon: Building2,
       title: "Smart Vaults",
       description: "Deploy compliant vaults with customizable policy rules and allowlists",
+<<<<<<< HEAD
       color: "text-teal-400",
       bgColor: "bg-teal-500/10",
+=======
+      link: "/login",
+      linkText: "Deploy Vault",
+      color: "text-teal-600",
+      bgColor: "bg-teal-100",
+>>>>>>> fix-vercel-build
     },
     {
       icon: Briefcase,
       title: "Payroll Automation",
       description: "Upload CSV files and automatically process compliant payroll batches",
+<<<<<<< HEAD
       color: "text-cyan-400",
       bgColor: "bg-cyan-500/10",
+=======
+      link: "/login",
+      linkText: "Process Payroll",
+      color: "text-cyan-600",
+      bgColor: "bg-cyan-100",
+>>>>>>> fix-vercel-build
     },
   ]
 
@@ -72,17 +112,30 @@ export default function LandingPage() {
     {
       icon: CheckCircle,
       title: "99.7% Compliance Rate",
+<<<<<<< HEAD
       description: "Automated screening with real-time updates across all chains",
     },
     {
       icon: Layers,
       title: "HashKey Chain Native",
       description: "First-class support for HashKey Chain — regulated, compliant, fast",
+=======
+      description: "Automated screening with real-time updates",
+    },
+    {
+      icon: Globe,
+      title: "Multi-Chain Support",
+      description: "Ethereum, Polygon, and more networks",
+>>>>>>> fix-vercel-build
     },
     {
       icon: Lock,
       title: "Enterprise Security",
+<<<<<<< HEAD
       description: "Bank-grade encryption, audit trails, and SOC 2 compliance",
+=======
+      description: "Bank-grade encryption and audit trails",
+>>>>>>> fix-vercel-build
     },
   ]
 
@@ -216,6 +269,7 @@ export default function LandingPage() {
           </p>
         </div>
 
+<<<<<<< HEAD
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {features.map((feature, index) => (
             <div key={index} className="group relative">
@@ -238,6 +292,40 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </CardContent>
+=======
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+          {features.map((feature, index) => (
+            <div key={index} className="group relative">
+              <Card className="relative overflow-hidden border border-emerald-500/20 bg-gradient-to-br from-slate-900/60 via-emerald-950/30 to-slate-800/60 backdrop-blur-sm group-hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-emerald-500/10">
+                {/* Subtle background gradient */}
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/3 via-transparent to-green-500/3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <CardContent className="p-6 relative z-10">
+                  {/* Icon */}
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      <div className={`p-3 rounded-xl ${feature.bgColor} group-hover:scale-110 transition-all duration-300 shadow-md`}>
+                        <feature.icon className={`h-6 w-6 ${feature.color}`} />
+                      </div>
+                      {/* Subtle glow */}
+                      <div className={`absolute inset-0 p-3 rounded-xl ${feature.bgColor} blur-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300`}></div>
+                    </div>
+                  </div>
+                  
+                  {/* Title */}
+                  <h3 className="text-lg font-semibold text-white text-center mb-3 group-hover:text-emerald-300 transition-colors duration-300">
+                    {feature.title}
+                  </h3>
+                  
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground text-center leading-relaxed group-hover:text-emerald-100 transition-colors duration-300">
+                    {feature.description}
+                  </p>
+                </CardContent>
+                
+                {/* Hover glow effect */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/10 via-green-500/10 to-teal-500/10 rounded-lg blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+>>>>>>> fix-vercel-build
               </Card>
             </div>
           ))}

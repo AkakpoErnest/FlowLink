@@ -76,10 +76,17 @@ export function usePaymentLinks(status?: string, merchantId?: string) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
   if (merchantId) params.append('merchantId', merchantId)
+<<<<<<< HEAD
 
   const endpoint = `/api/payment-links${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [status, merchantId])
+=======
+  
+  const endpoint = `/api/payment-links${params.toString() ? `?${params.toString()}` : ''}`
+  
+  return useApi(endpoint, {}, [status, merchantId])
+>>>>>>> fix-vercel-build
 }
 
 export function usePayments(linkId?: string, status?: string, limit = 50, offset = 0) {
@@ -88,49 +95,84 @@ export function usePayments(linkId?: string, status?: string, limit = 50, offset
   if (status) params.append('status', status)
   params.append('limit', limit.toString())
   params.append('offset', offset.toString())
+<<<<<<< HEAD
 
   const endpoint = `/api/payments?${params.toString()}`
 
   return useApi<any[]>(endpoint, {}, [linkId, status, limit, offset])
+=======
+  
+  const endpoint = `/api/payments?${params.toString()}`
+  
+  return useApi(endpoint, {}, [linkId, status, limit, offset])
+>>>>>>> fix-vercel-build
 }
 
 export function useVaults(status?: string, includePolicies = false) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
   if (includePolicies) params.append('includePolicies', 'true')
+<<<<<<< HEAD
 
   const endpoint = `/api/vaults${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [status, includePolicies])
+=======
+  
+  const endpoint = `/api/vaults${params.toString() ? `?${params.toString()}` : ''}`
+  
+  return useApi(endpoint, {}, [status, includePolicies])
+>>>>>>> fix-vercel-build
 }
 
 export function usePayrollBatches(status?: string, includeRecipients = false) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
   if (includeRecipients) params.append('includeRecipients', 'true')
+<<<<<<< HEAD
 
   const endpoint = `/api/payroll${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [status, includeRecipients])
+=======
+  
+  const endpoint = `/api/payroll${params.toString() ? `?${params.toString()}` : ''}`
+  
+  return useApi(endpoint, {}, [status, includeRecipients])
+>>>>>>> fix-vercel-build
 }
 
 export function useRWASubscriptions(status?: string, type?: string) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
   if (type) params.append('type', type)
+<<<<<<< HEAD
 
   const endpoint = `/api/rwa${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [status, type])
+=======
+  
+  const endpoint = `/api/rwa${params.toString() ? `?${params.toString()}` : ''}`
+  
+  return useApi(endpoint, {}, [status, type])
+>>>>>>> fix-vercel-build
 }
 
 export function useRWAProducts(type?: string) {
   const params = new URLSearchParams()
   if (type) params.append('type', type)
+<<<<<<< HEAD
 
   const endpoint = `/api/rwa/products${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [type])
+=======
+  
+  const endpoint = `/api/rwa/products${params.toString() ? `?${params.toString()}` : ''}`
+  
+  return useApi(endpoint, {}, [type])
+>>>>>>> fix-vercel-build
 }
 
 // Mutation hooks for creating/updating data
