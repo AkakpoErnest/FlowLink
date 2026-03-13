@@ -1,11 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-<<<<<<< HEAD
   experimental: {
     outputFileTracingRoot: undefined,
   },
-=======
->>>>>>> fix-vercel-build
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -13,18 +10,19 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   webpack: (config) => {
-<<<<<<< HEAD
     // Suppress MetaMask SDK react-native peer dep warning in browser build
-=======
-    // Stub out react-native peer dep from MetaMask SDK browser build
->>>>>>> fix-vercel-build
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+    };
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,
-    }
-    return config
+    };
+    return config;
   },
-}
+};
 
-module.exports = nextConfig
-
+module.exports = nextConfig;
