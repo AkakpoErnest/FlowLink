@@ -9,7 +9,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-emerald-500/20">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-700/60">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -69,7 +69,7 @@ export default function Header() {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-emerald-500/20 bg-slate-950/95 backdrop-blur-xl">
+          <div className="md:hidden border-t border-slate-700/60 bg-slate-900">
             <nav className="py-4 space-y-4">
               <Link 
                 href="/#features" 

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { mainnet, polygon, arbitrum, optimism, sepolia } from 'wagmi/chains'
 import { http } from 'viem'
 import { hashkey, hashkeyTestnet } from 'viem/chains'
+import { SessionProvider } from 'next-auth/react'
 
 import '@rainbow-me/rainbowkit/styles.css'
 
@@ -47,6 +48,7 @@ const queryClient = new QueryClient({
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
+    <SessionProvider>
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
@@ -68,5 +70,6 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
+    </SessionProvider>
   )
 }

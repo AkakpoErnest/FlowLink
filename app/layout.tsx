@@ -1,10 +1,16 @@
-import { GeistSans } from 'geist/font/sans'
+import { DM_Sans } from 'next/font/google'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { WalletProvider } from '@/components/providers/wallet-provider'
 import AiChat from '@/components/ai-chat'
 import './globals.css'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  weight: ['300', '400', '500', '600', '700', '800'],
+})
 
 export default function RootLayout({
   children,
@@ -21,7 +27,7 @@ export default function RootLayout({
         <meta name="description" content="FlowLink - Crypto Payments You Can Trust" />
         <title>FlowLink - Crypto Payments Platform</title>
       </head>
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className={`font-sans ${dmSans.variable} ${GeistMono.variable}`}>
         <WalletProvider>
           {children}
           <AiChat />
