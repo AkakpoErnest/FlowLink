@@ -1,157 +1,106 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-config'
+import { prisma } from '@/lib/prisma'
 
-// Mock database - in production, this would be a real database
-let payments = [
-  {
-    id: "1",
-    linkId: "abc123",
-    payer: "0x1234...5678",
-    amount: "500.00",
-    currency: "USDC",
-    txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    timestamp: "2024-01-15T14:30:00Z",
-    kycPassed: true,
-    sanctionsChecked: true,
-    status: "completed",
-    network: "polygon",
-    gasUsed: "0.002",
-    complianceScore: 98
-  },
-  {
-    id: "2",
-    linkId: "def456",
-    payer: "0x9876...5432",
-    amount: "250.00",
-    currency: "USDC",
-    txHash: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-    timestamp: "2024-01-14T09:15:00Z",
-    kycPassed: false,
-    sanctionsChecked: true,
-    status: "pending",
-    network: "ethereum",
-    gasUsed: "0.005",
-    complianceScore: 85
-  },
-  {
-    id: "3",
-    linkId: "ghi789",
-    payer: "0x5555...9999",
-    amount: "1000.00",
-    currency: "USDT",
-    txHash: "0x5555555555555555555555555555555555555555555555555555555555555555",
-    timestamp: "2024-01-13T16:45:00Z",
-    kycPassed: true,
-    sanctionsChecked: true,
-    status: "completed",
-    network: "polygon",
-    gasUsed: "0.001",
-    complianceScore: 99
-  },
-]
+function unauth() {
+  return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+}
 
-// GET /api/payments - Get all payments
+// GET — list payments for the logged-in user
 export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url)
-    const linkId = searchParams.get('linkId')
-    const status = searchParams.get('status')
-    const limit = parseInt(searchParams.get('limit') || '50')
-    const offset = parseInt(searchParams.get('offset') || '0')
-    
-    let filteredPayments = payments
-    
-    if (linkId) {
-      filteredPayments = filteredPayments.filter(payment => payment.linkId === linkId)
-    }
-    
-    if (status) {
-      filteredPayments = filteredPayments.filter(payment => payment.status === status)
-    }
-    
-    // Pagination
-    const paginatedPayments = filteredPayments.slice(offset, offset + limit)
-    
-    return NextResponse.json({
-      success: true,
-      data: paginatedPayments,
-      total: filteredPayments.length,
-      limit,
-      offset
-    })
-  } catch (error) {
-    console.error('Error fetching payments:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch payments' },
-      { status: 500 }
-    )
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
+  const { searchParams } = new URL(request.url)
+  const paymentLinkId = searchParams.get('paymentLinkId')
+  const status = searchParams.get('status')
+  const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
+  const offset = parseInt(searchParams.get('offset') || '0')
+
+  const where = {
+    userId,
+    ...(paymentLinkId ? { paymentLinkId } : {}),
+    ...(status ? { status } : {}),
   }
+
+  const [payments, total] = await Promise.all([
+    prisma.payment.findMany({ where, orderBy: { createdAt: 'desc' }, take: limit, skip: offset }),
+    prisma.payment.count({ where }),
+  ])
+
+  return NextResponse.json({ success: true, data: payments, total, limit, offset })
 }
 
-// POST /api/payments - Create a new payment record
+// POST — record a new payment (called from public pay page — no auth required)
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    
-    const newPayment = {
-      id: (payments.length + 1).toString(),
-      linkId: body.linkId,
-      payer: body.payer,
-      amount: body.amount,
-      currency: body.currency || "USDC",
-      txHash: body.txHash,
-      timestamp: new Date().toISOString(),
-      kycPassed: body.kycPassed || false,
-      sanctionsChecked: body.sanctionsChecked || false,
-      status: "pending",
-      network: body.network || "polygon",
-      gasUsed: body.gasUsed || "0",
-      complianceScore: body.complianceScore || 0
-    }
-    
-    payments.push(newPayment)
-    
-    return NextResponse.json({
-      success: true,
-      data: newPayment
-    }, { status: 201 })
-  } catch (error) {
-    console.error('Error creating payment:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to create payment' },
-      { status: 500 }
-    )
+  const body = await request.json()
+
+  if (!body.payer || !body.amount) {
+    return NextResponse.json({ success: false, error: 'payer and amount are required' }, { status: 400 })
   }
+
+  // Resolve userId from the payment link owner
+  let userId: string | undefined
+  if (body.paymentLinkId) {
+    const link = await prisma.paymentLink.findUnique({
+      where: { id: body.paymentLinkId },
+      select: { userId: true },
+    })
+    userId = link?.userId
+  }
+
+  const payment = await prisma.payment.create({
+    data: {
+      userId: userId ?? null,
+      paymentLinkId: body.paymentLinkId ?? null,
+      payer: body.payer,
+      amount: parseFloat(body.amount),
+      currency: body.currency || 'HSK',
+      txHash: body.txHash ?? null,
+      status: body.status || 'pending',
+      network: body.network || 'hashkey-testnet',
+      kycPassed: body.kycPassed ?? false,
+      sanctionsChecked: body.sanctionsChecked ?? false,
+      complianceScore: body.complianceScore ?? 0,
+      gasUsed: body.gasUsed ?? null,
+    },
+  })
+
+  // Update payment link totals on completion
+  if (body.paymentLinkId && body.status === 'completed') {
+    await prisma.paymentLink.update({
+      where: { id: body.paymentLinkId },
+      data: {
+        totalVolume: { increment: parseFloat(body.amount) },
+        transactions: { increment: 1 },
+      },
+    })
+  }
+
+  return NextResponse.json({ success: true, data: payment }, { status: 201 })
 }
 
-// PUT /api/payments - Update a payment
+// PUT — update a payment
 export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { id, ...updateData } = body
-    
-    const paymentIndex = payments.findIndex(payment => payment.id === id)
-    
-    if (paymentIndex === -1) {
-      return NextResponse.json(
-        { success: false, error: 'Payment not found' },
-        { status: 404 }
-      )
-    }
-    
-    payments[paymentIndex] = {
-      ...payments[paymentIndex],
-      ...updateData
-    }
-    
-    return NextResponse.json({
-      success: true,
-      data: payments[paymentIndex]
-    })
-  } catch (error) {
-    console.error('Error updating payment:', error)
-    return NextResponse.json(
-      { success: false, error: 'Failed to update payment' },
-      { status: 500 }
-    )
-  }
+  const body = await request.json()
+  const { id, ...updates } = body
+
+  if (!id) return NextResponse.json({ success: false, error: 'id required' }, { status: 400 })
+
+  const payment = await prisma.payment.update({
+    where: { id },
+    data: {
+      ...(updates.status && { status: updates.status }),
+      ...(updates.txHash && { txHash: updates.txHash }),
+      ...(updates.gasUsed && { gasUsed: updates.gasUsed }),
+      ...(updates.complianceScore !== undefined && { complianceScore: updates.complianceScore }),
+      ...(updates.kycPassed !== undefined && { kycPassed: updates.kycPassed }),
+      ...(updates.sanctionsChecked !== undefined && { sanctionsChecked: updates.sanctionsChecked }),
+    },
+  })
+
+  return NextResponse.json({ success: true, data: payment })
 }
