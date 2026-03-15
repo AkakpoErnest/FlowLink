@@ -28,7 +28,7 @@ export function useApi<T>(
       try {
         setLoading(true)
         setError(null)
-        
+
         const response = await fetch(endpoint, {
           headers: {
             'Content-Type': 'application/json',
@@ -64,7 +64,6 @@ export function useApi<T>(
   const refetch = () => {
     setLoading(true)
     setError(null)
-    // Trigger useEffect by updating a dependency
     setData(null)
   }
 
@@ -72,21 +71,13 @@ export function useApi<T>(
 }
 
 // Specific hooks for different data types
-export function usePaymentLinks(status?: string, merchantId?: string) {
+export function usePaymentLinks(status?: string) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
-  if (merchantId) params.append('merchantId', merchantId)
-<<<<<<< HEAD
 
   const endpoint = `/api/payment-links${params.toString() ? `?${params.toString()}` : ''}`
 
-  return useApi<any[]>(endpoint, {}, [status, merchantId])
-=======
-  
-  const endpoint = `/api/payment-links${params.toString() ? `?${params.toString()}` : ''}`
-  
-  return useApi(endpoint, {}, [status, merchantId])
->>>>>>> fix-vercel-build
+  return useApi<any[]>(endpoint, {}, [status])
 }
 
 export function usePayments(linkId?: string, status?: string, limit = 50, offset = 0) {
@@ -95,87 +86,32 @@ export function usePayments(linkId?: string, status?: string, limit = 50, offset
   if (status) params.append('status', status)
   params.append('limit', limit.toString())
   params.append('offset', offset.toString())
-<<<<<<< HEAD
 
   const endpoint = `/api/payments?${params.toString()}`
 
   return useApi<any[]>(endpoint, {}, [linkId, status, limit, offset])
-=======
-  
-  const endpoint = `/api/payments?${params.toString()}`
-  
-  return useApi(endpoint, {}, [linkId, status, limit, offset])
->>>>>>> fix-vercel-build
 }
 
-export function useVaults(status?: string, includePolicies = false) {
+export function useVaults(status?: string) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
-  if (includePolicies) params.append('includePolicies', 'true')
-<<<<<<< HEAD
 
   const endpoint = `/api/vaults${params.toString() ? `?${params.toString()}` : ''}`
 
-  return useApi<any[]>(endpoint, {}, [status, includePolicies])
-=======
-  
-  const endpoint = `/api/vaults${params.toString() ? `?${params.toString()}` : ''}`
-  
-  return useApi(endpoint, {}, [status, includePolicies])
->>>>>>> fix-vercel-build
+  return useApi<any[]>(endpoint, {}, [status])
 }
 
 export function usePayrollBatches(status?: string, includeRecipients = false) {
   const params = new URLSearchParams()
   if (status) params.append('status', status)
   if (includeRecipients) params.append('includeRecipients', 'true')
-<<<<<<< HEAD
 
   const endpoint = `/api/payroll${params.toString() ? `?${params.toString()}` : ''}`
 
   return useApi<any[]>(endpoint, {}, [status, includeRecipients])
-=======
-  
-  const endpoint = `/api/payroll${params.toString() ? `?${params.toString()}` : ''}`
-  
-  return useApi(endpoint, {}, [status, includeRecipients])
->>>>>>> fix-vercel-build
 }
 
-export function useRWASubscriptions(status?: string, type?: string) {
-  const params = new URLSearchParams()
-  if (status) params.append('status', status)
-  if (type) params.append('type', type)
-<<<<<<< HEAD
-
-  const endpoint = `/api/rwa${params.toString() ? `?${params.toString()}` : ''}`
-
-  return useApi<any[]>(endpoint, {}, [status, type])
-=======
-  
-  const endpoint = `/api/rwa${params.toString() ? `?${params.toString()}` : ''}`
-  
-  return useApi(endpoint, {}, [status, type])
->>>>>>> fix-vercel-build
-}
-
-export function useRWAProducts(type?: string) {
-  const params = new URLSearchParams()
-  if (type) params.append('type', type)
-<<<<<<< HEAD
-
-  const endpoint = `/api/rwa/products${params.toString() ? `?${params.toString()}` : ''}`
-
-  return useApi<any[]>(endpoint, {}, [type])
-=======
-  
-  const endpoint = `/api/rwa/products${params.toString() ? `?${params.toString()}` : ''}`
-  
-  return useApi(endpoint, {}, [type])
->>>>>>> fix-vercel-build
-}
-
-// Mutation hooks for creating/updating data
+// Mutation hooks
 export function useCreatePaymentLink() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<ApiError | null>(null)
@@ -184,12 +120,10 @@ export function useCreatePaymentLink() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await fetch('/api/payment-links', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
@@ -201,10 +135,7 @@ export function useCreatePaymentLink() {
 
       return result.data
     } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : 'Unknown error occurred',
-        status: err instanceof Error && 'status' in err ? (err as any).status : undefined
-      })
+      setError({ message: err instanceof Error ? err.message : 'Unknown error occurred' })
       throw err
     } finally {
       setLoading(false)
@@ -222,12 +153,10 @@ export function useCreateVault() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await fetch('/api/vaults', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
@@ -239,10 +168,7 @@ export function useCreateVault() {
 
       return result.data
     } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : 'Unknown error occurred',
-        status: err instanceof Error && 'status' in err ? (err as any).status : undefined
-      })
+      setError({ message: err instanceof Error ? err.message : 'Unknown error occurred' })
       throw err
     } finally {
       setLoading(false)
@@ -260,12 +186,10 @@ export function useCreatePayrollBatch() {
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await fetch('/api/payroll', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       })
 
@@ -277,10 +201,7 @@ export function useCreatePayrollBatch() {
 
       return result.data
     } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : 'Unknown error occurred',
-        status: err instanceof Error && 'status' in err ? (err as any).status : undefined
-      })
+      setError({ message: err instanceof Error ? err.message : 'Unknown error occurred' })
       throw err
     } finally {
       setLoading(false)
@@ -288,42 +209,4 @@ export function useCreatePayrollBatch() {
   }
 
   return { createBatch, loading, error }
-}
-
-export function useCreateRWASubscription() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-
-  const createSubscription = async (data: any) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await fetch('/api/rwa', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create RWA subscription')
-      }
-
-      return result.data
-    } catch (err) {
-      setError({
-        message: err instanceof Error ? err.message : 'Unknown error occurred',
-        status: err instanceof Error && 'status' in err ? (err as any).status : undefined
-      })
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return { createSubscription, loading, error }
 }

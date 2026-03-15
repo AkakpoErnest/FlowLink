@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Dialog,
   DialogContent,
@@ -40,8 +41,21 @@ import {
   Shield,
   TrendingUp,
   X,
+  Wallet,
 } from "lucide-react"
 import type { Invoice } from "@/app/api/invoices/route"
+
+interface Agent {
+  id: string
+  name: string
+  description: string | null
+  walletAddress: string | null
+  capabilities: string[]
+  status: string
+  totalEarned: number
+  invoiceCount: number
+  createdAt: string
+}
 
 const statusConfig = {
   draft: { label: "Draft", color: "bg-slate-500/20 text-slate-300 border-slate-500/30", icon: FileText },
@@ -66,14 +80,18 @@ interface LineItem {
 
 export function AIInvoiceModule() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [agents, setAgents] = useState<Agent[]>([])
   const [stats, setStats] = useState({ total: 0, pending: 0, paid: 0, overdue: 0, totalValue: "0", paidValue: "0" })
   const [showCreate, setShowCreate] = useState(false)
+  const [showRegisterAgent, setShowRegisterAgent] = useState(false)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [loading, setLoading] = useState(false)
+  const [agentLoading, setAgentLoading] = useState(false)
 
   // New invoice form state
   const [form, setForm] = useState({
+    selectedAgentId: "",
     agentName: "",
     agentDescription: "",
     issuedTo: "",
@@ -88,8 +106,17 @@ export function AIInvoiceModule() {
     { description: "", quantity: 1, unitPrice: "", total: "0.00" },
   ])
 
+  // Register agent form state
+  const [agentForm, setAgentForm] = useState({
+    name: "",
+    description: "",
+    walletAddress: "",
+    capabilitiesText: "",
+  })
+
   useEffect(() => {
     fetchInvoices()
+    fetchAgents()
   }, [filterStatus])
 
   const fetchInvoices = async () => {
@@ -99,6 +126,14 @@ export function AIInvoiceModule() {
     if (data.success) {
       setInvoices(data.data)
       setStats(data.stats)
+    }
+  }
+
+  const fetchAgents = async () => {
+    const res = await fetch("/api/agents")
+    const data = await res.json()
+    if (data.success) {
+      setAgents(data.data)
     }
   }
 
@@ -115,13 +150,36 @@ export function AIInvoiceModule() {
 
   const totalAmount = lineItems.reduce((sum, item) => sum + parseFloat(item.total || "0"), 0).toFixed(2)
 
+  const handleAgentSelect = (agentId: string) => {
+    const agent = agents.find(a => a.id === agentId)
+    if (agent) {
+      setForm({
+        ...form,
+        selectedAgentId: agentId,
+        agentName: agent.name,
+        agentDescription: agent.description ?? "",
+      })
+    } else {
+      setForm({ ...form, selectedAgentId: "", agentName: "", agentDescription: "" })
+    }
+  }
+
   const createInvoice = async () => {
     setLoading(true)
     const res = await fetch("/api/invoices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...form,
+        agentId: form.selectedAgentId || null,
+        agentName: form.agentName,
+        agentDescription: form.agentDescription,
+        issuedTo: form.issuedTo,
+        issuedToAddress: form.issuedToAddress,
+        description: form.description,
+        currency: form.currency,
+        network: form.network,
+        dueAt: form.dueAt,
+        kycRequired: form.kycRequired,
         lineItems,
         amount: totalAmount,
       }),
@@ -129,11 +187,37 @@ export function AIInvoiceModule() {
     const data = await res.json()
     if (data.success) {
       setShowCreate(false)
-      setForm({ agentName: "", agentDescription: "", issuedTo: "", issuedToAddress: "", description: "", currency: "USDC", network: "hashkey", dueAt: "", kycRequired: true })
+      setForm({ selectedAgentId: "", agentName: "", agentDescription: "", issuedTo: "", issuedToAddress: "", description: "", currency: "USDC", network: "hashkey", dueAt: "", kycRequired: true })
       setLineItems([{ description: "", quantity: 1, unitPrice: "", total: "0.00" }])
       fetchInvoices()
+      fetchAgents()
     }
     setLoading(false)
+  }
+
+  const registerAgent = async () => {
+    setAgentLoading(true)
+    const capabilities = agentForm.capabilitiesText
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean)
+    const res = await fetch("/api/agents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: agentForm.name,
+        description: agentForm.description || null,
+        walletAddress: agentForm.walletAddress || null,
+        capabilities,
+      }),
+    })
+    const data = await res.json()
+    if (data.success) {
+      setShowRegisterAgent(false)
+      setAgentForm({ name: "", description: "", walletAddress: "", capabilitiesText: "" })
+      fetchAgents()
+    }
+    setAgentLoading(false)
   }
 
   const markAsPaid = async (invoice: Invoice) => {
@@ -174,7 +258,7 @@ export function AIInvoiceModule() {
         ))}
       </div>
 
-      {/* Main Card */}
+      {/* Main Card with Tabs */}
       <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -187,265 +271,434 @@ export function AIInvoiceModule() {
                 <CardDescription>Crypto-native invoicing for AI agents and automated services</CardDescription>
               </div>
             </div>
-            <Dialog open={showCreate} onOpenChange={setShowCreate}>
-              <DialogTrigger asChild>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
-                  <Plus className="h-4 w-4" />
-                  New Invoice
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle className="text-white flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-blue-400" />
-                    Create AI Agent Invoice
-                  </DialogTitle>
-                  <DialogDescription>Issue a crypto invoice from an AI agent</DialogDescription>
-                </DialogHeader>
+          </div>
+        </CardHeader>
 
-                <div className="space-y-4 mt-2">
-                  {/* Agent Info */}
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <p className="text-blue-400 text-xs font-medium mb-2 flex items-center gap-1"><Bot className="h-3 w-3" /> Agent Details</p>
-                    <div className="grid grid-cols-2 gap-3">
+        <CardContent>
+          <Tabs defaultValue="invoices" className="w-full">
+            <TabsList className="bg-slate-700/50 border-slate-600 mb-4">
+              <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-400">
+                Invoices
+              </TabsTrigger>
+              <TabsTrigger value="agents" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-400">
+                Agents
+              </TabsTrigger>
+            </TabsList>
+
+            {/* ── Invoices Tab ── */}
+            <TabsContent value="invoices" className="mt-0">
+              <div className="flex items-center justify-between mb-4">
+                {/* Filter tabs */}
+                <div className="flex gap-2">
+                  {["all", "pending", "paid", "overdue", "draft"].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setFilterStatus(s)}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${filterStatus === s ? "bg-emerald-600 text-white" : "bg-slate-700/50 text-slate-400 hover:text-white"}`}
+                    >
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                <Dialog open={showCreate} onOpenChange={setShowCreate}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+                      <Plus className="h-4 w-4" />
+                      New Invoice
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-white flex items-center gap-2">
+                        <Bot className="h-5 w-5 text-blue-400" />
+                        Create AI Agent Invoice
+                      </DialogTitle>
+                      <DialogDescription>Issue a crypto invoice from an AI agent</DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4 mt-2">
+                      {/* Agent Selector */}
+                      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                        <p className="text-blue-400 text-xs font-medium mb-2 flex items-center gap-1"><Bot className="h-3 w-3" /> Agent Details</p>
+                        <div className="space-y-3">
+                          <div>
+                            <Label className="text-slate-300 text-xs">Select Agent</Label>
+                            <Select
+                              value={form.selectedAgentId}
+                              onValueChange={handleAgentSelect}
+                            >
+                              <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                                <SelectValue placeholder="Choose a registered agent..." />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-slate-600">
+                                {agents.length === 0 && (
+                                  <SelectItem value="__none__" disabled>No agents registered yet</SelectItem>
+                                )}
+                                {agents.map(agent => (
+                                  <SelectItem key={agent.id} value={agent.id}>
+                                    {agent.name} {agent.walletAddress ? `(${agent.walletAddress.slice(0, 6)}...${agent.walletAddress.slice(-4)})` : "(no wallet)"}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {form.selectedAgentId && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-slate-300 text-xs">Agent Name</Label>
+                                <Input
+                                  value={form.agentName}
+                                  onChange={e => setForm({ ...form, agentName: e.target.value })}
+                                  className="bg-slate-800 border-slate-600 text-white mt-1"
+                                  readOnly
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-slate-300 text-xs">Agent Description</Label>
+                                <Input
+                                  value={form.agentDescription}
+                                  onChange={e => setForm({ ...form, agentDescription: e.target.value })}
+                                  className="bg-slate-800 border-slate-600 text-white mt-1"
+                                  readOnly
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Client Info */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-slate-300 text-xs">Invoice To (Name)</Label>
+                          <Input
+                            value={form.issuedTo}
+                            onChange={e => setForm({ ...form, issuedTo: e.target.value })}
+                            placeholder="Client name"
+                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-slate-300 text-xs">Client Wallet Address</Label>
+                          <Input
+                            value={form.issuedToAddress}
+                            onChange={e => setForm({ ...form, issuedToAddress: e.target.value })}
+                            placeholder="0x..."
+                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                          />
+                        </div>
+                      </div>
+
                       <div>
-                        <Label className="text-slate-300 text-xs">Agent Name</Label>
+                        <Label className="text-slate-300 text-xs">Description</Label>
+                        <Textarea
+                          value={form.description}
+                          onChange={e => setForm({ ...form, description: e.target.value })}
+                          placeholder="Invoice description / service rendered"
+                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          rows={2}
+                        />
+                      </div>
+
+                      {/* Payment Settings */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div>
+                          <Label className="text-slate-300 text-xs">Currency</Label>
+                          <Select value={form.currency} onValueChange={v => setForm({ ...form, currency: v as any })}>
+                            <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-600">
+                              <SelectItem value="USDC">USDC</SelectItem>
+                              <SelectItem value="USDT">USDT</SelectItem>
+                              <SelectItem value="HSK">HSK</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-slate-300 text-xs">Network</Label>
+                          <Select value={form.network} onValueChange={v => setForm({ ...form, network: v as any })}>
+                            <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-800 border-slate-600">
+                              <SelectItem value="hashkey">HashKey Chain</SelectItem>
+                              <SelectItem value="polygon">Polygon</SelectItem>
+                              <SelectItem value="ethereum">Ethereum</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label className="text-slate-300 text-xs">Due Date</Label>
+                          <Input
+                            type="date"
+                            value={form.dueAt}
+                            onChange={e => setForm({ ...form, dueAt: e.target.value })}
+                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                          />
+                        </div>
+                      </div>
+
+                      {/* KYC Toggle */}
+                      <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                        <Shield className="h-4 w-4 text-emerald-400" />
+                        <div className="flex-1">
+                          <p className="text-white text-sm">Require KYC</p>
+                          <p className="text-slate-400 text-xs">Payer must complete KYC before payment</p>
+                        </div>
+                        <Switch
+                          checked={form.kycRequired}
+                          onCheckedChange={v => setForm({ ...form, kycRequired: v })}
+                        />
+                      </div>
+
+                      {/* Line Items */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <Label className="text-slate-300 text-xs">Line Items</Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-emerald-400 hover:text-emerald-300 h-6 text-xs"
+                            onClick={() => setLineItems([...lineItems, { description: "", quantity: 1, unitPrice: "", total: "0.00" }])}
+                          >
+                            <Plus className="h-3 w-3 mr-1" /> Add Item
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          {lineItems.map((item, idx) => (
+                            <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                              <Input
+                                className="col-span-5 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                placeholder="Description"
+                                value={item.description}
+                                onChange={e => updateLineItem(idx, "description", e.target.value)}
+                              />
+                              <Input
+                                className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                placeholder="Qty"
+                                type="number"
+                                value={item.quantity}
+                                onChange={e => updateLineItem(idx, "quantity", parseInt(e.target.value) || 1)}
+                              />
+                              <Input
+                                className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                placeholder="Price"
+                                value={item.unitPrice}
+                                onChange={e => updateLineItem(idx, "unitPrice", e.target.value)}
+                              />
+                              <div className="col-span-2 text-right">
+                                <span className="text-emerald-400 text-xs font-mono">${item.total}</span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="col-span-1 h-8 w-8 p-0 text-red-400 hover:text-red-300"
+                                onClick={() => setLineItems(lineItems.filter((_, i) => i !== idx))}
+                                disabled={lineItems.length === 1}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-end mt-3 pt-3 border-t border-slate-700">
+                          <div className="text-right">
+                            <p className="text-slate-400 text-xs">Total Amount</p>
+                            <p className="text-emerald-400 font-bold text-xl font-mono">${totalAmount} <span className="text-sm">{form.currency}</span></p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Button
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                        onClick={createInvoice}
+                        disabled={loading || !form.issuedTo || !lineItems[0].description}
+                      >
+                        {loading ? "Creating..." : "Create Invoice"}
+                        <Zap className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {invoices.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>No invoices found</p>
+                  <p className="text-xs mt-1">Create your first AI agent invoice to get started</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {invoices.map(invoice => {
+                    const status = statusConfig[invoice.status]
+                    const network = networkConfig[invoice.network as keyof typeof networkConfig] ?? networkConfig.hashkey
+                    const StatusIcon = status.icon
+                    return (
+                      <div
+                        key={invoice.id}
+                        className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg hover:border-slate-500/50 transition-all cursor-pointer group"
+                        onClick={() => setSelectedInvoice(invoice)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-500/10 rounded-lg">
+                              <Bot className="h-4 w-4 text-blue-400" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-white font-medium text-sm">{invoice.invoiceNumber}</p>
+                                <Badge className={`text-xs border ${network.badge}`}>{network.label}</Badge>
+                                {invoice.paymentLinkCode && (
+                                  <Badge className="text-xs border bg-blue-500/20 text-blue-300 border-blue-500/30">Pay Link</Badge>
+                                )}
+                              </div>
+                              <p className="text-slate-400 text-xs">{invoice.agentName} → {invoice.issuedTo}</p>
+                              <p className="text-slate-500 text-xs mt-0.5 truncate max-w-sm">{invoice.description}</p>
+                            </div>
+                          </div>
+                          <div className="text-right flex flex-col items-end gap-2">
+                            <Badge className={`text-xs border ${status.color} flex items-center gap-1`}>
+                              <StatusIcon className="h-3 w-3" />
+                              {status.label}
+                            </Badge>
+                            <p className="text-emerald-400 font-bold font-mono">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
+                            <p className="text-slate-500 text-xs">Due: {new Date(invoice.dueAt).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            {/* ── Agents Tab ── */}
+            <TabsContent value="agents" className="mt-0">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-slate-400 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
+                <Dialog open={showRegisterAgent} onOpenChange={setShowRegisterAgent}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
+                      <Plus className="h-4 w-4" />
+                      Register Agent
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="text-white flex items-center gap-2">
+                        <Bot className="h-5 w-5 text-blue-400" />
+                        Register Agent
+                      </DialogTitle>
+                      <DialogDescription>Register an agent with a wallet address to issue invoices on-chain</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-2">
+                      <div>
+                        <Label className="text-slate-300 text-xs">Agent Name *</Label>
                         <Input
-                          value={form.agentName}
-                          onChange={e => setForm({ ...form, agentName: e.target.value })}
+                          value={agentForm.name}
+                          onChange={e => setAgentForm({ ...agentForm, name: e.target.value })}
                           placeholder="e.g. Analytics Agent"
                           className="bg-slate-800 border-slate-600 text-white mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-slate-300 text-xs">Agent Description</Label>
-                        <Input
-                          value={form.agentDescription}
-                          onChange={e => setForm({ ...form, agentDescription: e.target.value })}
+                        <Label className="text-slate-300 text-xs">Description</Label>
+                        <Textarea
+                          value={agentForm.description}
+                          onChange={e => setAgentForm({ ...agentForm, description: e.target.value })}
                           placeholder="What does this agent do?"
+                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          rows={2}
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-slate-300 text-xs">Wallet Address</Label>
+                        <Input
+                          value={agentForm.walletAddress}
+                          onChange={e => setAgentForm({ ...agentForm, walletAddress: e.target.value })}
+                          placeholder="0x... (payments will be sent here)"
+                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                        />
+                        <p className="text-slate-500 text-xs mt-1">Payments from invoices issued by this agent will go directly to this wallet.</p>
+                      </div>
+                      <div>
+                        <Label className="text-slate-300 text-xs">Capabilities (comma-separated)</Label>
+                        <Input
+                          value={agentForm.capabilitiesText}
+                          onChange={e => setAgentForm({ ...agentForm, capabilitiesText: e.target.value })}
+                          placeholder="data-analysis, reporting, automation"
                           className="bg-slate-800 border-slate-600 text-white mt-1"
                         />
                       </div>
-                    </div>
-                  </div>
-
-                  {/* Client Info */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-slate-300 text-xs">Invoice To (Name)</Label>
-                      <Input
-                        value={form.issuedTo}
-                        onChange={e => setForm({ ...form, issuedTo: e.target.value })}
-                        placeholder="Client name"
-                        className="bg-slate-800 border-slate-600 text-white mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-slate-300 text-xs">Client Wallet Address</Label>
-                      <Input
-                        value={form.issuedToAddress}
-                        onChange={e => setForm({ ...form, issuedToAddress: e.target.value })}
-                        placeholder="0x..."
-                        className="bg-slate-800 border-slate-600 text-white mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label className="text-slate-300 text-xs">Description</Label>
-                    <Textarea
-                      value={form.description}
-                      onChange={e => setForm({ ...form, description: e.target.value })}
-                      placeholder="Invoice description / service rendered"
-                      className="bg-slate-800 border-slate-600 text-white mt-1"
-                      rows={2}
-                    />
-                  </div>
-
-                  {/* Payment Settings */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <Label className="text-slate-300 text-xs">Currency</Label>
-                      <Select value={form.currency} onValueChange={v => setForm({ ...form, currency: v as any })}>
-                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-600">
-                          <SelectItem value="USDC">USDC</SelectItem>
-                          <SelectItem value="USDT">USDT</SelectItem>
-                          <SelectItem value="HSK">HSK</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-slate-300 text-xs">Network</Label>
-                      <Select value={form.network} onValueChange={v => setForm({ ...form, network: v as any })}>
-                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-600">
-                          <SelectItem value="hashkey">HashKey Chain</SelectItem>
-                          <SelectItem value="polygon">Polygon</SelectItem>
-                          <SelectItem value="ethereum">Ethereum</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-slate-300 text-xs">Due Date</Label>
-                      <Input
-                        type="date"
-                        value={form.dueAt}
-                        onChange={e => setForm({ ...form, dueAt: e.target.value })}
-                        className="bg-slate-800 border-slate-600 text-white mt-1"
-                      />
-                    </div>
-                  </div>
-
-                  {/* KYC Toggle */}
-                  <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
-                    <Shield className="h-4 w-4 text-emerald-400" />
-                    <div className="flex-1">
-                      <p className="text-white text-sm">Require KYC</p>
-                      <p className="text-slate-400 text-xs">Payer must complete KYC before payment</p>
-                    </div>
-                    <Switch
-                      checked={form.kycRequired}
-                      onCheckedChange={v => setForm({ ...form, kycRequired: v })}
-                    />
-                  </div>
-
-                  {/* Line Items */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="text-slate-300 text-xs">Line Items</Label>
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-emerald-400 hover:text-emerald-300 h-6 text-xs"
-                        onClick={() => setLineItems([...lineItems, { description: "", quantity: 1, unitPrice: "", total: "0.00" }])}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        onClick={registerAgent}
+                        disabled={agentLoading || !agentForm.name}
                       >
-                        <Plus className="h-3 w-3 mr-1" /> Add Item
+                        {agentLoading ? "Registering..." : "Register Agent"}
+                        <Bot className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="space-y-2">
-                      {lineItems.map((item, idx) => (
-                        <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                          <Input
-                            className="col-span-5 bg-slate-800 border-slate-600 text-white text-xs h-8"
-                            placeholder="Description"
-                            value={item.description}
-                            onChange={e => updateLineItem(idx, "description", e.target.value)}
-                          />
-                          <Input
-                            className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
-                            placeholder="Qty"
-                            type="number"
-                            value={item.quantity}
-                            onChange={e => updateLineItem(idx, "quantity", parseInt(e.target.value) || 1)}
-                          />
-                          <Input
-                            className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
-                            placeholder="Price"
-                            value={item.unitPrice}
-                            onChange={e => updateLineItem(idx, "unitPrice", e.target.value)}
-                          />
-                          <div className="col-span-2 text-right">
-                            <span className="text-emerald-400 text-xs font-mono">${item.total}</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="col-span-1 h-8 w-8 p-0 text-red-400 hover:text-red-300"
-                            onClick={() => setLineItems(lineItems.filter((_, i) => i !== idx))}
-                            disabled={lineItems.length === 1}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex justify-end mt-3 pt-3 border-t border-slate-700">
-                      <div className="text-right">
-                        <p className="text-slate-400 text-xs">Total Amount</p>
-                        <p className="text-emerald-400 font-bold text-xl font-mono">${totalAmount} <span className="text-sm">{form.currency}</span></p>
-                      </div>
-                    </div>
-                  </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
 
-                  <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={createInvoice}
-                    disabled={loading || !form.agentName || !form.issuedTo || !lineItems[0].description}
-                  >
-                    {loading ? "Creating..." : "Create Invoice"}
-                    <Zap className="ml-2 h-4 w-4" />
-                  </Button>
+              {agents.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>No agents registered</p>
+                  <p className="text-xs mt-1">Register an agent with a wallet address to start issuing on-chain invoices</p>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {/* Filter tabs */}
-          <div className="flex gap-2 mt-3">
-            {["all", "pending", "paid", "overdue", "draft"].map(s => (
-              <button
-                key={s}
-                onClick={() => setFilterStatus(s)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${filterStatus === s ? "bg-emerald-600 text-white" : "bg-slate-700/50 text-slate-400 hover:text-white"}`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          {invoices.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p>No invoices found</p>
-              <p className="text-xs mt-1">Create your first AI agent invoice to get started</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {invoices.map(invoice => {
-                const status = statusConfig[invoice.status]
-                const network = networkConfig[invoice.network]
-                const StatusIcon = status.icon
-                return (
-                  <div
-                    key={invoice.id}
-                    className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg hover:border-slate-500/50 transition-all cursor-pointer group"
-                    onClick={() => setSelectedInvoice(invoice)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-500/10 rounded-lg">
-                          <Bot className="h-4 w-4 text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-white font-medium text-sm">{invoice.invoiceNumber}</p>
-                            <Badge className={`text-xs border ${network.badge}`}>{network.label}</Badge>
+              ) : (
+                <div className="space-y-3">
+                  {agents.map(agent => (
+                    <div key={agent.id} className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-500/10 rounded-lg">
+                            <Bot className="h-4 w-4 text-blue-400" />
                           </div>
-                          <p className="text-slate-400 text-xs">{invoice.agentName} → {invoice.issuedTo}</p>
-                          <p className="text-slate-500 text-xs mt-0.5 truncate max-w-sm">{invoice.description}</p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="text-white font-medium text-sm">{agent.name}</p>
+                              <Badge className={`text-xs border ${agent.status === "active" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-slate-500/20 text-slate-300 border-slate-500/30"}`}>
+                                {agent.status}
+                              </Badge>
+                            </div>
+                            {agent.description && <p className="text-slate-400 text-xs mt-0.5">{agent.description}</p>}
+                            {agent.walletAddress && (
+                              <div className="flex items-center gap-1 mt-1">
+                                <Wallet className="h-3 w-3 text-slate-500" />
+                                <span className="text-slate-400 text-xs font-mono">
+                                  {agent.walletAddress.slice(0, 10)}...{agent.walletAddress.slice(-6)}
+                                </span>
+                                <button onClick={() => copyToClipboard(agent.walletAddress!)} className="text-slate-500 hover:text-slate-300">
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right flex flex-col items-end gap-2">
-                        <Badge className={`text-xs border ${status.color} flex items-center gap-1`}>
-                          <StatusIcon className="h-3 w-3" />
-                          {status.label}
-                        </Badge>
-                        <p className="text-emerald-400 font-bold font-mono">${parseFloat(invoice.amount).toLocaleString()} {invoice.currency}</p>
-                        <p className="text-slate-500 text-xs">Due: {new Date(invoice.dueAt).toLocaleDateString()}</p>
+                        <div className="text-right space-y-1">
+                          <p className="text-slate-400 text-xs">{agent.invoiceCount} invoice{agent.invoiceCount !== 1 ? "s" : ""}</p>
+                          <p className="text-emerald-400 text-xs font-mono">${agent.totalEarned.toLocaleString()} earned</p>
+                          {(agent.capabilities as string[]).length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {(agent.capabilities as string[]).slice(0, 3).map(cap => (
+                                <span key={cap} className="text-xs bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">{cap}</span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -480,7 +733,7 @@ export function AIInvoiceModule() {
                     {selectedInvoice.issuedToAddress && (
                       <div className="flex items-center gap-1 mt-1">
                         <p className="text-slate-400 text-xs font-mono">{selectedInvoice.issuedToAddress.slice(0, 10)}...{selectedInvoice.issuedToAddress.slice(-6)}</p>
-                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress)} className="text-slate-500 hover:text-slate-300">
+                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress!)} className="text-slate-500 hover:text-slate-300">
                           <Copy className="h-3 w-3" />
                         </button>
                       </div>
@@ -519,8 +772,8 @@ export function AIInvoiceModule() {
                   <div className="flex justify-end mt-2 pt-2 border-t border-slate-700">
                     <div className="text-right">
                       <p className="text-slate-400 text-xs">Total Due</p>
-                      <p className="text-emerald-400 font-bold text-2xl font-mono">${parseFloat(selectedInvoice.amount).toLocaleString()} {selectedInvoice.currency}</p>
-                      <p className="text-slate-500 text-xs">on {networkConfig[selectedInvoice.network].label}</p>
+                      <p className="text-emerald-400 font-bold text-2xl font-mono">${parseFloat(String(selectedInvoice.amount)).toLocaleString()} {selectedInvoice.currency}</p>
+                      <p className="text-slate-500 text-xs">on {(networkConfig[selectedInvoice.network as keyof typeof networkConfig] ?? networkConfig.hashkey).label}</p>
                     </div>
                   </div>
                 </div>
@@ -529,7 +782,7 @@ export function AIInvoiceModule() {
                 <div className="grid grid-cols-3 gap-3 text-xs">
                   <div className="p-2 bg-slate-700/30 rounded">
                     <p className="text-slate-500">Issued</p>
-                    <p className="text-white">{new Date(selectedInvoice.issuedAt).toLocaleDateString()}</p>
+                    <p className="text-white">{new Date(selectedInvoice.createdAt).toLocaleDateString()}</p>
                   </div>
                   <div className="p-2 bg-slate-700/30 rounded">
                     <p className="text-slate-500">Due</p>
@@ -556,6 +809,30 @@ export function AIInvoiceModule() {
                     <button onClick={() => copyToClipboard(selectedInvoice.txHash!)} className="text-slate-400 hover:text-white shrink-0">
                       <Copy className="h-3 w-3" />
                     </button>
+                  </div>
+                )}
+
+                {/* Pay Now Button */}
+                {selectedInvoice.paymentLinkCode && selectedInvoice.status !== "paid" && (
+                  <div className="space-y-2">
+                    <a
+                      href={`/l/${selectedInvoice.paymentLinkCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2">
+                        <ExternalLink className="h-4 w-4" />
+                        Pay Now — {selectedInvoice.currency} on HashKey Chain
+                      </Button>
+                    </a>
+                    <Button
+                      variant="outline"
+                      className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 gap-2"
+                      onClick={() => copyToClipboard(`${window.location.origin}/l/${selectedInvoice.paymentLinkCode}`)}
+                    >
+                      <Copy className="h-4 w-4" />
+                      Copy Payment Link
+                    </Button>
                   </div>
                 )}
 

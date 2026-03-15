@@ -3,6 +3,31 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 
+export type Invoice = {
+  id: string
+  userId: string
+  invoiceNumber: string
+  agentId: string | null
+  agentName: string | null
+  agentDescription?: string | null
+  issuedTo: string | null
+  issuedToAddress: string | null
+  amount: number
+  currency: string
+  network: "hashkey" | "polygon" | "ethereum" | string
+  status: "draft" | "pending" | "paid" | "overdue" | "cancelled"
+  description: string | null
+  lineItems: Array<{ description: string; quantity: number; unitPrice: string; total: string }>
+  dueAt: string
+  paidAt: string | null
+  txHash: string | null
+  complianceStatus: string
+  paymentLinkCode: string | null
+  createdAt: string
+  updatedAt: string
+  issuedAt: string // alias for createdAt, provided for compatibility
+}
+
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
 }
@@ -73,6 +98,30 @@ export async function POST(request: NextRequest) {
       complianceStatus: "pending",
     },
   })
+
+  // If an agentId was provided, auto-create a PaymentLink routed to the agent's wallet
+  if (body.agentId) {
+    const agent = await prisma.agent.findFirst({ where: { id: body.agentId, userId } })
+    if (agent?.walletAddress) {
+      const linkCode = `inv-${invoice.id.slice(-8)}`
+      const link = await prisma.paymentLink.create({
+        data: {
+          userId,
+          code: linkCode,
+          name: `Invoice ${invoice.invoiceNumber} — ${agent.name}`,
+          sourceToken: invoice.currency,
+          destStable: invoice.currency,
+          amountMin: invoice.amount,
+          amountMax: invoice.amount,
+          recipientAddress: agent.walletAddress,
+          status: "active",
+        },
+      })
+      await prisma.invoice.update({ where: { id: invoice.id }, data: { paymentLinkCode: link.code } })
+      await prisma.agent.update({ where: { id: agent.id }, data: { invoiceCount: { increment: 1 } } })
+      return NextResponse.json({ success: true, data: { ...invoice, paymentLinkCode: link.code } }, { status: 201 })
+    }
+  }
 
   return NextResponse.json({ success: true, data: invoice }, { status: 201 })
 }

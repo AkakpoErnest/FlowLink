@@ -10,7 +10,7 @@ import { Switch } from "@/components/ui/switch"
 import { Copy, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-export function CreateLinkForm() {
+export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [amount, setAmount] = useState("")
   const [memo, setMemo] = useState("")
   const [requireKYC, setRequireKYC] = useState(false)
@@ -32,16 +32,16 @@ export function CreateLinkForm() {
     setIsCreating(true)
 
     try {
-      const response = await fetch("/api/links", {
+      const response = await fetch("/api/payment-links", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: Number.parseFloat(amount),
-          memo,
-          requireKYC,
-          checkSanctions,
+          code: `pay-${Date.now()}`,
+          name: memo || null,
+          amountMin: amount ? Number.parseFloat(amount) : null,
+          amountMax: amount ? Number.parseFloat(amount) : null,
         }),
       })
 
@@ -51,7 +51,8 @@ export function CreateLinkForm() {
         throw new Error(data.error || "Failed to create payment link")
       }
 
-      setGeneratedLink(data.paymentUrl)
+      const code = data.data?.code
+      setGeneratedLink(`${window.location.origin}/l/${code}`)
 
       toast({
         title: "Payment link created",
@@ -63,6 +64,7 @@ export function CreateLinkForm() {
       setMemo("")
       setRequireKYC(false)
       setCheckSanctions(false)
+      onSuccess?.()
     } catch (error) {
       console.error("Error creating payment link:", error)
       toast({

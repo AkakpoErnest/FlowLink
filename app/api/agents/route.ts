@@ -1,0 +1,84 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-config"
+import { prisma } from "@/lib/prisma"
+
+function unauth() {
+  return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+}
+
+export async function GET(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
+  const agents = await prisma.agent.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  })
+
+  return NextResponse.json({ success: true, data: agents, total: agents.length })
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
+  const body = await request.json()
+
+  const agent = await prisma.agent.create({
+    data: {
+      userId,
+      name: body.name,
+      description: body.description || null,
+      walletAddress: body.walletAddress || null,
+      capabilities: body.capabilities || [],
+      status: "active",
+    },
+  })
+
+  return NextResponse.json({ success: true, data: agent }, { status: 201 })
+}
+
+export async function PUT(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
+  const body = await request.json()
+  const { id, ...updates } = body
+
+  const existing = await prisma.agent.findFirst({ where: { id, userId } })
+  if (!existing) {
+    return NextResponse.json({ success: false, error: "Agent not found" }, { status: 404 })
+  }
+
+  const agent = await prisma.agent.update({ where: { id }, data: updates })
+  return NextResponse.json({ success: true, data: agent })
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get("id")
+
+  if (!id) {
+    return NextResponse.json({ success: false, error: "Missing id" }, { status: 400 })
+  }
+
+  const existing = await prisma.agent.findFirst({ where: { id, userId } })
+  if (!existing) {
+    return NextResponse.json({ success: false, error: "Agent not found" }, { status: 404 })
+  }
+
+  await prisma.agent.delete({ where: { id } })
+  return NextResponse.json({ success: true })
+}

@@ -63,7 +63,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
               </Text>
             ),
           }}
-          initialChain={hashkey} // Default to HashKey Chain
+          initialChain={hashkeyTestnet} // Default to HashKey Testnet
           showRecentTransactions={true}
         >
           {children}

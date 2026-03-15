@@ -16,7 +16,7 @@ export default async function PaymentLinkPage({ params }: Props) {
 
   if (!link || link.status !== 'active') notFound()
 
-  const recipientAddress = link.user.walletAddress
+  const recipientAddress = link.recipientAddress ?? link.user.walletAddress
 
   if (!recipientAddress) {
     return (
@@ -28,6 +28,11 @@ export default async function PaymentLinkPage({ params }: Props) {
       </div>
     )
   }
+
+  const isInvoiceLink = link.name?.startsWith('Invoice')
+  const ownerName = isInvoiceLink
+    ? (link.name ?? 'Invoice Payment')
+    : (link.user.name ?? link.user.email ?? 'Unknown')
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20">
@@ -41,7 +46,7 @@ export default async function PaymentLinkPage({ params }: Props) {
             amountMin: link.amountMin,
             amountMax: link.amountMax,
             recipientAddress,
-            ownerName: link.user.name ?? link.user.email ?? 'Unknown',
+            ownerName,
           }}
         />
       </div>

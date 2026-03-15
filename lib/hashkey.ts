@@ -1,8 +1,35 @@
 // HashKey Chain Configuration
-// Based on HashKey's compliance-friendly blockchain infrastructure
 
+// Testnet (Chain ID 133) — what we use in the app today
 export const hashkeyChain = {
-  id: 230315, // HashKey Chain ID (to be verified with official docs)
+  id: 133,
+  name: 'HashKey Testnet',
+  network: 'hashkey-testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'HashKey Token',
+    symbol: 'HSK',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://hashkeychain-testnet.alt.technology'],
+    },
+    public: {
+      http: ['https://hashkeychain-testnet.alt.technology'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'HashKey Testnet Explorer',
+      url: 'https://hashkeychain-testnet-explorer.alt.technology',
+    },
+  },
+  testnet: true,
+}
+
+// Mainnet (Chain ID 230315) — for future use
+export const hashkeyMainnet = {
+  id: 230315,
   name: 'HashKey Chain',
   network: 'hashkey',
   nativeCurrency: {
@@ -11,90 +38,39 @@ export const hashkeyChain = {
     symbol: 'HSK',
   },
   rpcUrls: {
-    default: {
-      http: ['https://rpc.hashkey-chain.io'], // To be verified
-    },
-    public: {
-      http: ['https://rpc.hashkey-chain.io'], // To be verified
-    },
+    default: { http: ['https://mainnet.hsk.xyz'] },
+    public:  { http: ['https://mainnet.hsk.xyz'] },
   },
   blockExplorers: {
-    default: {
-      name: 'HashKey Explorer',
-      url: 'https://explorer.hashkey-chain.io', // To be verified
-    },
+    default: { name: 'HashKey Explorer', url: 'https://explorer.hsk.xyz' },
   },
   testnet: false,
 }
 
-export const hashkeyTestnet = {
-  id: 230315, // HashKey Testnet Chain ID (to be verified)
-  name: 'HashKey Testnet',
-  network: 'hashkey-testnet',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'HashKey Test Token',
-    symbol: 'tHSK',
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://testnet-rpc.hashkey-chain.io'], // To be verified
-    },
-    public: {
-      http: ['https://testnet-rpc.hashkey-chain.io'], // To be verified
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'HashKey Testnet Explorer',
-      url: 'https://testnet-explorer.hashkey-chain.io', // To be verified
-    },
-  },
-  testnet: true,
-}
+// Alias for backwards compat
+export const hashkeyTestnet = hashkeyChain
 
 // HashKey-specific token configurations
 export const hashkeyTokens = {
-  // Real World Asset (RWA) tokens that HashKey supports
-  RWATokens: [
+  stablecoins: [
     {
       symbol: 'USDC',
       name: 'USD Coin',
-      address: '0x...', // HashKey USDC contract address
+      address: '0x9aa7fEc87CA69695Dd1f879567CcF49F3ba417E',
       decimals: 6,
-      type: 'stablecoin',
     },
     {
       symbol: 'USDT',
       name: 'Tether USD',
-      address: '0x...', // HashKey USDT contract address
+      address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
       decimals: 6,
-      type: 'stablecoin',
-    },
-    // Add more RWA tokens as they become available
-  ],
-
-  // Money Market Fund (MMF) tokens
-  MMFTokens: [
-    {
-      symbol: 'HSK-MMF',
-      name: 'HashKey Money Market Fund',
-      address: '0x...', // MMF contract address
-      decimals: 18,
-      type: 'fund',
     },
   ],
 
-  // Bond tokens
-  BondTokens: [
-    {
-      symbol: 'HSK-BOND',
-      name: 'HashKey Bond Token',
-      address: '0x...', // Bond contract address
-      decimals: 18,
-      type: 'bond',
-    },
-  ],
+  // Kept for utils compatibility
+  RWATokens: [] as Array<{ symbol: string; name: string; address: string; decimals: number; apy?: string }>,
+  MMFTokens: [] as Array<{ symbol: string; name: string; address: string; decimals: number }>,
+  BondTokens: [] as Array<{ symbol: string; name: string; address: string; decimals: number }>,
 }
 
 // HashKey compliance features

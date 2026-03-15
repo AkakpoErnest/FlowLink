@@ -29,6 +29,7 @@ model User {
   invoices       Invoice[]
   vaults         ComplianceVault[]
   payrollBatches PayrollBatch[]
+  agents         Agent[]
 }
 
 model Account {
@@ -72,19 +73,20 @@ model VerificationToken {
 // ============================================================
 
 model PaymentLink {
-  id           String   @id @default(cuid())
-  userId       String
-  code         String   @unique
-  name         String?
-  sourceToken  String   @default("USDC")
-  destStable   String   @default("USDC")
-  amountMin    Float?
-  amountMax    Float?
-  status       String   @default("active")
-  totalVolume  Float    @default(0)
-  transactions Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String   @id @default(cuid())
+  userId           String
+  code             String   @unique
+  name             String?
+  sourceToken      String   @default("USDC")
+  destStable       String   @default("USDC")
+  amountMin        Float?
+  amountMax        Float?
+  recipientAddress String?
+  status           String   @default("active")
+  totalVolume      Float    @default(0)
+  transactions     Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments Payment[]
@@ -128,10 +130,12 @@ model Invoice {
   paidAt           DateTime?
   txHash           String?
   complianceStatus String    @default("pending")
+  paymentLinkCode  String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent Agent? @relation(fields: [agentId], references: [id])
 }
 
 model ComplianceVault {
@@ -180,4 +184,21 @@ model PayrollRecipient {
   txHash        String?
 
   batch PayrollBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+}
+
+model Agent {
+  id            String   @id @default(cuid())
+  userId        String
+  name          String
+  description   String?
+  walletAddress String?
+  capabilities  Json     @default("[]")
+  status        String   @default("active")
+  totalEarned   Float    @default(0)
+  invoiceCount  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
 }

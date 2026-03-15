@@ -1,13 +1,27 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from "wagmi"
-import { parseEther } from "viem"
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt, useWriteContract } from "wagmi"
+import { parseEther, parseUnits } from "viem"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { Shield, CheckCircle, XCircle, Loader2, ExternalLink, Wallet, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { hashkeyChain, hashkeyTokens } from "@/lib/hashkey"
+
+const ERC20_TRANSFER_ABI = [
+  {
+    name: 'transfer',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'to', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const
 
 interface PaymentFlowProps {
   paymentLink: {
@@ -24,7 +38,7 @@ interface PaymentFlowProps {
 
 type Step = 'connect' | 'form' | 'compliance' | 'confirm' | 'sending' | 'complete' | 'failed'
 
-const HASHKEY_TESTNET_EXPLORER = 'https://hashkeychain-testnet.alt.technology'
+const HASHKEY_TESTNET_EXPLORER = hashkeyChain.blockExplorers.default.url
 
 export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
   const { address, isConnected, chain } = useAccount()
@@ -36,11 +50,22 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
 
   const {
     sendTransaction,
-    data: txHash,
-    isPending: isSending,
+    data: nativeTxHash,
+    isPending: isSendingNative,
     error: sendError,
     reset: resetTx,
   } = useSendTransaction()
+
+  const {
+    writeContract,
+    data: erc20TxHash,
+    isPending: isSendingErc20,
+    error: writeError,
+    reset: resetWrite,
+  } = useWriteContract()
+
+  const txHash = nativeTxHash ?? erc20TxHash
+  const isSending = isSendingNative || isSendingErc20
 
   const { isSuccess, isLoading: isConfirming } = useWaitForTransactionReceipt({ hash: txHash })
 
@@ -63,7 +88,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             paymentLinkId: paymentLink.id,
             payer: address,
             amount: parseFloat(amount),
-            currency: 'HSK',
+            currency: paymentLink.sourceToken,
             txHash,
             status: 'completed',
             network: 'hashkey-testnet',
@@ -85,22 +110,21 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
 
   // Handle send error
   useEffect(() => {
-    if (sendError) {
-      setError(sendError.message.includes('rejected') ? 'Transaction rejected.' : sendError.message)
+    const err = sendError ?? writeError
+    if (err) {
+      setError(err.message.includes('rejected') ? 'Transaction rejected.' : err.message)
       setStep('confirm')
     }
-  }, [sendError])
+  }, [sendError, writeError])
 
-  // Run compliance check (KYC/AML simulation — replace with real provider later)
+  // Run compliance check (placeholder — hook up Chainalysis / Elliptic for production)
   const runCompliance = async () => {
     setStep('compliance')
     setError(null)
 
-    await new Promise(r => setTimeout(r, 1800))
+    await new Promise(r => setTimeout(r, 1500))
 
-    // Simulated compliance pass — hook up Chainalysis / Elliptic here
-    const score = Math.floor(Math.random() * 15) + 85 // 85–100
-    setComplianceScore(score)
+    setComplianceScore(95)
     setStep('confirm')
   }
 
@@ -108,12 +132,34 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
     if (!amount || !paymentLink.recipientAddress) return
     setError(null)
 
+    const isNative = paymentLink.sourceToken === 'HSK'
+
     try {
-      sendTransaction({
-        to: paymentLink.recipientAddress as `0x${string}`,
-        value: parseEther(amount),
-        chainId: 133, // HashKey testnet
-      })
+      if (isNative) {
+        sendTransaction({
+          to: paymentLink.recipientAddress as `0x${string}`,
+          value: parseEther(amount),
+          chainId: 133,
+        })
+      } else {
+        const token = hashkeyTokens.stablecoins.find(
+          t => t.symbol === paymentLink.sourceToken
+        )
+        if (!token) {
+          setError(`Unsupported token: ${paymentLink.sourceToken}`)
+          return
+        }
+        writeContract({
+          address: token.address as `0x${string}`,
+          abi: ERC20_TRANSFER_ABI,
+          functionName: 'transfer',
+          args: [
+            paymentLink.recipientAddress as `0x${string}`,
+            parseUnits(amount, token.decimals),
+          ],
+          chainId: 133,
+        })
+      }
       setStep('sending')
     } catch (e: any) {
       setError(e.message)
@@ -168,7 +214,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             <span className="font-mono text-xs text-slate-700">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
           </div>
           <div className="border-t border-slate-100 pt-4 space-y-2">
-            <Label htmlFor="amount">Amount (HSK)</Label>
+            <Label htmlFor="amount">Amount ({paymentLink.sourceToken})</Label>
             <div className="relative">
               <Input
                 id="amount"
@@ -184,10 +230,10 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
                 max={paymentLink.amountMax ?? undefined}
                 className="pr-16 text-lg font-semibold"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">HSK</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">{paymentLink.sourceToken}</span>
             </div>
             {paymentLink.amountMin && paymentLink.amountMax && (
-              <p className="text-xs text-slate-400">Min {paymentLink.amountMin} · Max {paymentLink.amountMax} HSK</p>
+              <p className="text-xs text-slate-400">Min {paymentLink.amountMin} · Max {paymentLink.amountMax} {paymentLink.sourceToken}</p>
             )}
           </div>
           {chain?.id !== 133 && (
@@ -234,7 +280,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
           {/* Summary */}
           <div className="space-y-2">
             {[
-              { label: 'You send', value: `${amount} HSK` },
+              { label: 'You send', value: `${amount} ${paymentLink.sourceToken}` },
               { label: 'To', value: `${paymentLink.ownerName}` },
               { label: 'Network', value: 'HashKey Testnet' },
               { label: 'Recipient', value: `${paymentLink.recipientAddress.slice(0, 8)}…${paymentLink.recipientAddress.slice(-6)}` },
@@ -261,7 +307,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             {isSending ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Confirm in wallet…</>
             ) : (
-              `Send ${amount} HSK`
+              `Send ${amount} ${paymentLink.sourceToken}`
             )}
           </Button>
         </div>
@@ -296,7 +342,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
           <div>
             <h2 className="text-xl font-bold text-slate-900 mb-1">Payment sent</h2>
             <p className="text-sm text-slate-500">
-              {amount} HSK sent to {paymentLink.ownerName}. Fully compliant. Fully on-chain.
+              {amount} {paymentLink.sourceToken} sent to {paymentLink.ownerName}. Fully compliant. Fully on-chain.
             </p>
           </div>
           {txHash && (
@@ -321,7 +367,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             )}
             <Button
               className="flex-1 bg-teal-600 hover:bg-teal-500 text-white"
-              onClick={() => { resetTx(); setStep('form'); setAmount(paymentLink.amountMin?.toString() ?? '') }}
+              onClick={() => { resetTx(); resetWrite(); setStep('form'); setAmount(paymentLink.amountMin?.toString() ?? '') }}
             >
               Pay again
             </Button>

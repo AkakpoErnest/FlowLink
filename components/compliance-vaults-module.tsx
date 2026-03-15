@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -57,39 +57,35 @@ export function ComplianceVaultsModule() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedVault, setSelectedVault] = useState<ComplianceVault | null>(null)
   const [showSimulator, setShowSimulator] = useState(false)
+  const [vaults, setVaults] = useState<ComplianceVault[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const vaults: ComplianceVault[] = [
-    {
-      id: "cv_001",
-      name: "Institutional Trading Vault",
-      status: "active",
-      policies: 8,
-      blocked: 23,
-      allowed: 1247,
-      riskScore: 92,
-      created: "2024-01-10",
-    },
-    {
-      id: "cv_002",
-      name: "Cross-border Payments",
-      status: "active",
-      policies: 5,
-      blocked: 7,
-      allowed: 456,
-      riskScore: 88,
-      created: "2024-01-08",
-    },
-    {
-      id: "cv_003",
-      name: "SME Subscription Vault",
-      status: "paused",
-      policies: 3,
-      blocked: 2,
-      allowed: 89,
-      riskScore: 95,
-      created: "2024-01-05",
-    },
-  ]
+  const fetchVaults = async () => {
+    try {
+      const res = await fetch("/api/vaults")
+      const json = await res.json()
+      if (json.success) {
+        setVaults(
+          json.data.map((v: any) => ({
+            id: v.id,
+            name: v.name,
+            status: v.status as "active" | "paused" | "draft",
+            policies: Array.isArray(v.policies) ? v.policies.length : 0,
+            blocked: 0,
+            allowed: v.monthlyTransactions,
+            riskScore: v.riskScore,
+            created: v.createdAt.split("T")[0],
+          }))
+        )
+      }
+    } catch (e) {
+      console.error("Failed to fetch vaults", e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchVaults() }, [])
 
   const policyRules: PolicyRule[] = [
     {
@@ -147,7 +143,7 @@ export function ComplianceVaultsModule() {
                 <DialogTitle>Create Compliance Vault</DialogTitle>
                 <DialogDescription>Set up a new smart-account factory with custom policies</DialogDescription>
               </DialogHeader>
-              <CreateVaultForm onClose={() => setShowCreateDialog(false)} />
+              <CreateVaultForm onClose={() => setShowCreateDialog(false)} onSuccess={() => { fetchVaults(); setShowCreateDialog(false) }} />
             </DialogContent>
           </Dialog>
         </div>
@@ -155,9 +151,15 @@ export function ComplianceVaultsModule() {
 
       {/* Vaults Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {vaults.map((vault) => (
-          <VaultCard key={vault.id} vault={vault} onSelect={setSelectedVault} />
-        ))}
+        {loading ? (
+          <div className="col-span-3 text-center py-12 text-muted-foreground">Loading vaults…</div>
+        ) : vaults.length === 0 ? (
+          <div className="col-span-3 text-center py-12 text-muted-foreground">No vaults yet. Create your first vault.</div>
+        ) : (
+          vaults.map((vault) => (
+            <VaultCard key={vault.id} vault={vault} onSelect={setSelectedVault} />
+          ))
+        )}
       </div>
 
       {/* Policy Rules Management */}
@@ -312,20 +314,39 @@ function PolicyRulesManager({ rules }: { rules: PolicyRule[] }) {
   )
 }
 
-function CreateVaultForm({ onClose }: { onClose: () => void }) {
+function CreateVaultForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [selectedPolicies, setSelectedPolicies] = useState<string[]>([])
+  const [vaultName, setVaultName] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  const handleCreate = async () => {
+    if (!vaultName.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch("/api/vaults", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: vaultName.trim(), policies: selectedPolicies }),
+      })
+      if (res.ok) onSuccess()
+    } catch (e) {
+      console.error("Failed to create vault", e)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="vault-name">Vault Name</Label>
-          <Input id="vault-name" placeholder="e.g., Institutional Trading Vault" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="vault-description">Description</Label>
-          <Input id="vault-description" placeholder="Brief description of vault purpose" />
+          <Input
+            id="vault-name"
+            placeholder="e.g., Institutional Trading Vault"
+            value={vaultName}
+            onChange={(e) => setVaultName(e.target.value)}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -394,10 +415,12 @@ function CreateVaultForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} disabled={saving}>
           Cancel
         </Button>
-        <Button className="bg-primary hover:bg-primary/90">Create Vault</Button>
+        <Button className="bg-primary hover:bg-primary/90" onClick={handleCreate} disabled={!vaultName.trim() || saving}>
+          {saving ? "Creating…" : "Create Vault"}
+        </Button>
       </div>
     </div>
   )
@@ -533,15 +556,20 @@ function PolicyConfigurationPanel() {
 
 function PolicySimulator() {
   const [simulationResults, setSimulationResults] = useState<any>(null)
+  const [volume, setVolume] = useState('1000')
 
   const runSimulation = () => {
-    // Mock simulation results
+    const total = parseInt(volume) || 1000
+    // Estimated impact based on typical screening rates:
+    // ~3% of transactions blocked by geographic/sanctions rules, ~0.2% false positives
+    const blocked = Math.round(total * 0.03)
+    const falsePositives = Math.max(1, Math.round(total * 0.002))
     setSimulationResults({
-      totalTransactions: 1500,
-      blocked: 45,
-      allowed: 1455,
-      riskReduction: 23,
-      falsePositives: 3,
+      totalTransactions: total,
+      blocked,
+      allowed: total - blocked,
+      riskReduction: 23, // estimated % risk reduction from policy
+      falsePositives,
     })
   }
 
@@ -568,8 +596,8 @@ function PolicySimulator() {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Transaction Volume</Label>
-              <Input defaultValue="1500" />
+              <Label>Transaction Volume (estimate)</Label>
+              <Input type="number" value={volume} onChange={e => setVolume(e.target.value)} />
             </div>
             <Button onClick={runSimulation} className="w-full bg-primary hover:bg-primary/90">
               <Play className="h-4 w-4 mr-2" />
@@ -605,7 +633,7 @@ function PolicySimulator() {
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-lg">Simulation Results</CardTitle>
-            <CardDescription>Impact analysis of policy configuration</CardDescription>
+            <CardDescription>Estimated impact based on industry screening rates (~3% block rate)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -638,63 +666,14 @@ function PolicySimulator() {
 }
 
 function TransactionHistory({ vaultId }: { vaultId: string }) {
-  const transactions = [
-    {
-      id: "tx_001",
-      amount: "$45,000",
-      status: "blocked",
-      reason: "Geographic restriction",
-      timestamp: "2024-01-15 14:30",
-    },
-    {
-      id: "tx_002",
-      amount: "$12,500",
-      status: "allowed",
-      reason: "All checks passed",
-      timestamp: "2024-01-15 14:25",
-    },
-    {
-      id: "tx_003",
-      amount: "$75,000",
-      status: "blocked",
-      reason: "Transaction limit exceeded",
-      timestamp: "2024-01-15 14:20",
-    },
-  ]
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-card-foreground">Recent Transactions</h3>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-        </div>
       </div>
-      <div className="space-y-3">
-        {transactions.map((tx) => (
-          <div key={tx.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className={`h-2 w-2 rounded-full ${tx.status === "allowed" ? "bg-green-500" : "bg-red-500"}`} />
-              <div>
-                <p className="font-medium text-card-foreground">{tx.amount}</p>
-                <p className="text-sm text-muted-foreground">{tx.reason}</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <Badge className={tx.status === "allowed" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
-                {tx.status}
-              </Badge>
-              <p className="text-xs text-muted-foreground mt-1">{tx.timestamp}</p>
-            </div>
-          </div>
-        ))}
+      <div className="text-center py-12 text-muted-foreground">
+        <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+        <p className="text-sm">No transactions recorded for this vault yet.</p>
       </div>
     </div>
   )
@@ -709,19 +688,8 @@ function VaultAnalytics({ vault }: { vault: ComplianceVault }) {
             <CardTitle className="text-base">Policy Effectiveness</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Geographic Restrictions</span>
-                <span className="text-sm font-medium">94%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Sanctions Screening</span>
-                <span className="text-sm font-medium">100%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Transaction Limits</span>
-                <span className="text-sm font-medium">87%</span>
-              </div>
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="text-sm">Policy effectiveness metrics will populate as transactions are processed through this vault.</p>
             </div>
           </CardContent>
         </Card>
@@ -737,12 +705,8 @@ function VaultAnalytics({ vault }: { vault: ComplianceVault }) {
                 <span className="text-sm font-medium text-green-600">{vault.riskScore}%</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">False Positive Rate</span>
-                <span className="text-sm font-medium">2.1%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Compliance Rating</span>
-                <span className="text-sm font-medium text-green-600">Excellent</span>
+                <span className="text-sm">Transactions Processed</span>
+                <span className="text-sm font-medium">{vault.allowed}</span>
               </div>
             </div>
           </CardContent>

@@ -1,237 +1,169 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CreateLinkForm } from '@/components/create-link-form'
-import { PaymentLinksTable } from '@/components/payment-links-table'
-import { Plus, Link2, QrCode, Eye, Copy, ExternalLink, DollarSign, Users, TrendingUp } from 'lucide-react'
+import { Plus, Link2, QrCode, DollarSign, TrendingUp, Copy, ExternalLink, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+
+interface Link {
+  id: string
+  code: string
+  name: string | null
+  sourceToken: string
+  amountMin: number | null
+  amountMax: number | null
+  status: string
+  totalVolume: number
+  transactions: number
+  createdAt: string
+}
 
 export default function PaymentLinksPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [links, setLinks] = useState<Link[]>([])
+  const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
-  const [mounted, setMounted] = useState(false)
 
-  // Mock user data for build
-  const user = { name: 'User', email: 'user@example.com' }
-  const isAuthenticated = true
-  const isConnected = false
+  useEffect(() => {
+    if (status === 'unauthenticated') router.push('/login')
+  }, [status, router])
 
-  useState(() => {
-    setMounted(true)
-  })
+  const fetchLinks = useCallback(async () => {
+    try {
+      const res = await fetch('/api/payment-links')
+      const data = await res.json()
+      if (data.success) setLinks(data.data)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
-  // Mock data for demonstration
-  const stats = [
-    {
-      title: 'Total Links',
-      value: '24',
-      change: '+12%',
-      changeType: 'positive' as const,
-      icon: Link2,
-    },
-    {
-      title: 'Active Links',
-      value: '18',
-      change: '+8%',
-      changeType: 'positive' as const,
-      icon: QrCode,
-    },
-    {
-      title: 'Total Volume',
-      value: '$12,450',
-      change: '+23%',
-      changeType: 'positive' as const,
-      icon: DollarSign,
-    },
-    {
-      title: 'Success Rate',
-      value: '94.2%',
-      change: '+2.1%',
-      changeType: 'positive' as const,
-      icon: TrendingUp,
-    },
-  ]
+  useEffect(() => {
+    if (status === 'authenticated') fetchLinks()
+  }, [status, fetchLinks])
 
-  const recentLinks = [
-    {
-      id: '1',
-      title: 'Web3 Conference Ticket',
-      amount: '$150.00',
-      currency: 'USDC',
-      status: 'active',
-      clicks: 45,
-      payments: 12,
-      createdAt: '2024-01-15',
-      url: 'https://flowlink.app/l/abc123',
-    },
-    {
-      id: '2',
-      title: 'NFT Collection Drop',
-      amount: '0.5 ETH',
-      currency: 'ETH',
-      status: 'completed',
-      clicks: 89,
-      payments: 67,
-      createdAt: '2024-01-14',
-      url: 'https://flowlink.app/l/def456',
-    },
-    {
-      id: '3',
-      title: 'DeFi Protocol Fee',
-      amount: '$25.00',
-      currency: 'USDC',
-      status: 'active',
-      clicks: 23,
-      payments: 8,
-      createdAt: '2024-01-13',
-      url: 'https://flowlink.app/l/ghi789',
-    },
-  ]
+  const copyLink = (code: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/l/${code}`)
+    toast.success('Link copied!')
+  }
 
-  if (!mounted) {
+  const totalVolume = links.reduce((s, l) => s + l.totalVolume, 0)
+  const activeLinks = links.filter(l => l.status === 'active')
+
+  if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-          <p className="text-lg">Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Payment Links</h1>
-          <p className="text-slate-300">
-            Create and manage crypto payment links for your business
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Payment Links</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Create and share compliant payment links</p>
         </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
-            <Card key={index} className="bg-slate-800/50 border-slate-700/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-400">{stat.title}</p>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    <p className={`text-sm ${
-                      stat.changeType === 'positive' ? 'text-emerald-400' : 'text-red-400'
-                    }`}>
-                      {stat.change} from last month
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-emerald-500/10">
-                    <stat.icon className="h-6 w-6 text-emerald-400" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 border-slate-700/50">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-emerald-600">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="create" className="data-[state=active]:bg-emerald-600">
-              Create Link
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Quick Actions */}
-            <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader>
-                <CardTitle className="text-white">Quick Actions</CardTitle>
-                <CardDescription className="text-slate-400">
-                  Manage your payment links efficiently
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-4">
-                  <Button 
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                    onClick={() => setActiveTab('create')}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Link
-                  </Button>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
-                    <Copy className="h-4 w-4 mr-2" />
-                    Bulk Import
-                  </Button>
-                  <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Export Data
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Links */}
-            <Card className="bg-slate-800/50 border-slate-700/50">
-              <CardHeader>
-                <CardTitle className="text-white">Recent Payment Links</CardTitle>
-                <CardDescription className="text-slate-400">
-                  Your latest payment link activity
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentLinks.map((link) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600/30"
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold text-white">{link.title}</h3>
-                          <Badge 
-                            variant={link.status === 'active' ? 'default' : 'secondary'}
-                            className={link.status === 'active' ? 'bg-emerald-600' : 'bg-slate-600'}
-                          >
-                            {link.status}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-6 text-sm text-slate-400">
-                          <span className="font-medium text-white">{link.amount} {link.currency}</span>
-                          <span>{link.clicks} clicks</span>
-                          <span>{link.payments} payments</span>
-                          <span>{link.createdAt}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                          <ExternalLink className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="create">
-            <CreateLinkForm />
-          </TabsContent>
-        </Tabs>
+        <Button className="bg-teal-600 hover:bg-teal-500 text-white" onClick={() => setActiveTab('create')}>
+          <Plus className="h-4 w-4 mr-2" /> Create Link
+        </Button>
       </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Links', value: links.length, icon: Link2 },
+          { label: 'Active Links', value: activeLinks.length, icon: QrCode },
+          { label: 'Total Volume', value: `$${totalVolume.toLocaleString()}`, icon: DollarSign },
+          { label: 'Total Payments', value: links.reduce((s, l) => s + l.transactions, 0), icon: TrendingUp },
+        ].map(s => (
+          <Card key={s.label}>
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">{s.label}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-0.5">{s.value}</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-teal-50">
+                  <s.icon className="h-5 w-5 text-teal-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="overview">My Links</TabsTrigger>
+          <TabsTrigger value="create">Create New</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-4 space-y-3">
+          {links.length === 0 ? (
+            <div className="text-center py-16 text-slate-400 border border-dashed rounded-2xl">
+              <QrCode className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">No links yet</p>
+              <p className="text-sm mt-1">Create your first payment link</p>
+              <Button className="mt-4 bg-teal-600 hover:bg-teal-500 text-white" size="sm" onClick={() => setActiveTab('create')}>
+                <Plus className="h-4 w-4 mr-1" /> Create Link
+              </Button>
+            </div>
+          ) : (
+            links.map(link => (
+              <Card key={link.id} className="hover:shadow-sm transition-shadow">
+                <CardContent className="p-5 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-slate-900 truncate">{link.name ?? link.code}</p>
+                      <Badge className={link.status === 'active' ? 'bg-teal-100 text-teal-800 border-teal-200 text-xs' : 'bg-slate-100 text-slate-600 text-xs'}>
+                        {link.status}
+                      </Badge>
+                    </div>
+                    <p className="text-xs font-mono text-slate-400 mb-2 truncate">/l/{link.code}</p>
+                    <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+                      <span>{link.sourceToken}</span>
+                      {link.amountMin && <span>Min {link.amountMin}</span>}
+                      {link.amountMax && <span>Max {link.amountMax}</span>}
+                      <span>{link.transactions} payments</span>
+                      <span>${link.totalVolume.toLocaleString()} volume</span>
+                      <span>{new Date(link.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <Button variant="outline" size="sm" onClick={() => copyLink(link.code)}>
+                      <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                    </Button>
+                    <a href={`/l/${link.code}`} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm">
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Button>
+                    </a>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </TabsContent>
+
+        <TabsContent value="create" className="mt-4">
+          <Card>
+            <CardContent className="p-6">
+              <CreateLinkForm onSuccess={() => { fetchLinks(); setActiveTab('overview') }} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

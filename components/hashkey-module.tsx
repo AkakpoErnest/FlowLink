@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +9,6 @@ import {
   ArrowUpRight,
   ArrowDownLeft,
   Shield,
-  TrendingUp,
   ExternalLink,
   Copy,
   CheckCircle,
@@ -21,78 +20,46 @@ import {
 } from "lucide-react"
 import { hashkeyChain, hashkeyTokens, hashkeyCompliance } from "@/lib/hashkey"
 
-const mockTransactions = [
-  {
-    hash: "0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1",
-    type: "Received",
-    amount: "500.00",
-    token: "USDC",
-    from: "0x742d35Cc6634C05329",
-    to: "0xYour...Wallet",
-    status: "confirmed",
-    time: "2 min ago",
-    direction: "in",
-  },
-  {
-    hash: "0xdef456abc123def456abc123def456abc123def456abc123def456abc123def4",
-    type: "Sent",
-    amount: "250.00",
-    token: "USDC",
-    from: "0xYour...Wallet",
-    to: "0x1234567890abcdef12",
-    status: "confirmed",
-    time: "1 hour ago",
-    direction: "out",
-  },
-  {
-    hash: "0x789abc123def456789abc123def456789abc123def456789abc123def456789a",
-    type: "RWA Subscription",
-    amount: "1000.00",
-    token: "HSK-MMF",
-    from: "0xYour...Wallet",
-    to: "0xMMF...Contract",
-    status: "confirmed",
-    time: "3 hours ago",
-    direction: "out",
-  },
-  {
-    hash: "0x321cba654fed987321cba654fed987321cba654fed987321cba654fed987321c",
-    type: "Received",
-    amount: "100.00",
-    token: "USDT",
-    from: "0xPayroll...Agent",
-    to: "0xYour...Wallet",
-    status: "pending",
-    time: "5 hours ago",
-    direction: "in",
-  },
-]
-
-const rwaProducts = [
-  {
-    name: "HashKey Money Market Fund",
-    symbol: "HSK-MMF",
-    apy: "4.2%",
-    tvl: "$12.4M",
-    type: "Money Market",
-    risk: "Low",
-    minInvestment: "$1,000",
-    description: "Tokenized money market fund backed by short-term government securities",
-  },
-  {
-    name: "HashKey Bond Token",
-    symbol: "HSK-BOND",
-    apy: "5.8%",
-    tvl: "$8.7M",
-    type: "Fixed Income",
-    risk: "Low-Medium",
-    minInvestment: "$5,000",
-    description: "Tokenized bond portfolio with quarterly coupon payments",
-  },
-]
+interface TxRow {
+  hash: string
+  type: string
+  amount: string
+  token: string
+  from: string
+  to: string
+  status: string
+  time: string
+  direction: "in" | "out"
+}
 
 export function HashKeyModule() {
   const [copied, setCopied] = useState("")
+  const [transactions, setTransactions] = useState<TxRow[]>([])
+  const [loadingTx, setLoadingTx] = useState(true)
+
+  useEffect(() => {
+    fetch("/api/payments?limit=10")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          setTransactions(
+            json.data.map((p: any) => ({
+              hash: p.txHash || p.id,
+              type: p.payer ? "Received" : "Payment",
+              amount: Number(p.amount).toFixed(2),
+              token: p.currency,
+              from: p.payer || "—",
+              to: "—",
+              status: p.status === "completed" ? "confirmed" : p.status,
+              time: new Date(p.createdAt).toLocaleDateString(),
+              direction: "in" as const,
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingTx(false))
+  }, [])
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text)
@@ -112,7 +79,7 @@ export function HashKeyModule() {
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 HashKey Chain
-                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">Mainnet</Badge>
+                <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">Testnet</Badge>
               </h2>
               <p className="text-slate-400 text-sm">Compliance-ready blockchain for regulated finance</p>
             </div>
@@ -190,20 +157,6 @@ export function HashKeyModule() {
                 </div>
               </div>
             ))}
-            {hashkeyTokens.RWATokens.map(token => (
-              <div key={token.symbol} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-white text-sm font-medium">{token.name}</p>
-                    <p className="text-blue-400 text-xs">APY: {token.apy}</p>
-                  </div>
-                </div>
-                <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">{token.symbol}</Badge>
-              </div>
-            ))}
           </CardContent>
         </Card>
 
@@ -255,55 +208,6 @@ export function HashKeyModule() {
         </Card>
       </div>
 
-      {/* RWA Products */}
-      <Card className="bg-slate-800/50 border-slate-700/50">
-        <CardHeader>
-          <CardTitle className="text-white text-base flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-purple-400" />
-            Real World Assets (RWA) on HashKey
-          </CardTitle>
-          <CardDescription>Tokenized financial products available on HashKey Chain</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {rwaProducts.map(product => (
-              <div key={product.symbol} className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-xl hover:border-slate-500/50 transition-all">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <TrendingUp className="h-4 w-4 text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium text-sm">{product.name}</p>
-                      <p className="text-slate-400 text-xs">{product.symbol}</p>
-                    </div>
-                  </div>
-                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 font-bold">{product.apy} APY</Badge>
-                </div>
-                <p className="text-slate-400 text-xs mb-3">{product.description}</p>
-                <div className="grid grid-cols-3 gap-2 text-xs mb-3">
-                  <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="text-slate-500">TVL</p>
-                    <p className="text-white font-medium">{product.tvl}</p>
-                  </div>
-                  <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="text-slate-500">Type</p>
-                    <p className="text-white font-medium">{product.type}</p>
-                  </div>
-                  <div className="p-2 bg-slate-800/50 rounded">
-                    <p className="text-slate-500">Risk</p>
-                    <p className="text-emerald-400 font-medium">{product.risk}</p>
-                  </div>
-                </div>
-                <Button className="w-full h-8 text-xs bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30">
-                  Subscribe (Min: {product.minInvestment})
-                </Button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Recent Transactions */}
       <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
@@ -314,7 +218,12 @@ export function HashKeyModule() {
           <CardDescription>Your latest on-chain activity</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          {mockTransactions.map((tx, idx) => (
+          {loadingTx ? (
+            <div className="text-center py-8 text-slate-400">Loading transactions…</div>
+          ) : transactions.length === 0 ? (
+            <div className="text-center py-8 text-slate-400">No transactions yet</div>
+          ) : null}
+          {transactions.map((tx, idx) => (
             <div key={idx} className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-all">
               <div className={`p-2 rounded-full ${tx.direction === "in" ? "bg-emerald-500/20" : "bg-red-500/20"}`}>
                 {tx.direction === "in"

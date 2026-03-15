@@ -1,60 +1,76 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { TrendingUp, Users, DollarSign, Shield } from "lucide-react"
+import { TrendingUp, Link2, DollarSign, Shield, Loader2 } from "lucide-react"
 
 export function StatsCards() {
-  const stats = [
-    {
-      title: "Total Links",
-      value: "1,247",
-      change: "+12.5%",
-      icon: TrendingUp,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      title: "Active Users",
-      value: "3,891",
-      change: "+8.2%",
-      icon: Users,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      title: "Volume Processed",
-      value: "$2.4M",
-      change: "+23.1%",
-      icon: DollarSign,
-      color: "text-purple-600",
-      bgColor: "bg-purple-100",
-    },
-    {
-      title: "Compliance Rate",
-      value: "99.7%",
-      change: "+0.3%",
-      icon: Shield,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-    },
-  ]
+  const [data, setData] = useState<{ links: number; volume: number; payments: number; compliance: number } | null>(null)
 
+  useEffect(() => {
+    async function load() {
+      try {
+        const [linksRes, paymentsRes] = await Promise.all([
+          fetch('/api/payment-links'),
+          fetch('/api/payments?limit=100'),
+        ])
+        const [links, payments] = await Promise.all([linksRes.json(), paymentsRes.json()])
+
+        const totalVolume = links.data?.reduce((s: number, l: any) => s + (l.totalVolume ?? 0), 0) ?? 0
+        const completedPayments = payments.data?.filter((p: any) => p.status === 'completed') ?? []
+        const compliance = completedPayments.length > 0
+          ? Math.round(completedPayments.reduce((s: number, p: any) => s + (p.complianceScore ?? 0), 0) / completedPayments.length)
+          : 100
+
+        setData({
+          links: links.data?.length ?? 0,
+          volume: totalVolume,
+          payments: payments.total ?? 0,
+          compliance,
+        })
+      } catch (e) {
+        console.error(e)
+      }
+    }
+    load()
+  }, [])
+
+  const stats = data
+    ? [
+        { title: 'Payment Links', value: data.links.toString(), icon: Link2, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { title: 'Total Volume', value: `$${data.volume.toLocaleString()}`, icon: DollarSign, color: 'text-teal-600', bg: 'bg-teal-50' },
+        { title: 'Payments Processed', value: data.payments.toString(), icon: TrendingUp, color: 'text-violet-600', bg: 'bg-violet-50' },
+        { title: 'Avg Compliance Score', value: `${data.compliance}%`, icon: Shield, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+      ]
+    : []
+
+  if (!data) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-6 flex items-center gap-2 text-slate-400">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading…</span>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat) => (
-        <Card key={stat.title} className="relative overflow-hidden">
+      {stats.map((s) => (
+        <Card key={s.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {stat.title}
-            </CardTitle>
-            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            <CardTitle className="text-sm font-medium text-slate-500">{s.title}</CardTitle>
+            <div className={`p-2 rounded-lg ${s.bg}`}>
+              <s.icon className={`h-4 w-4 ${s.color}`} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600 font-medium">{stat.change}</span> from last month
-            </p>
+            <div className="text-2xl font-bold text-slate-900">{s.value}</div>
           </CardContent>
         </Card>
       ))}

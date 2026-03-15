@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useAccount, useConnect, useDisconnect, useBalance, useChainId } from 'wagmi'
-import { useAuthStore } from '@/lib/auth'
 import { useToast } from '@/hooks/use-toast'
 
 export function useWalletConnection() {
@@ -10,20 +9,8 @@ export function useWalletConnection() {
   const { data: balance } = useBalance({ address })
   const chainId = useChainId()
   const { toast } = useToast()
-  
-  const { user, connectWallet, disconnectWallet } = useAuthStore()
   const [isConnectingWallet, setIsConnectingWallet] = useState(false)
 
-  // Sync wallet connection with auth store
-  useEffect(() => {
-    if (isConnected && address && user) {
-      connectWallet(address)
-    } else if (!isConnected && user?.isWalletConnected) {
-      disconnectWallet()
-    }
-  }, [isConnected, address, user, connectWallet, disconnectWallet])
-
-  // Handle connection errors
   useEffect(() => {
     if (connectError) {
       toast({
@@ -93,32 +80,24 @@ export function useWalletConnection() {
       10: 'Optimism',
       11155111: 'Sepolia',
       80001: 'Mumbai',
-      230315: 'HashKey',
+      133: 'HashKey Testnet',
+      230315: 'HashKey Chain',
     }
     return chainNames[chainId] || `Chain ${chainId}`
   }
 
   return {
-    // Connection state
     isConnected,
     isConnecting: isConnecting || isConnectingWallet,
     address,
     chainId,
     balance,
-    
-    // Wallet info
     walletDisplayName: getWalletDisplayName(),
     balanceDisplay: getBalanceDisplay(),
     chainName: getChainName(),
-    
-    // Available connectors
     connectors,
-    
-    // Actions
     connectToWallet,
     disconnectFromWallet,
-    
-    // Error state
     error: connectError,
   }
 }

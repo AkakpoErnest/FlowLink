@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -76,43 +76,37 @@ export function PayrollRailsModule() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [selectedBatch, setSelectedBatch] = useState<PayrollBatch | null>(null)
   const [showRecipientsDialog, setShowRecipientsDialog] = useState(false)
+  const [payrollBatches, setPayrollBatches] = useState<PayrollBatch[]>([])
+  const [loadingBatches, setLoadingBatches] = useState(true)
 
-  const payrollBatches: PayrollBatch[] = [
-    {
-      id: "pr_001",
-      name: "Q1 2024 Developer Salaries",
-      totalAmount: "78,500",
-      currency: "USDC",
-      recipients: 45,
-      status: "completed",
-      created: "2024-01-15",
-      scheduled: "2024-01-15",
-      completedAt: "2024-01-15 16:30",
-      complianceScore: 98,
-    },
-    {
-      id: "pr_002",
-      name: "Contractor Payments - Africa",
-      totalAmount: "32,400",
-      currency: "USDT",
-      recipients: 23,
-      status: "processing",
-      created: "2024-01-14",
-      scheduled: "2024-01-16",
-      complianceScore: 95,
-    },
-    {
-      id: "pr_003",
-      name: "Bonus Distribution - Asia",
-      totalAmount: "156,000",
-      currency: "SGD",
-      recipients: 67,
-      status: "draft",
-      created: "2024-01-13",
-      scheduled: "2024-01-20",
-      complianceScore: 92,
-    },
-  ]
+  const fetchBatches = async () => {
+    try {
+      const res = await fetch("/api/payroll")
+      const json = await res.json()
+      if (json.success) {
+        setPayrollBatches(
+          json.data.map((b: any) => ({
+            id: b.id,
+            name: b.name,
+            totalAmount: Number(b.totalAmount).toLocaleString(),
+            currency: b.currency,
+            recipients: b.recipients?.length ?? 0,
+            status: b.status as PayrollBatch["status"],
+            created: b.createdAt.split("T")[0],
+            scheduled: b.scheduledAt ? b.scheduledAt.split("T")[0] : b.createdAt.split("T")[0],
+            completedAt: b.completedAt ? b.completedAt.replace("T", " ").slice(0, 16) : undefined,
+            complianceScore: 0,
+          }))
+        )
+      }
+    } catch (e) {
+      console.error("Failed to fetch payroll batches", e)
+    } finally {
+      setLoadingBatches(false)
+    }
+  }
+
+  useEffect(() => { fetchBatches() }, [])
 
   const recipients: Recipient[] = [
     {
@@ -213,61 +207,76 @@ export function PayrollRailsModule() {
                 <DialogTitle>Create Payroll Batch</DialogTitle>
                 <DialogDescription>Set up a new batch payment with compliance rules</DialogDescription>
               </DialogHeader>
-              <CreatePayrollBatchForm onClose={() => setShowCreateDialog(false)} />
+              <CreatePayrollBatchForm onClose={() => setShowCreateDialog(false)} onSuccess={() => { fetchBatches(); setShowCreateDialog(false) }} />
             </DialogContent>
           </Dialog>
         </div>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-card-foreground">Total Processed</span>
-            </div>
-            <p className="text-2xl font-bold text-card-foreground">$2.4M</p>
-            <p className="text-xs text-accent flex items-center gap-1 mt-1">
-              <BarChart3 className="h-3 w-3" />
-              +18.2% this month
-            </p>
-          </CardContent>
-        </Card>
+      {(() => {
+        const totalProcessed = payrollBatches
+          .filter((b) => b.status === "completed")
+          .reduce((sum, b) => sum + parseFloat(b.totalAmount.replace(/,/g, "")), 0)
+        const totalRecipients = payrollBatches.reduce((sum, b) => sum + b.recipients, 0)
+        const completedCount = payrollBatches.filter((b) => b.status === "completed").length
+        const successRate = payrollBatches.length > 0
+          ? Math.round((completedCount / payrollBatches.length) * 100)
+          : 0
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-card-foreground">Total Processed</span>
+                </div>
+                <p className="text-2xl font-bold text-card-foreground">
+                  {totalProcessed > 0 ? `$${totalProcessed.toLocaleString()}` : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">Completed batches</p>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-card-foreground">Recipients</span>
-            </div>
-            <p className="text-2xl font-bold text-card-foreground">1,247</p>
-            <p className="text-xs text-muted-foreground mt-1">Across 15 countries</p>
-          </CardContent>
-        </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-card-foreground">Recipients</span>
+                </div>
+                <p className="text-2xl font-bold text-card-foreground">
+                  {totalRecipients > 0 ? totalRecipients.toLocaleString() : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">Across all batches</p>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-card-foreground">Success Rate</span>
-            </div>
-            <p className="text-2xl font-bold text-green-600">98.7%</p>
-            <p className="text-xs text-muted-foreground mt-1">Last 30 days</p>
-          </CardContent>
-        </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-card-foreground">Completed</span>
+                </div>
+                <p className="text-2xl font-bold text-green-600">{completedCount}</p>
+                <p className="text-xs text-muted-foreground mt-1">of {payrollBatches.length} batches</p>
+              </CardContent>
+            </Card>
 
-        <Card className="bg-card border-border">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-card-foreground">Compliance</span>
-            </div>
-            <p className="text-2xl font-bold text-green-600">95.2%</p>
-            <p className="text-xs text-muted-foreground mt-1">Average score</p>
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-card-foreground">Success Rate</span>
+                </div>
+                <p className="text-2xl font-bold text-green-600">
+                  {payrollBatches.length > 0 ? `${successRate}%` : "—"}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">By batch count</p>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      })()}
 
       <Tabs defaultValue="batches" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -279,9 +288,15 @@ export function PayrollRailsModule() {
 
         <TabsContent value="batches" className="space-y-4">
           <div className="grid gap-4">
-            {payrollBatches.map((batch) => (
-              <PayrollBatchCard key={batch.id} batch={batch} onSelect={setSelectedBatch} />
-            ))}
+            {loadingBatches ? (
+              <div className="text-center py-12 text-muted-foreground">Loading batches…</div>
+            ) : payrollBatches.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">No payroll batches yet. Create your first batch.</div>
+            ) : (
+              payrollBatches.map((batch) => (
+                <PayrollBatchCard key={batch.id} batch={batch} onSelect={setSelectedBatch} />
+              ))
+            )}
           </div>
         </TabsContent>
 
@@ -408,10 +423,27 @@ function PayrollBatchCard({ batch, onSelect }: { batch: PayrollBatch; onSelect: 
   )
 }
 
-function CreatePayrollBatchForm({ onClose }: { onClose: () => void }) {
+function CreatePayrollBatchForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [batchName, setBatchName] = useState("")
   const [selectedCurrency, setSelectedCurrency] = useState("USDC")
-  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const handleCreate = async () => {
+    if (!batchName.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch("/api/payroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: batchName.trim(), currency: selectedCurrency, totalAmount: 0 }),
+      })
+      if (res.ok) onSuccess()
+    } catch (e) {
+      console.error("Failed to create batch", e)
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -536,11 +568,11 @@ function CreatePayrollBatchForm({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose}>
+        <Button variant="outline" onClick={onClose} disabled={saving}>
           Cancel
         </Button>
-        <Button className="bg-primary hover:bg-primary/90" disabled={!batchName}>
-          Create Batch
+        <Button className="bg-primary hover:bg-primary/90" onClick={handleCreate} disabled={!batchName.trim() || saving}>
+          {saving ? "Creating…" : "Create Batch"}
         </Button>
       </div>
     </div>
@@ -816,44 +848,8 @@ function PayrollBatchDetails({ batch, recipients }: { batch: PayrollBatch; recip
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {[
-                  {
-                    timestamp: "2024-01-15 16:30:45",
-                    action: "Batch completed",
-                    details: "All payments processed successfully",
-                    user: "System",
-                  },
-                  {
-                    timestamp: "2024-01-15 16:25:12",
-                    action: "Payment processing started",
-                    details: "Batch processing initiated",
-                    user: "admin@company.com",
-                  },
-                  {
-                    timestamp: "2024-01-15 16:20:33",
-                    action: "Compliance checks passed",
-                    details: "All recipients verified",
-                    user: "System",
-                  },
-                  {
-                    timestamp: "2024-01-15 16:15:22",
-                    action: "Batch created",
-                    details: "45 recipients added",
-                    user: "admin@company.com",
-                  },
-                ].map((entry, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium text-card-foreground">{entry.action}</p>
-                      <p className="text-sm text-muted-foreground">{entry.details}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-card-foreground">{entry.user}</p>
-                      <p className="text-xs text-muted-foreground">{entry.timestamp}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-8 text-muted-foreground">
+                <p className="text-sm">Audit trail events will appear here as the batch is processed.</p>
               </div>
             </CardContent>
           </Card>
@@ -872,25 +868,8 @@ function PayrollAnalytics() {
             <CardTitle className="text-lg">Payment Volume by Country</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {[
-                { country: "Singapore", amount: 245000, percentage: 35 },
-                { country: "Nigeria", amount: 156000, percentage: 22 },
-                { country: "Kenya", amount: 98000, percentage: 14 },
-                { country: "Hong Kong", amount: 87000, percentage: 12 },
-                { country: "Others", amount: 114000, percentage: 17 },
-              ].map((item) => (
-                <div key={item.country} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-primary" />
-                    <span className="text-sm font-medium">{item.country}</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">${item.amount.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">{item.percentage}%</p>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="text-sm">Country breakdown will appear once payroll batches have been processed.</p>
             </div>
           </CardContent>
         </Card>
@@ -900,28 +879,8 @@ function PayrollAnalytics() {
             <CardTitle className="text-lg">Compliance Metrics</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>KYC Completion Rate</span>
-                  <span>96%</span>
-                </div>
-                <Progress value={96} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Sanctions Screening</span>
-                  <span>100%</span>
-                </div>
-                <Progress value={100} className="h-2" />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Country Limit Compliance</span>
-                  <span>94%</span>
-                </div>
-                <Progress value={94} className="h-2" />
-              </div>
+            <div className="text-center py-6 text-muted-foreground">
+              <p className="text-sm">Compliance metrics will populate as batches are processed.</p>
             </div>
           </CardContent>
         </Card>

@@ -2,6 +2,7 @@ import { DM_Sans } from 'next/font/google'
 import { GeistMono } from 'geist/font/mono'
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
+import { Toaster as SonnerToaster } from 'sonner'
 import { WalletProvider } from '@/components/providers/wallet-provider'
 import AiChat from '@/components/ai-chat'
 import './globals.css'
@@ -32,6 +33,7 @@ export default function RootLayout({
           {children}
           <AiChat />
           <Toaster />
+          <SonnerToaster position="bottom-right" richColors />
           <Analytics />
         </WalletProvider>
       </body>
