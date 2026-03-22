@@ -6,77 +6,66 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Copy, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 
-const TOKENS = [
-  { value: 'USDC', label: 'USDC — USD Coin (ERC-20)' },
-  { value: 'USDT', label: 'USDT — Tether (ERC-20)' },
-  { value: 'HSK',  label: 'HSK — Native token' },
-]
+// Only show testnets for now (flip to false for mainnet)
+const SHOW_TESTNETS_ONLY = true
+const CHAINS = SUPPORTED_CHAINS.filter(c => SHOW_TESTNETS_ONLY ? c.testnet : !c.testnet)
 
 export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
+  const [network, setNetwork] = useState(DEFAULT_CHAIN_KEY)
+  const [sourceToken, setSourceToken] = useState(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'cUSD')
   const [amount, setAmount] = useState("")
   const [memo, setMemo] = useState("")
-  const [sourceToken, setSourceToken] = useState("USDC")
-  const [requireKYC, setRequireKYC] = useState(false)
-  const [checkSanctions, setCheckSanctions] = useState(false)
   const [generatedLink, setGeneratedLink] = useState("")
   const [isCreating, setIsCreating] = useState(false)
   const { toast } = useToast()
 
+  const selectedChain = CHAINS.find(c => c.key === network) ?? CHAINS[0]
+
+  const handleNetworkChange = (key: string) => {
+    setNetwork(key)
+    const chain = CHAINS.find(c => c.key === key)
+    // Default to first stablecoin on the new chain
+    setSourceToken(chain?.tokens[0]?.symbol ?? '')
+  }
+
   const handleCreateLink = async () => {
     if (!amount) {
-      toast({
-        title: "Error",
-        description: "Please enter an amount",
-        variant: "destructive",
-      })
+      toast({ title: "Error", description: "Please enter an amount", variant: "destructive" })
       return
     }
 
     setIsCreating(true)
-
     try {
       const response = await fetch("/api/payment-links", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: `pay-${Date.now()}`,
           name: memo || null,
+          network,
           sourceToken,
-          amountMin: amount ? Number.parseFloat(amount) : null,
-          amountMax: amount ? Number.parseFloat(amount) : null,
+          amountMin: parseFloat(amount),
+          amountMax: parseFloat(amount),
         }),
       })
 
       const data = await response.json()
+      if (!response.ok) throw new Error(data.error || "Failed to create payment link")
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create payment link")
-      }
+      setGeneratedLink(`${window.location.origin}/l/${data.data?.code}`)
+      toast({ title: "Payment link created", description: "Your payment request is ready to share" })
 
-      const code = data.data?.code
-      setGeneratedLink(`${window.location.origin}/l/${code}`)
-
-      toast({
-        title: "Payment link created",
-        description: "Your compliant payment link has been generated",
-      })
-
-      // Reset form
       setAmount("")
       setMemo("")
-      setSourceToken("USDC")
-      setRequireKYC(false)
-      setCheckSanctions(false)
+      setNetwork(DEFAULT_CHAIN_KEY)
+      setSourceToken(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'cUSD')
       onSuccess?.()
     } catch (error) {
-      console.error("Error creating payment link:", error)
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create payment link",
@@ -89,10 +78,7 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedLink)
-    toast({
-      title: "Copied!",
-      description: "Payment link copied to clipboard",
-    })
+    toast({ title: "Copied!", description: "Payment link copied to clipboard" })
   }
 
   return (
@@ -100,13 +86,33 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
       <CardHeader className="bg-gradient-to-r from-primary/5 to-accent/5 border-b border-primary/10">
         <CardTitle className="flex items-center gap-2 text-primary">
           <Plus className="w-5 h-5" />
-          Create Payment Link
+          Create Payment Request
         </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Generate trusted crypto payment links with built-in compliance and security
+        <CardDescription>
+          Generate a shareable payment link — payer pays directly to your wallet
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-5 pt-5">
+
+        {/* Network */}
+        <div className="space-y-2">
+          <Label>Network</Label>
+          <Select value={network} onValueChange={handleNetworkChange}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CHAINS.map(c => (
+                <SelectItem key={c.key} value={c.key}>
+                  {c.name}
+                  {c.testnet && <span className="ml-2 text-xs text-muted-foreground">(testnet)</span>}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Token */}
         <div className="space-y-2">
           <Label>Token</Label>
           <Select value={sourceToken} onValueChange={setSourceToken}>
@@ -114,13 +120,16 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {TOKENS.map(t => (
-                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              {selectedChain.tokens.map(t => (
+                <SelectItem key={t.symbol} value={t.symbol}>
+                  {t.symbol} — {t.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
+        {/* Amount */}
         <div className="space-y-2">
           <Label htmlFor="amount">Amount ({sourceToken})</Label>
           <Input
@@ -132,52 +141,38 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
           />
         </div>
 
+        {/* Memo */}
         <div className="space-y-2">
-          <Label htmlFor="memo">Memo (Optional)</Label>
+          <Label htmlFor="memo">Description (optional)</Label>
           <Textarea
             id="memo"
-            placeholder="Payment for services..."
+            placeholder="Invoice #123 — Freelance services..."
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            rows={3}
+            rows={2}
           />
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="kyc-toggle">Require KYC</Label>
-              <p className="text-sm text-muted-foreground">Payer must pass identity verification</p>
-            </div>
-            <Switch id="kyc-toggle" checked={requireKYC} onCheckedChange={setRequireKYC} />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="sanctions-toggle">Check Sanctions</Label>
-              <p className="text-sm text-muted-foreground">Verify payer is not on sanctions lists</p>
-            </div>
-            <Switch id="sanctions-toggle" checked={checkSanctions} onCheckedChange={setCheckSanctions} />
-          </div>
-        </div>
-
-        <Button 
-          onClick={handleCreateLink} 
-          className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transition-all duration-300" 
+        <Button
+          onClick={handleCreateLink}
+          className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg"
           disabled={isCreating}
         >
-          {isCreating ? "Creating Link..." : "Create Payment Link"}
+          {isCreating ? "Creating..." : "Create Payment Request"}
         </Button>
 
         {generatedLink && (
           <div className="space-y-2">
-            <Label>Generated Payment Link</Label>
+            <Label>Your payment link</Label>
             <div className="flex gap-2">
               <Input value={generatedLink} readOnly className="font-mono text-sm" />
               <Button size="icon" variant="outline" onClick={copyToClipboard}>
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Share this link — payer connects wallet, switches to {selectedChain.name}, and pays {sourceToken} directly to you.
+            </p>
           </div>
         )}
       </CardContent>

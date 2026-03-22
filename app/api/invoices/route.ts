@@ -80,50 +80,84 @@ export async function POST(request: NextRequest) {
   const year = new Date().getFullYear()
   const invoiceNumber = `FL-${year}-${String(count + 1).padStart(3, "0")}`
 
+  // Resolve recipient wallet: agent wallet > explicit recipientAddress > user's own wallet
+  let recipientAddress: string | null = null
+  let agentName: string | null = body.agentName || null
+
+  if (body.agentId) {
+    const agent = await prisma.agent.findFirst({ where: { id: body.agentId, userId } })
+    if (agent?.walletAddress) {
+      recipientAddress = agent.walletAddress
+      agentName = agent.name
+    }
+  }
+
+  if (!recipientAddress && body.recipientAddress) {
+    recipientAddress = body.recipientAddress
+  }
+
+  if (!recipientAddress) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { walletAddress: true } })
+    recipientAddress = user?.walletAddress ?? null
+  }
+
+  if (!recipientAddress) {
+    return NextResponse.json(
+      { success: false, error: 'No wallet address found. Connect a wallet or provide a recipient address.' },
+      { status: 422 }
+    )
+  }
+
+  const network = body.network || 'celo-alfajores'
+  const currency = body.currency || 'cUSD'
+  const amount = parseFloat(body.amount)
+
   const invoice = await prisma.invoice.create({
     data: {
       userId,
       invoiceNumber,
       agentId: body.agentId || null,
-      agentName: body.agentName || null,
+      agentName,
       issuedTo: body.issuedTo || null,
       issuedToAddress: body.issuedToAddress || null,
-      amount: parseFloat(body.amount),
-      currency: body.currency || "USDC",
-      network: body.network || "hashkey-testnet",
-      status: "draft",
+      amount,
+      currency,
+      network,
+      status: 'pending',
       description: body.description || null,
       lineItems: body.lineItems || [],
       dueAt: body.dueAt ? new Date(body.dueAt) : new Date(Date.now() + 14 * 86400000),
-      complianceStatus: "pending",
+      complianceStatus: 'pending',
     },
   })
 
-  // If an agentId was provided, auto-create a PaymentLink routed to the agent's wallet
+  // Always auto-create a payment link tied to this invoice
+  const linkCode = `inv-${invoice.id.slice(-8)}`
+  const link = await prisma.paymentLink.create({
+    data: {
+      userId,
+      code: linkCode,
+      name: `Invoice ${invoice.invoiceNumber}${body.issuedTo ? ` — ${body.issuedTo}` : ''}`,
+      network,
+      sourceToken: currency,
+      destStable: currency,
+      amountMin: amount,
+      amountMax: amount,
+      recipientAddress,
+      status: 'active',
+    },
+  })
+
+  await prisma.invoice.update({ where: { id: invoice.id }, data: { paymentLinkCode: link.code } })
+
   if (body.agentId) {
-    const agent = await prisma.agent.findFirst({ where: { id: body.agentId, userId } })
-    if (agent?.walletAddress) {
-      const linkCode = `inv-${invoice.id.slice(-8)}`
-      const link = await prisma.paymentLink.create({
-        data: {
-          userId,
-          code: linkCode,
-          name: `Invoice ${invoice.invoiceNumber} — ${agent.name}`,
-          sourceToken: invoice.currency,
-          destStable: invoice.currency,
-          amountMin: invoice.amount,
-          amountMax: invoice.amount,
-          recipientAddress: agent.walletAddress,
-          status: "active",
-        },
-      })
-      await prisma.invoice.update({ where: { id: invoice.id }, data: { paymentLinkCode: link.code } })
-      await prisma.agent.update({ where: { id: agent.id }, data: { invoiceCount: { increment: 1 } } })
-      return NextResponse.json({ success: true, data: { ...invoice, paymentLinkCode: link.code } }, { status: 201 })
-    }
+    await prisma.agent.update({ where: { id: body.agentId }, data: { invoiceCount: { increment: 1 } } }).catch(() => {})
   }
 
-  return NextResponse.json({ success: true, data: invoice }, { status: 201 })
+  return NextResponse.json({
+    success: true,
+    data: { ...invoice, paymentLinkCode: link.code },
+  }, { status: 201 })
 }
 
 export async function PUT(request: NextRequest) {

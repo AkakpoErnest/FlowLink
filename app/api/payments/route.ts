@@ -102,6 +102,28 @@ export async function POST(request: NextRequest) {
         })
       }
     }
+
+    // Auto-create an invoice as on-chain proof if requested
+    if (body.createInvoice && userId) {
+      const invoiceNumber = `INV-${Date.now()}`
+      await prisma.invoice.create({
+        data: {
+          userId,
+          invoiceNumber,
+          issuedTo: body.payer ?? null,
+          issuedToAddress: body.payer ?? null,
+          amount: parseFloat(body.amount),
+          currency: body.currency || 'cUSD',
+          network: body.network || 'celo-alfajores',
+          status: 'paid',
+          description: `Payment via link ${link.code}`,
+          paymentLinkCode: link.code,
+          txHash: body.txHash ?? null,
+          paidAt: new Date(),
+          complianceStatus: 'approved',
+        },
+      })
+    }
   }
 
   return NextResponse.json({ success: true, data: payment }, { status: 201 })

@@ -44,6 +44,9 @@ import {
   Wallet,
 } from "lucide-react"
 import type { Invoice } from "@/app/api/invoices/route"
+import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
+
+const CHAINS = SUPPORTED_CHAINS.filter(c => c.testnet)
 
 interface Agent {
   id: string
@@ -85,6 +88,7 @@ export function AIInvoiceModule() {
   const [showCreate, setShowCreate] = useState(false)
   const [showRegisterAgent, setShowRegisterAgent] = useState(false)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [createdPaymentLink, setCreatedPaymentLink] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>("all")
   const [loading, setLoading] = useState(false)
   const [agentLoading, setAgentLoading] = useState(false)
@@ -97,8 +101,8 @@ export function AIInvoiceModule() {
     issuedTo: "",
     issuedToAddress: "",
     description: "",
-    currency: "USDC" as "USDC" | "USDT" | "HSK",
-    network: "hashkey" as "hashkey" | "polygon" | "ethereum",
+    currency: "cUSD",
+    network: DEFAULT_CHAIN_KEY,
     dueAt: "",
     kycRequired: true,
   })
@@ -166,33 +170,41 @@ export function AIInvoiceModule() {
 
   const createInvoice = async () => {
     setLoading(true)
-    const res = await fetch("/api/invoices", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        agentId: form.selectedAgentId || null,
-        agentName: form.agentName,
-        agentDescription: form.agentDescription,
-        issuedTo: form.issuedTo,
-        issuedToAddress: form.issuedToAddress,
-        description: form.description,
-        currency: form.currency,
-        network: form.network,
-        dueAt: form.dueAt,
-        kycRequired: form.kycRequired,
-        lineItems,
-        amount: totalAmount,
-      }),
-    })
-    const data = await res.json()
-    if (data.success) {
-      setShowCreate(false)
-      setForm({ selectedAgentId: "", agentName: "", agentDescription: "", issuedTo: "", issuedToAddress: "", description: "", currency: "USDC", network: "hashkey", dueAt: "", kycRequired: true })
-      setLineItems([{ description: "", quantity: 1, unitPrice: "", total: "0.00" }])
-      fetchInvoices()
-      fetchAgents()
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: form.selectedAgentId || null,
+          agentName: form.agentName,
+          issuedTo: form.issuedTo,
+          issuedToAddress: form.issuedToAddress,
+          description: form.description,
+          currency: form.currency,
+          network: form.network,
+          dueAt: form.dueAt,
+          kycRequired: form.kycRequired,
+          lineItems,
+          amount: totalAmount,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        const linkCode = data.data?.paymentLinkCode
+        if (linkCode) {
+          setCreatedPaymentLink(`${window.location.origin}/l/${linkCode}`)
+        }
+        setForm({ selectedAgentId: "", agentName: "", agentDescription: "", issuedTo: "", issuedToAddress: "", description: "", currency: "cUSD", network: DEFAULT_CHAIN_KEY, dueAt: "", kycRequired: true })
+        setLineItems([{ description: "", quantity: 1, unitPrice: "", total: "0.00" }])
+        setShowCreate(false)
+        fetchInvoices()
+        fetchAgents()
+      } else {
+        alert(data.error || "Failed to create invoice")
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const registerAgent = async () => {
@@ -236,6 +248,38 @@ export function AIInvoiceModule() {
 
   return (
     <div className="space-y-6">
+
+      {/* Payment link created banner */}
+      {createdPaymentLink && (
+        <div className="flex items-center justify-between gap-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+          <div className="flex items-center gap-3 min-w-0">
+            <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-emerald-300 font-semibold text-sm">Invoice created — share this link with your client</p>
+              <p className="font-mono text-xs text-emerald-400/80 truncate">{createdPaymentLink}</p>
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/10"
+              onClick={() => { navigator.clipboard.writeText(createdPaymentLink); }}
+            >
+              <Copy className="h-3 w-3 mr-1" /> Copy
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-slate-400 hover:text-white"
+              onClick={() => setCreatedPaymentLink(null)}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -403,28 +447,34 @@ export function AIInvoiceModule() {
                       {/* Payment Settings */}
                       <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <Label className="text-slate-300 text-xs">Currency</Label>
-                          <Select value={form.currency} onValueChange={v => setForm({ ...form, currency: v as any })}>
+                          <Label className="text-slate-300 text-xs">Network</Label>
+                          <Select
+                            value={form.network}
+                            onValueChange={v => {
+                              const chain = CHAINS.find(c => c.key === v)
+                              setForm({ ...form, network: v, currency: chain?.tokens[0]?.symbol ?? 'cUSD' })
+                            }}
+                          >
                             <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-600">
-                              <SelectItem value="USDC">USDC</SelectItem>
-                              <SelectItem value="USDT">USDT</SelectItem>
-                              <SelectItem value="HSK">HSK</SelectItem>
+                              {CHAINS.map(c => (
+                                <SelectItem key={c.key} value={c.key}>{c.name}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label className="text-slate-300 text-xs">Network</Label>
-                          <Select value={form.network} onValueChange={v => setForm({ ...form, network: v as any })}>
+                          <Label className="text-slate-300 text-xs">Token</Label>
+                          <Select value={form.currency} onValueChange={v => setForm({ ...form, currency: v })}>
                             <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-800 border-slate-600">
-                              <SelectItem value="hashkey">HashKey Chain</SelectItem>
-                              <SelectItem value="polygon">Polygon</SelectItem>
-                              <SelectItem value="ethereum">Ethereum</SelectItem>
+                              {(CHAINS.find(c => c.key === form.network)?.tokens ?? []).map(t => (
+                                <SelectItem key={t.symbol} value={t.symbol}>{t.symbol}</SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -551,7 +601,12 @@ export function AIInvoiceModule() {
                                 <p className="text-white font-medium text-sm">{invoice.invoiceNumber}</p>
                                 <Badge className={`text-xs border ${network.badge}`}>{network.label}</Badge>
                                 {invoice.paymentLinkCode && (
-                                  <Badge className="text-xs border bg-blue-500/20 text-blue-300 border-blue-500/30">Pay Link</Badge>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/l/${invoice.paymentLinkCode}`) }}
+                                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
+                                  >
+                                    <Copy className="h-2.5 w-2.5" /> Copy Link
+                                  </button>
                                 )}
                               </div>
                               <p className="text-slate-400 text-xs">{invoice.agentName} → {invoice.issuedTo}</p>

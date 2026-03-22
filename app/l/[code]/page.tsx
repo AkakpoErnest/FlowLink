@@ -42,6 +42,7 @@ export default async function PaymentLinkPage({ params }: Props) {
             id: link.id,
             code: link.code,
             name: link.name,
+            network: link.network,
             sourceToken: link.sourceToken,
             amountMin: link.amountMin,
             amountMax: link.amountMax,
