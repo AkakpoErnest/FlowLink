@@ -69,15 +69,39 @@ export async function POST(request: NextRequest) {
     },
   })
 
-  // Update payment link totals on completion
+  // Update payment link totals + downstream records on completion
   if (body.paymentLinkId && body.status === 'completed') {
-    await prisma.paymentLink.update({
+    const link = await prisma.paymentLink.update({
       where: { id: body.paymentLinkId },
       data: {
         totalVolume: { increment: parseFloat(body.amount) },
         transactions: { increment: 1 },
       },
     })
+
+    // Auto-mark the related invoice as paid
+    const invoice = await prisma.invoice.findFirst({
+      where: { paymentLinkCode: link.code, status: { not: 'paid' } },
+    })
+    if (invoice) {
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: {
+          status: 'paid',
+          paidAt: new Date(),
+          txHash: body.txHash ?? null,
+          complianceStatus: 'approved',
+        },
+      })
+
+      // Increment agent totalEarned if the invoice was issued by an agent
+      if (invoice.agentId) {
+        await prisma.agent.update({
+          where: { id: invoice.agentId },
+          data: { totalEarned: { increment: parseFloat(body.amount) } },
+        })
+      }
+    }
   }
 
   return NextResponse.json({ success: true, data: payment }, { status: 201 })

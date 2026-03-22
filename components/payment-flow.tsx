@@ -145,8 +145,8 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
         const token = hashkeyTokens.stablecoins.find(
           t => t.symbol === paymentLink.sourceToken
         )
-        if (!token) {
-          setError(`Unsupported token: ${paymentLink.sourceToken}`)
+        if (!token || !token.address) {
+          setError(`${paymentLink.sourceToken} contract address is not yet configured for HashKey Testnet. Check the README for details.`)
           return
         }
         writeContract({

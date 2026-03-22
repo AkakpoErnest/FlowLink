@@ -7,12 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Copy, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+
+const TOKENS = [
+  { value: 'USDC', label: 'USDC — USD Coin (ERC-20)' },
+  { value: 'USDT', label: 'USDT — Tether (ERC-20)' },
+  { value: 'HSK',  label: 'HSK — Native token' },
+]
 
 export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [amount, setAmount] = useState("")
   const [memo, setMemo] = useState("")
+  const [sourceToken, setSourceToken] = useState("USDC")
   const [requireKYC, setRequireKYC] = useState(false)
   const [checkSanctions, setCheckSanctions] = useState(false)
   const [generatedLink, setGeneratedLink] = useState("")
@@ -40,6 +48,7 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
         body: JSON.stringify({
           code: `pay-${Date.now()}`,
           name: memo || null,
+          sourceToken,
           amountMin: amount ? Number.parseFloat(amount) : null,
           amountMax: amount ? Number.parseFloat(amount) : null,
         }),
@@ -62,6 +71,7 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
       // Reset form
       setAmount("")
       setMemo("")
+      setSourceToken("USDC")
       setRequireKYC(false)
       setCheckSanctions(false)
       onSuccess?.()
@@ -98,7 +108,21 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount (USDC)</Label>
+          <Label>Token</Label>
+          <Select value={sourceToken} onValueChange={setSourceToken}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TOKENS.map(t => (
+                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="amount">Amount ({sourceToken})</Label>
           <Input
             id="amount"
             type="number"

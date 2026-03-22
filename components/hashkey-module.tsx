@@ -19,6 +19,7 @@ import {
   Activity,
 } from "lucide-react"
 import { hashkeyChain, hashkeyTokens, hashkeyCompliance } from "@/lib/hashkey"
+import { useAccount } from "wagmi"
 
 interface TxRow {
   hash: string
@@ -36,6 +37,7 @@ export function HashKeyModule() {
   const [copied, setCopied] = useState("")
   const [transactions, setTransactions] = useState<TxRow[]>([])
   const [loadingTx, setLoadingTx] = useState(true)
+  const { isConnected, chain } = useAccount()
 
   useEffect(() => {
     fetch("/api/payments?limit=10")
@@ -85,8 +87,10 @@ export function HashKeyModule() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-2 w-2 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-emerald-400 text-sm font-medium">Connected</span>
+            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
+            <span className={`text-sm font-medium ${isConnected ? 'text-emerald-400' : 'text-slate-400'}`}>
+              {isConnected ? (chain?.id === 133 ? 'HashKey Testnet' : `Wrong network`) : 'Not connected'}
+            </span>
           </div>
         </div>
 
@@ -148,7 +152,11 @@ export function HashKeyModule() {
                   </div>
                   <div>
                     <p className="text-white text-sm font-medium">{token.name}</p>
-                    <p className="text-slate-400 text-xs font-mono">{token.address.slice(0, 10)}...{token.address.slice(-6)}</p>
+                    <p className="text-slate-400 text-xs font-mono">
+                      {token.address
+                        ? `${token.address.slice(0, 10)}...${token.address.slice(-6)}`
+                        : 'Address TBD — check HashKey testnet explorer'}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">

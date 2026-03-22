@@ -77,13 +77,16 @@ export function PayrollRailsModule() {
   const [selectedBatch, setSelectedBatch] = useState<PayrollBatch | null>(null)
   const [showRecipientsDialog, setShowRecipientsDialog] = useState(false)
   const [payrollBatches, setPayrollBatches] = useState<PayrollBatch[]>([])
+  const [rawBatches, setRawBatches] = useState<any[]>([])
   const [loadingBatches, setLoadingBatches] = useState(true)
+  const [recipients, setRecipients] = useState<Recipient[]>([])
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch("/api/payroll")
+      const res = await fetch("/api/payroll?includeRecipients=true")
       const json = await res.json()
       if (json.success) {
+        setRawBatches(json.data)
         setPayrollBatches(
           json.data.map((b: any) => ({
             id: b.id,
@@ -108,79 +111,23 @@ export function PayrollRailsModule() {
 
   useEffect(() => { fetchBatches() }, [])
 
-  const recipients: Recipient[] = [
-    {
-      id: "rec_001",
-      name: "John Doe",
-      email: "john@example.com",
-      walletAddress: "0x1234...5678",
-      amount: "2500",
-      currency: "USDC",
-      country: "Singapore",
-      kycLevel: "enhanced",
-      status: "verified",
+  useEffect(() => {
+    if (!selectedBatch) { setRecipients([]); return }
+    const batchData = rawBatches.find(b => b.id === selectedBatch.id)
+    if (!batchData?.recipients) { setRecipients([]); return }
+    setRecipients(batchData.recipients.map((r: any) => ({
+      id: r.id,
+      name: r.name,
+      email: r.email ?? '',
+      walletAddress: r.walletAddress,
+      amount: String(r.amount),
+      currency: r.currency,
+      country: r.country ?? 'Unknown',
+      kycLevel: r.kycStatus === 'verified' ? 'enhanced' : 'basic',
+      status: r.status as Recipient['status'],
       complianceFlags: [],
-    },
-    {
-      id: "rec_002",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      walletAddress: "0x9876...5432",
-      amount: "3200",
-      currency: "USDC",
-      country: "Nigeria",
-      kycLevel: "basic",
-      status: "pending",
-      complianceFlags: ["kyc_review"],
-    },
-    {
-      id: "rec_003",
-      name: "Ahmed Hassan",
-      email: "ahmed@example.com",
-      walletAddress: "0x5555...7777",
-      amount: "2800",
-      currency: "USDC",
-      country: "Kenya",
-      kycLevel: "enhanced",
-      status: "blocked",
-      complianceFlags: ["sanctions_check", "high_risk_country"],
-    },
-  ]
-
-  const countryLimits: CountryLimit[] = [
-    {
-      country: "Singapore",
-      code: "SG",
-      dailyLimit: 500000,
-      monthlyLimit: 10000000,
-      kycRequired: false,
-      currentUsage: 125000,
-    },
-    {
-      country: "Nigeria",
-      code: "NG",
-      dailyLimit: 50000,
-      monthlyLimit: 1000000,
-      kycRequired: true,
-      currentUsage: 32400,
-    },
-    {
-      country: "Kenya",
-      code: "KE",
-      dailyLimit: 25000,
-      monthlyLimit: 500000,
-      kycRequired: true,
-      currentUsage: 18500,
-    },
-    {
-      country: "Hong Kong",
-      code: "HK",
-      dailyLimit: 1000000,
-      monthlyLimit: 20000000,
-      kycRequired: false,
-      currentUsage: 245000,
-    },
-  ]
+    })))
+  }, [selectedBatch])
 
   return (
     <div className="space-y-6">
@@ -305,7 +252,7 @@ export function PayrollRailsModule() {
         </TabsContent>
 
         <TabsContent value="limits" className="space-y-4">
-          <CountryLimitsPanel limits={countryLimits} />
+          <CountryLimitsPanel limits={[]} />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">

@@ -8,20 +8,94 @@ import { SiweMessage } from "siwe"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { Shield, Wallet, ArrowRight, Chrome, Loader2 } from "lucide-react"
+import { Shield, Wallet, ArrowRight, Chrome, Loader2, Mail } from "lucide-react"
 import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
   const { address, isConnected, chain } = useAccount()
   const { signMessageAsync } = useSignMessage()
+
   const [googleLoading, setGoogleLoading] = useState(false)
   const [walletLoading, setWalletLoading] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+
+  // Email/password form state
+  const [mode, setMode] = useState<"login" | "register">("login")
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true)
     await signIn("google", { callbackUrl: "/dashboard" })
+  }
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (mode === "register") {
+      if (password !== confirmPassword) {
+        toast.error("Passwords do not match")
+        return
+      }
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters")
+        return
+      }
+
+      setEmailLoading(true)
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        })
+        const data = await res.json()
+
+        if (!res.ok) {
+          toast.error(data.error || "Registration failed")
+          return
+        }
+
+        toast.success("Account created! Signing you in...")
+        // Auto sign in after registration
+        const result = await signIn("email-password", {
+          email,
+          password,
+          redirect: false,
+          callbackUrl: "/dashboard",
+        })
+        if (result?.ok) {
+          router.push("/dashboard")
+        } else {
+          toast.error("Sign-in after registration failed")
+        }
+      } finally {
+        setEmailLoading(false)
+      }
+    } else {
+      setEmailLoading(true)
+      try {
+        const result = await signIn("email-password", {
+          email,
+          password,
+          redirect: false,
+          callbackUrl: "/dashboard",
+        })
+        if (result?.ok) {
+          router.push("/dashboard")
+        } else {
+          toast.error("Invalid email or password")
+        }
+      } finally {
+        setEmailLoading(false)
+      }
+    }
   }
 
   const handleWalletSignIn = async () => {
@@ -33,11 +107,9 @@ export default function LoginPage() {
     try {
       setWalletLoading(true)
 
-      // Fetch nonce
       const nonceRes = await fetch("/api/auth/nonce")
       const { nonce } = await nonceRes.json()
 
-      // Build SIWE message
       const message = new SiweMessage({
         domain: window.location.host,
         address,
@@ -104,11 +176,123 @@ export default function LoginPage() {
           </div>
 
           {/* Auth Options */}
-          <Tabs defaultValue="google" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="google">Email / Google</TabsTrigger>
+          <Tabs defaultValue="email" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="email">Email</TabsTrigger>
+              <TabsTrigger value="google">Google</TabsTrigger>
               <TabsTrigger value="wallet">Wallet</TabsTrigger>
             </TabsList>
+
+            {/* Email / Password Tab */}
+            <TabsContent value="email">
+              <Card className="border-emerald-500/20 shadow-2xl">
+                <CardHeader className="text-center pb-2">
+                  <CardTitle className="text-2xl">
+                    {mode === "login" ? "Welcome back" : "Create account"}
+                  </CardTitle>
+                  <CardDescription>
+                    {mode === "login"
+                      ? "Sign in with your email and password"
+                      : "Register to get started with FlowLink"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
+                    {mode === "register" && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          placeholder="Your name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                        />
+                      </div>
+                    )}
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    {mode === "register" && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+
+                    <Button
+                      type="submit"
+                      disabled={emailLoading}
+                      className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700"
+                      size="lg"
+                    >
+                      {emailLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Mail className="mr-2 h-4 w-4" />
+                      )}
+                      {emailLoading
+                        ? mode === "register" ? "Creating account..." : "Signing in..."
+                        : mode === "register" ? "Create Account" : "Sign In"}
+                    </Button>
+                  </form>
+
+                  <div className="mt-4 text-center text-sm text-muted-foreground">
+                    {mode === "login" ? (
+                      <>
+                        Don&apos;t have an account?{" "}
+                        <button
+                          type="button"
+                          onClick={() => { setMode("register"); setPassword(""); setConfirmPassword("") }}
+                          className="text-emerald-400 hover:underline"
+                        >
+                          Register
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        Already have an account?{" "}
+                        <button
+                          type="button"
+                          onClick={() => { setMode("login"); setPassword(""); setConfirmPassword("") }}
+                          className="text-emerald-400 hover:underline"
+                        >
+                          Sign in
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
             {/* Google Tab */}
             <TabsContent value="google">
@@ -134,15 +318,6 @@ export default function LoginPage() {
                     {googleLoading ? "Redirecting..." : "Continue with Google"}
                   </Button>
 
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-slate-700" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-card px-2 text-muted-foreground">or use wallet</span>
-                    </div>
-                  </div>
-
                   <p className="text-xs text-center text-muted-foreground">
                     A new account is created automatically on first sign-in.
                   </p>
@@ -160,7 +335,6 @@ export default function LoginPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* RainbowKit connect button */}
                   <div className="flex justify-center">
                     <ConnectButton
                       label="Connect Wallet"

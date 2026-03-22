@@ -59,6 +59,11 @@ export function PaymentLinksModule() {
     fetchLinks()
   }
 
+  const deleteLink = async (id: string) => {
+    await fetch(`/api/payment-links?id=${id}`, { method: 'DELETE' })
+    fetchLinks()
+  }
+
   const activeLinks = links.filter(l => l.status === 'active')
   const inactiveLinks = links.filter(l => l.status !== 'active')
 
@@ -103,7 +108,7 @@ export function PaymentLinksModule() {
               <p className="text-sm mt-1">Create your first payment link to get started</p>
             </div>
           ) : (
-            activeLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} />)
+            activeLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} onDelete={deleteLink} />)
           )}
         </TabsContent>
 
@@ -114,7 +119,7 @@ export function PaymentLinksModule() {
               <p className="text-sm">No inactive links</p>
             </div>
           ) : (
-            inactiveLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} />)
+            inactiveLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} onDelete={deleteLink} />)
           )}
         </TabsContent>
       </Tabs>
@@ -122,7 +127,7 @@ export function PaymentLinksModule() {
   )
 }
 
-function LinkCard({ link, onCopy, onDeactivate }: { link: PaymentLink; onCopy: (c: string) => void; onDeactivate: (id: string) => void }) {
+function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink; onCopy: (c: string) => void; onDeactivate: (id: string) => void; onDelete: (id: string) => void }) {
   const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/l/${link.code}`
 
   return (
@@ -159,10 +164,13 @@ function LinkCard({ link, onCopy, onDeactivate }: { link: PaymentLink; onCopy: (
               </Button>
             </a>
             {link.status === 'active' && (
-              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-200" onClick={() => onDeactivate(link.id)}>
+              <Button variant="outline" size="sm" className="text-amber-600 hover:text-amber-700 hover:border-amber-200" onClick={() => onDeactivate(link.id)}>
                 Deactivate
               </Button>
             )}
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-200" onClick={() => onDelete(link.id)}>
+              Delete
+            </Button>
           </div>
         </div>
       </CardContent>

@@ -4,7 +4,8 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Shield, CreditCard, Zap, CheckCircle, Clock, DollarSign, Loader2 } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Shield, CreditCard, Zap, CheckCircle, Clock, DollarSign, Loader2, Download, ChevronDown } from "lucide-react"
 
 interface Stats {
   totalVolume: number
@@ -29,6 +30,15 @@ interface ComplianceMetrics {
   amlRate: number
   monitoringRate: number
   score: number
+}
+
+function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
+  const a = document.createElement('a')
+  a.href = `/api/reports?type=${type}`
+  a.download = ''
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
 }
 
 export function DashboardOverview() {
@@ -99,7 +109,26 @@ export function DashboardOverview() {
           <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
           <p className="text-slate-500 mt-0.5 text-sm">Your compliance payment activity</p>
         </div>
-        <Button size="sm" className="bg-teal-600 hover:bg-teal-500 text-white">Generate Report</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" className="bg-teal-600 hover:bg-teal-500 text-white">
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Export Report
+              <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => downloadReport('payments')}>
+              Payments CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadReport('invoices')}>
+              Invoices CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => downloadReport('payroll')}>
+              Payroll CSV
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Stats */}
