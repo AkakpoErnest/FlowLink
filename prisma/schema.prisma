@@ -78,7 +78,7 @@ model PaymentLink {
   userId           String
   code             String   @unique
   name             String?
-  network          String   @default("celo-alfajores")
+  network          String   @default("celo")
   sourceToken      String   @default("cUSD")
   destStable       String   @default("cUSD")
   amountMin        Float?

@@ -46,7 +46,7 @@ import {
 import type { Invoice } from "@/app/api/invoices/route"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 
-const CHAINS = SUPPORTED_CHAINS.filter(c => c.testnet)
+const CHAINS = SUPPORTED_CHAINS.filter(c => !c.testnet)
 
 interface Agent {
   id: string

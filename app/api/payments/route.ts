@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
           issuedToAddress: body.payer ?? null,
           amount: parseFloat(body.amount),
           currency: body.currency || 'cUSD',
-          network: body.network || 'celo-alfajores',
+          network: body.network || 'celo',
           status: 'paid',
           description: `Payment via link ${link.code}`,
           paymentLinkCode: link.code,

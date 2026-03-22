@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       userId,
       code: body.code || `pay-${Date.now()}`,
       name: body.name || null,
-      network: body.network || "celo-alfajores",
+      network: body.network || "celo",
       sourceToken: body.sourceToken || "cUSD",
       destStable: body.destStable || "cUSD",
       amountMin: body.amountMin ? parseFloat(body.amountMin) : null,

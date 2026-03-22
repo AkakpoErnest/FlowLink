@@ -11,9 +11,7 @@ import { Copy, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 
-// Only show testnets for now (flip to false for mainnet)
-const SHOW_TESTNETS_ONLY = true
-const CHAINS = SUPPORTED_CHAINS.filter(c => SHOW_TESTNETS_ONLY ? c.testnet : !c.testnet)
+const CHAINS = SUPPORTED_CHAINS.filter(c => !c.testnet)
 
 export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [network, setNetwork] = useState(DEFAULT_CHAIN_KEY)

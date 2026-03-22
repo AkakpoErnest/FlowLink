@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  const network = body.network || 'celo-alfajores'
+  const network = body.network || 'celo'
   const currency = body.currency || 'cUSD'
   const amount = parseFloat(body.amount)
 

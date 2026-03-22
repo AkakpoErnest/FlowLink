@@ -3,7 +3,7 @@
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { mainnet, polygon, arbitrum, optimism, sepolia } from 'wagmi/chains'
+import { mainnet, polygon, arbitrum, optimism, celo, celoAlfajores } from 'wagmi/chains'
 import { http } from 'viem'
 import { hashkey, hashkeyTestnet } from 'viem/chains'
 import { SessionProvider } from 'next-auth/react'
@@ -17,22 +17,24 @@ const config = getDefaultConfig({
   appName: 'FlowLink - Crypto Payments Platform',
   projectId,
   chains: [
+    celo,
     mainnet,
     polygon,
     arbitrum,
     optimism,
-    hashkey,      // HashKey Chain mainnet (ID: 177)
-    hashkeyTestnet, // HashKey Chain testnet (ID: 133)
-    sepolia,
+    hashkey,
+    hashkeyTestnet,
+    celoAlfajores,
   ],
   transports: {
+    [celo.id]: http('https://forno.celo.org'),
     [mainnet.id]: http(),
     [polygon.id]: http(),
     [arbitrum.id]: http(),
     [optimism.id]: http(),
     [hashkey.id]: http('https://mainnet.hsk.xyz'),
     [hashkeyTestnet.id]: http('https://hashkeychain-testnet.alt.technology'),
-    [sepolia.id]: http(),
+    [celoAlfajores.id]: http(),
   },
   ssr: true, // Enable SSR support
 })
@@ -63,7 +65,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
               </Text>
             ),
           }}
-          initialChain={hashkeyTestnet} // Default to HashKey Testnet
+          initialChain={celo}
           showRecentTransactions={true}
         >
           {children}
