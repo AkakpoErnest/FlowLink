@@ -35,6 +35,12 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
+  // Look up the authenticated user's wallet address to use as recipient
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { walletAddress: true },
+  })
+
   const link = await prisma.paymentLink.create({
     data: {
       userId,
@@ -45,6 +51,7 @@ export async function POST(request: NextRequest) {
       destStable: body.destStable || "cUSD",
       amountMin: body.amountMin ? parseFloat(body.amountMin) : null,
       amountMax: body.amountMax ? parseFloat(body.amountMax) : null,
+      recipientAddress: user?.walletAddress ?? null,
       status: "active",
     },
   })

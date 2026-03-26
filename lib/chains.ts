@@ -95,8 +95,18 @@ export const SUPPORTED_CHAINS: SupportedChain[] = [
         address: '',
         decimals: 18,
       },
-      // USDC/USDT addresses TBD — check HashKey testnet explorer
-      // {  symbol: 'USDC', address: '0x...', decimals: 6 },
+      {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        address: '0x47725537961326e4b906558BD208012c6C11aCa2',
+        decimals: 6,
+      },
+      {
+        symbol: 'USDT',
+        name: 'Tether USD',
+        address: '0x60EFCa24B785391C6063ba37fF917Ff0edEb9f4a',
+        decimals: 6,
+      },
     ],
   },
   {

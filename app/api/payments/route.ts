@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
           issuedTo: body.payer ?? null,
           issuedToAddress: body.payer ?? null,
           amount: parseFloat(body.amount),
-          currency: body.currency || 'cUSD',
+          currency: body.currency || 'HSK',
           network: body.network || 'celo',
           status: 'paid',
           description: `Payment via link ${link.code}`,

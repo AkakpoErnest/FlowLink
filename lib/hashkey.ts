@@ -51,31 +51,18 @@ export const hashkeyMainnet = {
 export const hashkeyTestnet = hashkeyChain
 
 // HashKey-specific token configurations
-//
-// ⚠️  USDC / USDT addresses below are UNVERIFIED PLACEHOLDERS.
-//    Circle does not officially list HashKey Chain Testnet (ID 133) in their
-//    deployed-contracts registry, and no confirmed addresses were found in the
-//    public HashKey docs or explorer as of March 2025.
-//
-//    Before enabling ERC-20 payments on testnet:
-//      1. Open https://hashkeychain-testnet-explorer.alt.technology and search "USDC" / "USDT"
-//      2. Or check the official HashKey developer Discord / Telegram for deployed addresses
-//      3. Replace the address values below and remove this comment
-//
 export const hashkeyTokens = {
   stablecoins: [
     {
       symbol: 'USDC',
       name: 'USD Coin',
-      // TODO: replace with confirmed HashKey testnet address
-      address: '' as string,
+      address: '0x47725537961326e4b906558BD208012c6C11aCa2' as string,
       decimals: 6,
     },
     {
       symbol: 'USDT',
       name: 'Tether USD',
-      // TODO: replace with confirmed HashKey testnet address
-      address: '' as string,
+      address: '0x60EFCa24B785391C6063ba37fF917Ff0edEb9f4a' as string,
       decimals: 6,
     },
   ],

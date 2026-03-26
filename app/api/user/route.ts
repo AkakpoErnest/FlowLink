@@ -33,6 +33,12 @@ export async function PATCH(request: NextRequest) {
 
   if (body.walletAddress !== undefined) {
     const addr = body.walletAddress ? (body.walletAddress as string).toLowerCase() : null
+    if (addr && !/^0x[0-9a-fA-F]{40}$/.test(body.walletAddress as string)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid EVM wallet address' },
+        { status: 400 }
+      )
+    }
     if (addr) {
       const conflict = await prisma.user.findFirst({ where: { walletAddress: addr } })
       if (conflict && conflict.id !== userId) {
