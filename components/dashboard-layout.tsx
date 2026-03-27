@@ -110,18 +110,18 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
         <div className="space-y-4 pt-1">
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Name</Label>
-            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-50" />
+            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-800" />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Email</Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50" />
+            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-800" />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Linked wallet</Label>
             <Input
               value={sessionWallet ?? "No wallet linked"}
               readOnly
-              className="bg-slate-50 font-mono text-xs"
+              className="bg-slate-800 font-mono text-xs"
             />
           </div>
 
@@ -144,7 +144,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <div className="space-y-2">
               <p className="text-xs text-slate-500">
                 Connected wallet:{" "}
-                <span className="font-mono text-slate-700">
+                <span className="font-mono text-slate-300">
                   {address.slice(0, 8)}…{address.slice(-6)}
                 </span>
               </p>

@@ -88,11 +88,15 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (user) {
         token.id = user.id
         // @ts-ignore — custom field
         token.walletAddress = user.walletAddress ?? null
+      }
+      // Handle session.update({ walletAddress }) calls from the client
+      if (trigger === 'update' && session?.walletAddress !== undefined) {
+        token.walletAddress = session.walletAddress
       }
       return token
     },

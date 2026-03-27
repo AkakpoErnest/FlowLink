@@ -68,10 +68,10 @@ export default function LoginPage() {
           email,
           password,
           redirect: false,
-          callbackUrl: "/dashboard",
+          callbackUrl: "/dashboard?setup=wallet",
         })
         if (result?.ok) {
-          router.push("/dashboard")
+          router.push("/dashboard?setup=wallet")
         } else {
           toast.error("Sign-in after registration failed")
         }

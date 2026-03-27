@@ -176,16 +176,16 @@ export function DashboardOverview() {
               </div>
             ) : (
               recent.map((p) => (
-                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100">
+                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/60 border border-slate-700/60">
                   <div className="flex items-center gap-3">
                     <div className={`h-2 w-2 rounded-full ${p.status === 'completed' ? 'bg-teal-500' : p.status === 'pending' ? 'bg-amber-500' : 'bg-slate-400'}`} />
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{p.payer ? `${p.payer.slice(0, 6)}…${p.payer.slice(-4)}` : 'Unknown'}</p>
+                      <p className="text-sm font-medium text-slate-200">{p.payer ? `${p.payer.slice(0, 6)}…${p.payer.slice(-4)}` : 'Unknown'}</p>
                       <p className="text-xs text-slate-500 capitalize">{p.status}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{p.amount} {p.currency}</p>
+                    <p className="text-sm font-semibold text-slate-200">{p.amount} {p.currency}</p>
                     <p className="text-xs text-slate-400">{new Date(p.createdAt).toLocaleDateString()}</p>
                   </div>
                 </div>
