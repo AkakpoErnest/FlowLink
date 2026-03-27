@@ -28,12 +28,27 @@ export async function PATCH(request: NextRequest) {
   // @ts-ignore
   const userId = session.user.id as string
 
-  const body = await request.json()
+  // Guard: session user id must be present (can be absent when JWT is misconfigured)
+  if (!userId) {
+    return NextResponse.json({ success: false, error: 'Session user ID missing' }, { status: 401 })
+  }
+
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 })
+  }
+
   const data: Record<string, unknown> = {}
 
   if (body.walletAddress !== undefined) {
-    const addr = body.walletAddress ? (body.walletAddress as string).toLowerCase() : null
-    if (addr && !/^0x[0-9a-fA-F]{40}$/.test(body.walletAddress as string)) {
+    // Normalise to lowercase; null means "unlink"
+    const addr = body.walletAddress
+      ? (body.walletAddress as string).trim().toLowerCase()
+      : null
+
+    if (addr && !/^0x[0-9a-f]{40}$/.test(addr)) {
       return NextResponse.json(
         { success: false, error: 'Invalid EVM wallet address' },
         { status: 400 }
@@ -53,11 +68,27 @@ export async function PATCH(request: NextRequest) {
 
   if (body.name !== undefined) data.name = body.name
 
-  const user = await prisma.user.update({
-    where: { id: userId },
-    data,
-    select: { id: true, name: true, email: true, walletAddress: true },
-  })
+  // Nothing to update — return the current user without touching the DB
+  if (Object.keys(data).length === 0) {
+    const current = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true, walletAddress: true },
+    })
+    return NextResponse.json({ success: true, data: current })
+  }
 
-  return NextResponse.json({ success: true, data: user })
+  try {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data,
+      select: { id: true, name: true, email: true, walletAddress: true },
+    })
+    return NextResponse.json({ success: true, data: user })
+  } catch (err: unknown) {
+    console.error('[PATCH /api/user]', err)
+    return NextResponse.json(
+      { success: false, error: 'Database error while updating user' },
+      { status: 500 }
+    )
+  }
 }

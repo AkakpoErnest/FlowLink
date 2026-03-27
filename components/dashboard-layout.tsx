@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -17,6 +18,8 @@ import { ComplianceVaultsModule } from "@/components/compliance-vaults-module"
 import { PayrollRailsModule } from "@/components/payroll-rails-module"
 import { AIInvoiceModule } from "@/components/ai-invoice-module"
 import { HashKeyModule } from "@/components/hashkey-module"
+import { WalletSetupModal } from "@/components/wallet-setup-modal"
+import { WalletOnboardingModal } from "@/components/wallet-onboarding-modal"
 import { useSession, signOut } from "next-auth/react"
 import { useAccount } from "wagmi"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
@@ -34,60 +37,29 @@ const navigation = [
   { id: "hashkey-chain", name: "HashKey Chain", icon: Layers, group: "networks", badge: "HSK" },
 ]
 
-function WalletLinkBanner() {
-  const { data: session, update } = useSession()
-  const { address, isConnected } = useAccount()
-  const [linking, setLinking] = useState(false)
+function WalletBanner({ onSetup }: { onSetup: () => void }) {
+  const { data: session } = useSession()
   const [dismissed, setDismissed] = useState(false)
 
   // @ts-ignore
   const sessionWallet = session?.user?.walletAddress as string | null | undefined
 
-  // Auto-link when wallet connects and session has no wallet yet
-  useEffect(() => {
-    if (!isConnected || !address || sessionWallet || linking) return
-
-    const link = async () => {
-      setLinking(true)
-      try {
-        const res = await fetch('/api/user', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ walletAddress: address }),
-        })
-        const data = await res.json()
-        if (data.success) {
-          // Refresh the JWT session so walletAddress is picked up
-          await update({ walletAddress: address })
-        }
-      } catch (e) {
-        console.error('Failed to link wallet:', e)
-      } finally {
-        setLinking(false)
-      }
-    }
-
-    link()
-  }, [isConnected, address, sessionWallet])
-
-  // Hide if wallet already linked, or dismissed, or wallet is connected (linking in progress)
   if (sessionWallet || dismissed) return null
 
   return (
     <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3">
       <Wallet className="h-4 w-4 text-amber-400 shrink-0" />
       <p className="flex-1 text-sm text-amber-200">
-        {isConnected && linking
-          ? 'Linking wallet to your account…'
-          : isConnected
-          ? 'Wallet connected — linking to your account…'
-          : 'Connect a wallet so your payment links can receive funds.'}
+        No wallet linked. Set one up to send and receive payments.
       </p>
-      {!isConnected && (
-        <div className="shrink-0">
-          <ConnectButton accountStatus="avatar" showBalance={false} chainStatus="none" />
-        </div>
-      )}
+      <Button
+        size="sm"
+        onClick={onSetup}
+        className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 text-xs"
+        variant="outline"
+      >
+        Set up wallet
+      </Button>
       <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-300 shrink-0">
         <X className="h-4 w-4" />
       </button>
@@ -116,7 +88,8 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
       })
       const data = await res.json()
       if (data.success) {
-        await update({ walletAddress: address })
+        // Use the canonical (lowercased) address the server stored in the DB
+        await update({ walletAddress: data.data?.walletAddress ?? address.toLowerCase() })
         setMsg("Wallet linked successfully.")
       } else {
         setMsg(data.error ?? "Failed to link wallet.")
@@ -132,7 +105,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Profile</DialogTitle>
+          <DialogTitle>Profile &amp; Wallet</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 pt-1">
           <div className="space-y-1">
@@ -151,10 +124,29 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               className="bg-slate-50 font-mono text-xs"
             />
           </div>
+
+          {/* Connect via RainbowKit if not yet connected */}
+          {!isConnected && !sessionWallet && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
+              <div className="flex justify-center pt-1">
+                <ConnectButton
+                  label="Connect Wallet"
+                  accountStatus="address"
+                  showBalance={false}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Show link button when RainbowKit wallet differs from linked wallet */}
           {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
             <div className="space-y-2">
               <p className="text-xs text-slate-500">
-                Connected wallet: <span className="font-mono text-slate-700">{address.slice(0, 8)}…{address.slice(-6)}</span>
+                Connected wallet:{" "}
+                <span className="font-mono text-slate-700">
+                  {address.slice(0, 8)}…{address.slice(-6)}
+                </span>
               </p>
               <Button
                 size="sm"
@@ -178,7 +170,39 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [walletSetupOpen, setWalletSetupOpen] = useState(false)
+  const [walletOnboardingOpen, setWalletOnboardingOpen] = useState(false)
+  // Guard so the onboarding modal only auto-fires once per page load
+  const [onboardingShown, setOnboardingShown] = useState(false)
   const { data: session } = useSession()
+  const { isConnected } = useAccount()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  // @ts-ignore
+  const sessionWalletTop = session?.user?.walletAddress as string | null | undefined
+
+  // Auto-show the onboarding modal for first-time users:
+  // trigger when the session is loaded, the user has no linked wallet,
+  // and they have not connected a wallet via RainbowKit yet.
+  useEffect(() => {
+    if (
+      !onboardingShown &&
+      session?.user &&
+      !sessionWalletTop &&
+      !isConnected
+    ) {
+      setOnboardingShown(true)
+      setWalletOnboardingOpen(true)
+    }
+  }, [session, sessionWalletTop, isConnected, onboardingShown])
+
+  useEffect(() => {
+    if (searchParams.get("setup") === "wallet") {
+      setWalletSetupOpen(true)
+      router.replace("/dashboard")
+    }
+  }, [searchParams, router])
 
   const handleLogout = () => {
     signOut({ callbackUrl: "/login" })
@@ -272,9 +296,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       </header>
 
       <ProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} />
+      <WalletSetupModal open={walletSetupOpen} onClose={() => setWalletSetupOpen(false)} />
+      <WalletOnboardingModal
+        open={walletOnboardingOpen}
+        onClose={() => setWalletOnboardingOpen(false)}
+      />
 
-      {/* Wallet linkage banner — shown to Google OAuth users without a linked wallet */}
-      <WalletLinkBanner />
+      {/* Wallet setup banner — shown to users without a linked wallet */}
+      <WalletBanner onSetup={() => setWalletSetupOpen(true)} />
 
       <div className="flex">
         {/* Sidebar */}
