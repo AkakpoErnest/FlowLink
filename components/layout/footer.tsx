@@ -45,7 +45,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-white">Compliance</h3>
             <ul className="space-y-3">
-              {['KYC / AML', 'Sanctions Screening', 'HashKey Chain', 'Audit Logs', 'Security', 'SOC 2'].map((l) => (
+              {['KYC / AML', 'Sanctions Screening', 'HashKey Chain', 'Audit Logs', 'Security', 'Travel Rule'].map((l) => (
                 <li key={l}>
                   <Link href="#" className="text-sm text-slate-400 hover:text-white transition-colors">{l}</Link>
                 </li>

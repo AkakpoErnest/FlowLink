@@ -152,14 +152,14 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
                 size="sm"
                 onClick={linkWallet}
                 disabled={saving}
-                className="w-full bg-teal-600 hover:bg-teal-500 text-white"
+                className="w-full bg-blue-600 hover:bg-blue-500 text-white"
               >
                 <Wallet className="h-3.5 w-3.5 mr-1.5" />
                 {saving ? "Linking…" : "Link this wallet to account"}
               </Button>
             </div>
           )}
-          {msg && <p className="text-xs text-teal-600">{msg}</p>}
+          {msg && <p className="text-xs text-blue-400">{msg}</p>}
         </div>
       </DialogContent>
     </Dialog>
@@ -246,7 +246,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 flex items-center justify-center p-1">
+              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center p-1">
                 <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-full h-full object-contain" />
               </div>
               <div>
@@ -265,7 +265,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="h-2 w-2 bg-blue-400 rounded-full animate-pulse" />
               <span className="text-blue-400 text-xs font-medium">HashKey Chain</span>
             </button>
-            <Badge className="hidden md:flex bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 text-xs font-medium">
+            <Badge className="hidden md:flex bg-blue-500/10 text-blue-400 border border-blue-500/25 text-xs font-medium">
               Compliant
             </Badge>
             <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
@@ -274,8 +274,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30">
-                    <span className="text-sm font-semibold text-emerald-400">{initials}</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/15 border border-blue-500/25">
+                    <span className="text-sm font-semibold text-blue-400">{initials}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -323,7 +323,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${
                           activeTab === item.id
-                            ? "bg-emerald-500/12 text-emerald-400 border border-emerald-500/25 shadow-sm"
+                            ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-sm"
                             : "text-slate-400 hover:text-white hover:bg-slate-800"
                         }`}
                       >
