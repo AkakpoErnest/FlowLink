@@ -71,7 +71,7 @@ export default function HowItWorksSection() {
           {steps.map((s, i) => (
             <motion.div
               key={i}
-              className={`relative rounded-2xl p-7 border ${s.featured ? 'bg-[#0F1B2D] border-[#0F1B2D]' : 'bg-white border-slate-200'}`}
+              className={`relative rounded-2xl p-7 border ${s.featured ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}
               variants={cardVariants}
               whileHover={{ y: -4, boxShadow: s.featured ? '0 20px 40px rgba(15,27,45,0.3)' : '0 20px 40px rgba(0,0,0,0.08)' }}
               transition={{ duration: 0.2 }}

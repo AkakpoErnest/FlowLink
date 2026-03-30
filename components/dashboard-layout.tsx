@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   CreditCard, Shield, Users, Menu, Bell,
-  LogOut, Bot, Layers, Home, Wallet, X
+  LogOut, Bot, Layers, Home, Wallet, X, Link2
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -47,20 +47,20 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
   if (sessionWallet || dismissed) return null
 
   return (
-    <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3">
-      <Wallet className="h-4 w-4 text-amber-400 shrink-0" />
-      <p className="flex-1 text-sm text-amber-200">
+    <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+      <Wallet className="h-4 w-4 text-amber-600 shrink-0" />
+      <p className="flex-1 text-sm text-amber-800">
         No wallet linked. Set one up to send and receive payments.
       </p>
       <Button
         size="sm"
         onClick={onSetup}
-        className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 text-xs"
+        className="shrink-0 bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300 text-xs"
         variant="outline"
       >
         Set up wallet
       </Button>
-      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-300 shrink-0">
+      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-700 shrink-0">
         <X className="h-4 w-4" />
       </button>
     </div>
@@ -110,11 +110,11 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
         <div className="space-y-4 pt-1">
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Name</Label>
-            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-800" />
+            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-50 border-slate-200" />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Email</Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-800" />
+            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50 border-slate-200" />
           </div>
           <div className="space-y-1">
             <Label className="text-xs text-slate-500">Linked wallet</Label>
@@ -232,25 +232,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="border-b border-slate-700/60 bg-slate-900 sticky top-0 z-50">
+      <header className="border-b border-slate-200 bg-white sticky top-0 z-50">
         <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-slate-400 hover:text-white"
+              className="text-slate-600 hover:text-slate-900"
             >
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center p-1">
-                <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-full h-full object-contain" />
+              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center p-1.5">
+                <Link2 className="w-full h-full text-white" />
               </div>
               <div>
-                <h1 className="text-[15px] font-bold text-white tracking-tight">FlowLink</h1>
+                <h1 className="text-[15px] font-bold tracking-tight">
+                  <span className="text-slate-900">Flow</span><span className="text-blue-600">Link</span>
+                </h1>
                 <p className="text-[11px] text-slate-500 leading-none mt-0.5">Compliant Payment Infrastructure</p>
               </div>
             </div>
@@ -260,22 +262,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* HashKey Chain indicator */}
             <button
               onClick={() => setActiveTab("hashkey-chain")}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full hover:bg-blue-500/20 transition-all"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition-all"
             >
-              <div className="h-2 w-2 bg-blue-400 rounded-full animate-pulse" />
-              <span className="text-blue-400 text-xs font-medium">HashKey Chain</span>
+              <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse" />
+              <span className="text-blue-600 text-xs font-medium">HashKey Chain</span>
             </button>
-            <Badge className="hidden md:flex bg-blue-500/10 text-blue-400 border border-blue-500/25 text-xs font-medium">
+            <Badge className="hidden md:flex bg-blue-50 text-blue-600 border border-blue-200 text-xs font-medium">
               Compliant
             </Badge>
-            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
               <Bell className="h-5 w-5" />
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600/15 border border-blue-500/25">
-                    <span className="text-sm font-semibold text-blue-400">{initials}</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 border border-blue-200">
+                    <span className="text-sm font-semibold text-blue-600">{initials}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -308,11 +310,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex">
         {/* Sidebar */}
         {sidebarOpen && (
-          <aside className="w-64 bg-slate-900 border-r border-slate-700/60 min-h-[calc(100vh-4rem)]">
+          <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)]">
             <nav className="p-4 space-y-4">
               {groups.map((group) => (
                 <div key={group.label} className="space-y-0.5">
-                  <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+                  <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     {group.label}
                   </h3>
                   {navigation
@@ -323,14 +325,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${
                           activeTab === item.id
-                            ? "bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-sm"
-                            : "text-slate-400 hover:text-white hover:bg-slate-800"
+                            ? "bg-blue-50 text-blue-600 border border-blue-200 shadow-sm"
+                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                         }`}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span>{item.name}</span>
                         {item.badge && (
-                          <Badge className="ml-auto bg-blue-500/10 text-blue-400 border border-blue-500/25 text-[10px] font-semibold px-1.5 py-0">
+                          <Badge className="ml-auto bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-semibold px-1.5 py-0">
                             {item.badge}
                           </Badge>
                         )}
@@ -343,7 +345,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-6 bg-slate-950">
+        <main className="flex-1 p-6 bg-slate-50">
           {renderContent()}
         </main>
       </div>

@@ -144,36 +144,38 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F1B2D] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center">
-              <Link2 className="w-6 h-6 text-white" />
+            <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center p-2.5">
+              <Link2 className="w-full h-full text-white" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white">FlowLink</h1>
-          <p className="text-slate-400 mt-1 text-sm">Compliant crypto payments on HashKey Chain</p>
+          <h1 className="text-2xl font-bold">
+            <span className="text-slate-900">Flow</span><span className="text-blue-600">Link</span>
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">Compliant crypto payments on HashKey Chain</p>
         </div>
 
         {/* Auth Options */}
         <Tabs defaultValue="email" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-slate-700">
-            <TabsTrigger value="email" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Email</TabsTrigger>
-            <TabsTrigger value="google" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Google</TabsTrigger>
-            <TabsTrigger value="wallet" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Wallet</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-white border border-slate-200">
+            <TabsTrigger value="email" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Email</TabsTrigger>
+            <TabsTrigger value="google" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Google</TabsTrigger>
+            <TabsTrigger value="wallet" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Wallet</TabsTrigger>
           </TabsList>
 
           {/* Email / Password Tab */}
           <TabsContent value="email">
-            <Card className="border-slate-700 bg-slate-900 shadow-xl">
+            <Card className="border-slate-200 bg-white shadow-sm">
               <CardHeader className="text-center pb-2">
-                <CardTitle className="text-2xl text-white">
+                <CardTitle className="text-2xl text-slate-900">
                   {mode === "login" ? "Welcome back" : "Create account"}
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-slate-500">
                   {mode === "login"
                     ? "Sign in with your email and password"
                     : "Register to get started with FlowLink"}
@@ -183,19 +185,19 @@ export default function LoginPage() {
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
                   {mode === "register" && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="name" className="text-slate-300">Name</Label>
+                      <Label htmlFor="name" className="text-slate-700">Name</Label>
                       <Input
                         id="name"
                         placeholder="Your name"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                       />
                     </div>
                   )}
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="text-slate-300">Email</Label>
+                    <Label htmlFor="email" className="text-slate-700">Email</Label>
                     <Input
                       id="email"
                       type="email"
@@ -203,12 +205,12 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="password" className="text-slate-300">Password</Label>
+                    <Label htmlFor="password" className="text-slate-700">Password</Label>
                     <Input
                       id="password"
                       type="password"
@@ -216,13 +218,13 @@ export default function LoginPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                     />
                   </div>
 
                   {mode === "register" && (
                     <div className="space-y-1.5">
-                      <Label htmlFor="confirmPassword" className="text-slate-300">Confirm Password</Label>
+                      <Label htmlFor="confirmPassword" className="text-slate-700">Confirm Password</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
@@ -230,7 +232,7 @@ export default function LoginPage() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                        className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                        className="bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
                       />
                     </div>
                   )}
@@ -252,14 +254,14 @@ export default function LoginPage() {
                   </Button>
                 </form>
 
-                <div className="mt-4 text-center text-sm text-slate-400">
+                <div className="mt-4 text-center text-sm text-slate-500">
                   {mode === "login" ? (
                     <>
                       Don&apos;t have an account?{" "}
                       <button
                         type="button"
                         onClick={() => { setMode("register"); setPassword(""); setConfirmPassword("") }}
-                        className="text-blue-400 hover:underline"
+                        className="text-blue-600 hover:underline"
                       >
                         Register
                       </button>
@@ -270,7 +272,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => { setMode("login"); setPassword(""); setConfirmPassword("") }}
-                        className="text-blue-400 hover:underline"
+                        className="text-blue-600 hover:underline"
                       >
                         Sign in
                       </button>
@@ -283,10 +285,10 @@ export default function LoginPage() {
 
           {/* Google Tab */}
           <TabsContent value="google">
-            <Card className="border-slate-700 bg-slate-900 shadow-xl">
+            <Card className="border-slate-200 bg-white shadow-sm">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-white">Welcome</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-2xl text-slate-900">Welcome</CardTitle>
+                <CardDescription className="text-slate-500">
                   Sign in with your Google account to access FlowLink
                 </CardDescription>
               </CardHeader>
@@ -314,10 +316,10 @@ export default function LoginPage() {
 
           {/* Wallet Tab */}
           <TabsContent value="wallet">
-            <Card className="border-slate-700 bg-slate-900 shadow-xl">
+            <Card className="border-slate-200 bg-white shadow-sm">
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl text-white">Connect Wallet</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-2xl text-slate-900">Connect Wallet</CardTitle>
+                <CardDescription className="text-slate-500">
                   Sign in with your wallet — no email required
                 </CardDescription>
               </CardHeader>
@@ -358,11 +360,11 @@ export default function LoginPage() {
         {/* Trust badges */}
         <div className="mt-6 grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Shield className="h-4 w-4 text-blue-500" />
+            <Shield className="h-4 w-4 text-blue-600" />
             <span>KYC / AML screening</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Wallet className="h-4 w-4 text-blue-500" />
+            <Wallet className="h-4 w-4 text-blue-600" />
             <span>HashKey Chain</span>
           </div>
         </div>
