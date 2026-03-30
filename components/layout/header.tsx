@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Link2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function Header() {
@@ -16,16 +16,16 @@ export default function Header() {
   }, [])
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled ? 'bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm' : 'bg-transparent'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${scrolled ? 'bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm' : 'bg-white border-b border-slate-100'}`}>
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="h-8 w-8 rounded-lg bg-teal-600 flex items-center justify-center">
-              <img src="/flowlink-logo-new.png" alt="FlowLink" className="w-5 h-5" />
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+              <Link2 className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-slate-900">FlowLink</span>
+            <span className="font-bold text-lg text-[#0F1B2D] tracking-tight">FlowLink</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -48,7 +48,7 @@ export default function Header() {
             <Button asChild variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 font-medium text-sm">
               <Link href="/login">Sign In</Link>
             </Button>
-            <Button asChild className="bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold px-5">
+            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5">
               <Link href="/login">Get Started Free</Link>
             </Button>
           </div>
@@ -88,7 +88,7 @@ export default function Header() {
               <Button asChild variant="outline" className="w-full justify-center">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
               </Button>
-              <Button asChild className="w-full bg-teal-600 hover:bg-teal-700 justify-center">
+              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 justify-center">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Get Started Free</Link>
               </Button>
             </div>
