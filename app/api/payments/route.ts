@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const paymentLinkId = searchParams.get('paymentLinkId')
   const status = searchParams.get('status')
+  const network = searchParams.get('network')
   const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
   const offset = parseInt(searchParams.get('offset') || '0')
 
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
     userId,
     ...(paymentLinkId ? { paymentLinkId } : {}),
     ...(status ? { status } : {}),
+    ...(network ? { network } : {}),
   }
 
   const [payments, total] = await Promise.all([
@@ -114,7 +116,7 @@ export async function POST(request: NextRequest) {
           issuedToAddress: body.payer ?? null,
           amount: parseFloat(body.amount),
           currency: body.currency || 'HSK',
-          network: body.network || 'celo',
+          network: body.network || 'hashkey-testnet',
           status: 'paid',
           description: `Payment via link ${link.code}`,
           paymentLinkCode: link.code,

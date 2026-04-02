@@ -27,9 +27,9 @@ export const hashkeyChain = {
   testnet: true,
 }
 
-// Mainnet (Chain ID 230315) — for future use
+// Mainnet (Chain ID 177)
 export const hashkeyMainnet = {
-  id: 230315,
+  id: 177,
   name: 'HashKey Chain',
   network: 'hashkey',
   nativeCurrency: {

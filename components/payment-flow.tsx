@@ -8,13 +8,14 @@ import {
   useWriteContract,
   useSwitchChain,
 } from "wagmi"
-import { parseEther, parseUnits } from "viem"
+import { parseEther, parseUnits, keccak256, toHex } from "viem"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { Shield, CheckCircle, XCircle, Loader2, ExternalLink, Wallet, AlertCircle, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getChain, getToken, isNativeToken } from "@/lib/chains"
+import { FLOWLINK_PAYMENTS_ADDRESS, FLOWLINK_PAYMENTS_ABI, ZERO_ADDRESS } from "@/lib/flowlink-contract"
 
 const ERC20_TRANSFER_ABI = [
   {
@@ -142,24 +143,58 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
       return
     }
 
+    const contractAddress = FLOWLINK_PAYMENTS_ADDRESS[paymentLink.network]
+    const useFlowLinkContract = contractAddress && contractAddress !== ZERO_ADDRESS
+    // bytes32 id derived from the payment link's string id
+    const paymentLinkId32 = keccak256(toHex(paymentLink.id))
+
     try {
       if (isNativeToken(token)) {
-        sendTransaction({
-          to: paymentLink.recipientAddress as `0x${string}`,
-          value: parseEther(amount),
-          chainId: targetChain!.id,
-        })
+        if (useFlowLinkContract) {
+          // Route native HSK through FlowLink contract — emits PaymentProcessed event
+          writeContract({
+            address: contractAddress,
+            abi: FLOWLINK_PAYMENTS_ABI,
+            functionName: 'payNative',
+            args: [paymentLinkId32, paymentLink.recipientAddress as `0x${string}`],
+            value: parseEther(amount),
+            chainId: targetChain!.id,
+          })
+        } else {
+          sendTransaction({
+            to: paymentLink.recipientAddress as `0x${string}`,
+            value: parseEther(amount),
+            chainId: targetChain!.id,
+          })
+        }
       } else {
-        writeContract({
-          address: token.address as `0x${string}`,
-          abi: ERC20_TRANSFER_ABI,
-          functionName: 'transfer',
-          args: [
-            paymentLink.recipientAddress as `0x${string}`,
-            parseUnits(amount, token.decimals),
-          ],
-          chainId: targetChain!.id,
-        })
+        if (useFlowLinkContract) {
+          // Route ERC20 through FlowLink contract — requires prior approval of contract
+          // User must approve: token.approve(contractAddress, amount) before this call
+          writeContract({
+            address: contractAddress,
+            abi: FLOWLINK_PAYMENTS_ABI,
+            functionName: 'pay',
+            args: [
+              paymentLinkId32,
+              paymentLink.recipientAddress as `0x${string}`,
+              token.address as `0x${string}`,
+              parseUnits(amount, token.decimals),
+            ],
+            chainId: targetChain!.id,
+          })
+        } else {
+          writeContract({
+            address: token.address as `0x${string}`,
+            abi: ERC20_TRANSFER_ABI,
+            functionName: 'transfer',
+            args: [
+              paymentLink.recipientAddress as `0x${string}`,
+              parseUnits(amount, token.decimals),
+            ],
+            chainId: targetChain!.id,
+          })
+        }
       }
       setStep('sending')
     } catch (e: any) {
