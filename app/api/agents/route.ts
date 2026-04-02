@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
+import { deriveAgentWallet } from "@/lib/agent-wallet"
 
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
+  // Create agent first to get DB-generated id
   const agent = await prisma.agent.create({
     data: {
       userId,
@@ -40,7 +42,20 @@ export async function POST(request: NextRequest) {
     },
   })
 
-  return NextResponse.json({ success: true, data: agent }, { status: 201 })
+  // Auto-derive a deterministic wallet address from the master mnemonic
+  let walletAddress = agent.walletAddress
+  if (!walletAddress && process.env.DEPLOYER_MNEMONIC) {
+    try {
+      const agentIndex = agent.id.charCodeAt(0) % 100
+      const { address } = deriveAgentWallet(agentIndex)
+      walletAddress = address
+      await prisma.agent.update({ where: { id: agent.id }, data: { walletAddress: address } })
+    } catch {
+      // Non-fatal: agent still created without wallet address
+    }
+  }
+
+  return NextResponse.json({ success: true, data: { ...agent, walletAddress } }, { status: 201 })
 }
 
 export async function PUT(request: NextRequest) {

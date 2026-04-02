@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Shield, CreditCard, Zap, CheckCircle, Clock, DollarSign, Loader2, Download, ChevronDown } from "lucide-react"
+import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 
 interface Stats {
   totalVolume: number
@@ -46,22 +47,26 @@ export function DashboardOverview() {
   const [recent, setRecent] = useState<RecentPayment[]>([])
   const [compliance, setCompliance] = useState<ComplianceMetrics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [agents, setAgents] = useState<{ id: string; name: string; walletAddress?: string | null }[]>([])
 
   useEffect(() => {
     async function load() {
       try {
-        const [linksRes, paymentsRes, allPaymentsRes, invoicesRes] = await Promise.all([
+        const [linksRes, paymentsRes, allPaymentsRes, invoicesRes, agentsRes] = await Promise.all([
           fetch('/api/payment-links'),
           fetch('/api/payments?limit=5'),
           fetch('/api/payments?limit=100'),
           fetch('/api/invoices'),
+          fetch('/api/agents'),
         ])
-        const [links, payments, allPayments, invoices] = await Promise.all([
+        const [links, payments, allPayments, invoices, agentsData] = await Promise.all([
           linksRes.json(),
           paymentsRes.json(),
           allPaymentsRes.json(),
           invoicesRes.json(),
+          agentsRes.json(),
         ])
+        setAgents(agentsData.data ?? [])
 
         const activeLinks = links.data?.filter((l: any) => l.status === 'active').length ?? 0
         const totalVolume = links.data?.reduce((sum: number, l: any) => sum + (l.totalVolume ?? 0), 0) ?? 0
@@ -240,6 +245,11 @@ export function DashboardOverview() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      {/* Agent Payments */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <AgentPaymentWidget agents={agents} />
       </div>
     </div>
   )

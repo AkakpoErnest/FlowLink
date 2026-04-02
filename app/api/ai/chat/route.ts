@@ -4,28 +4,27 @@ import Anthropic from '@anthropic-ai/sdk'
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:7b'
 
-const systemPrompt = `You are FlowLink AI, a helpful assistant for a crypto payments compliance platform. FlowLink specializes in:
+const systemPrompt = `You are FlowLink's AI assistant for crypto compliance payments on HashKey Chain.
 
+FlowLink specializes in:
 - Compliant crypto payments with built-in KYC/AML screening
 - Instant payment links with QR codes
 - Compliance vaults with programmable policies
 - Payroll automation for crypto payments
+- AI agents that autonomously pay each other and humans on HashKey Chain (agent-to-agent, agent-to-human)
 - HashKey Chain integration — a regulated blockchain for institutional finance
-- Multi-chain support (Ethereum, Polygon, Arbitrum, and more)
 
 Platform facts:
 - Built on HashKey Chain Testnet (Chain ID: 133)
 - Real-time sanctions screening against OFAC, UN, and EU lists
 - Compliance status tracked per payment (KYC passed, sanctions checked)
+- Each AI agent has its own embedded wallet derived via BIP-44 from the master key
 
-When users ask questions:
-1. Be helpful and informative about crypto payments, compliance, and FlowLink features
-2. Provide accurate information about blockchain technology and crypto regulations
-3. For specific technical or legal advice, recommend they consult their compliance team
-4. Keep responses concise but comprehensive
-5. If you don't know something specific, say so honestly
+PAYMENT INTENT DETECTION:
+When a user requests a payment (e.g. "pay 10 USDC to 0x...", "agent pay John", "send 5 HSK to agent B", "have agent X pay agent Y"), extract the payment details and respond ONLY with valid JSON:
+{"action":"agent_payment","amount":<number>,"token":"<HSK|USDC|USDT>","toAddress":"<0x... or null>","toAgentName":"<agent name or null>","paymentType":"<agent-to-human|agent-to-agent>","memo":"<optional memo>"}
 
-Always maintain a professional, friendly tone.`
+For all other questions, respond normally as a helpful compliance assistant. Keep responses concise but comprehensive. For specific legal advice, recommend consulting their compliance team.`
 
 async function askClaude(message: string, history: { role: string; content: string }[]) {
   const client = new Anthropic()

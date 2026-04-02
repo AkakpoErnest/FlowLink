@@ -98,9 +98,11 @@ model Payment {
   id               String   @id @default(cuid())
   userId           String?
   paymentLinkId    String?
+  agentId          String?
   payer            String?
   amount           Float
   currency         String   @default("USDC")
+  token            String?
   txHash           String?
   status           String   @default("pending")
   network          String   @default("hashkey-testnet")
@@ -108,10 +110,15 @@ model Payment {
   kycPassed        Boolean  @default(false)
   sanctionsChecked Boolean  @default(false)
   gasUsed          String?
+  payerAddress     String?
+  recipientAddress String?
+  memo             String?
+  paymentType      String?  @default("standard")
   createdAt        DateTime @default(now())
 
   user        User?        @relation(fields: [userId], references: [id])
   paymentLink PaymentLink? @relation(fields: [paymentLinkId], references: [id])
+  agent       Agent?       @relation(fields: [agentId], references: [id])
 }
 
 model Invoice {
@@ -203,4 +210,5 @@ model Agent {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]
+  payments Payment[]
 }
