@@ -4,7 +4,9 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as SonnerToaster } from 'sonner'
 import { WalletProvider } from '@/components/providers/wallet-provider'
+import { GoogleOneTap } from '@/components/google-one-tap'
 import AiChat from '@/components/ai-chat'
+import Script from 'next/script'
 import './globals.css'
 
 const dmSans = DM_Sans({
@@ -29,7 +31,9 @@ export default function RootLayout({
         <title>FlowLink - Crypto Payments Platform</title>
       </head>
       <body className={`font-sans ${dmSans.variable} ${GeistMono.variable}`}>
+        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
         <WalletProvider>
+          <GoogleOneTap />
           {children}
           <AiChat />
           <Toaster />
