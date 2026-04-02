@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+import { useState, useEffect } from "react"
+import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useAccount, useSignMessage } from "wagmi"
 import { SiweMessage } from "siwe"
@@ -16,8 +16,16 @@ import { toast } from "sonner"
 
 export default function LoginPage() {
   const router = useRouter()
+  const { data: session, status } = useSession()
   const { address, isConnected, chain } = useAccount()
   const { signMessageAsync } = useSignMessage()
+
+  // Redirect already-authenticated users to dashboard
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard")
+    }
+  }, [status, router])
 
   const [googleLoading, setGoogleLoading] = useState(false)
   const [walletLoading, setWalletLoading] = useState(false)

@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { SiweMessage } from "siwe"
+import { OAuth2Client } from "google-auth-library"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
@@ -39,6 +40,43 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           name: user.name,
           email: user.email,
+          // @ts-ignore
+          walletAddress: user.walletAddress ?? null,
+        }
+      },
+    }),
+
+    // ── Google One Tap ───────────────────────────────────────
+    CredentialsProvider({
+      id: "google-one-tap",
+      name: "Google One Tap",
+      credentials: { credential: { type: "text" } },
+      async authorize(credentials) {
+        if (!credentials?.credential) return null
+
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+        const ticket = await client.verifyIdToken({
+          idToken: credentials.credential,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        })
+        const payload = ticket.getPayload()
+        if (!payload?.email) return null
+
+        let user = await prisma.user.findUnique({ where: { email: payload.email } })
+        if (!user) {
+          user = await prisma.user.create({
+            data: {
+              email: payload.email,
+              name: payload.name ?? "",
+              emailVerified: new Date(),
+            },
+          })
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
           // @ts-ignore
           walletAddress: user.walletAddress ?? null,
         }
