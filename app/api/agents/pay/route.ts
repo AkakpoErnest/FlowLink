@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { agentSendERC20, agentSendNative, deriveAgentWallet } from '@/lib/agent-wallet'
+import { logAudit } from '@/lib/audit'
 
 // Token addresses on HashKey Testnet
 const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
@@ -92,6 +93,14 @@ export async function POST(req: Request) {
       sanctionsChecked: true,
       complianceScore: 95,
     },
+  })
+
+  await logAudit({
+    userId,
+    action: 'agent.payment.executed',
+    entityId: payment.id,
+    entityType: 'Payment',
+    metadata: { agentId, paymentType, amount, token, txHash: txResult.txHash },
   })
 
   return NextResponse.json({

@@ -31,6 +31,7 @@ model User {
   vaults         ComplianceVault[]
   payrollBatches PayrollBatch[]
   agents         Agent[]
+  auditLogs      AuditLog[]
 }
 
 model Account {
@@ -211,4 +212,20 @@ model Agent {
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]
   payments Payment[]
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  action     String
+  entityId   String?
+  entityType String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([action])
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
+import { logAudit } from "@/lib/audit"
 
 export type Invoice = {
   id: string
@@ -153,6 +154,13 @@ export async function POST(request: NextRequest) {
   if (body.agentId) {
     await prisma.agent.update({ where: { id: body.agentId }, data: { invoiceCount: { increment: 1 } } }).catch(() => {})
   }
+
+  await logAudit({
+    userId,
+    action: 'invoice.created',
+    entityId: invoice.id,
+    entityType: 'Invoice',
+  })
 
   return NextResponse.json({
     success: true,

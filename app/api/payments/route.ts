@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { logAudit } from '@/lib/audit'
 
 function unauth() {
   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -126,6 +127,16 @@ export async function POST(request: NextRequest) {
         },
       })
     }
+  }
+
+  if (userId) {
+    await logAudit({
+      userId,
+      action: 'payment.created',
+      entityId: payment.id,
+      entityType: 'Payment',
+      metadata: { amount: payment.amount, network: payment.network, token: payment.currency },
+    })
   }
 
   return NextResponse.json({ success: true, data: payment }, { status: 201 })
