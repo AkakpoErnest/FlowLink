@@ -1,18 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   CreditCard, Shield, Users, Menu, Bell,
-  LogOut, Bot, Layers, Home, Wallet, X, Link2
+  LogOut, Bot, Layers, Home, Wallet, X, Link2,
+  Settings, Newspaper, HelpCircle, ChevronUp
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { PaymentLinksModule } from "@/components/payment-links-module"
 import { ComplianceVaultsModule } from "@/components/compliance-vaults-module"
 import { PayrollRailsModule } from "@/components/payroll-rails-module"
@@ -22,7 +21,7 @@ import { WalletSetupModal } from "@/components/wallet-setup-modal"
 import { WalletOnboardingModal } from "@/components/wallet-onboarding-modal"
 import { useSession, signOut } from "next-auth/react"
 import { useAccount } from "wagmi"
-import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { cn } from "@/lib/utils"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -67,105 +66,6 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
   )
 }
 
-function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data: session, update } = useSession()
-  const { address, isConnected } = useAccount()
-  const [saving, setSaving] = useState(false)
-  const [msg, setMsg] = useState("")
-
-  // @ts-ignore
-  const sessionWallet = session?.user?.walletAddress as string | null | undefined
-
-  const linkWallet = async () => {
-    if (!address) return
-    setSaving(true)
-    setMsg("")
-    try {
-      const res = await fetch('/api/user', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ walletAddress: address }),
-      })
-      const data = await res.json()
-      if (data.success) {
-        // Use the canonical (lowercased) address the server stored in the DB
-        await update({ walletAddress: data.data?.walletAddress ?? address.toLowerCase() })
-        setMsg("Wallet linked successfully.")
-      } else {
-        setMsg(data.error ?? "Failed to link wallet.")
-      }
-    } catch {
-      setMsg("Something went wrong.")
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Profile &amp; Wallet</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 pt-1">
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Name</Label>
-            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-50 border-slate-200" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Email</Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50 border-slate-200" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Linked wallet</Label>
-            <Input
-              value={sessionWallet ?? "No wallet linked"}
-              readOnly
-              className="bg-slate-800 font-mono text-xs"
-            />
-          </div>
-
-          {/* Connect via RainbowKit if not yet connected */}
-          {!isConnected && !sessionWallet && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
-              <div className="flex justify-center pt-1">
-                <ConnectButton
-                  label="Connect Wallet"
-                  accountStatus="address"
-                  showBalance={false}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Show link button when RainbowKit wallet differs from linked wallet */}
-          {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
-            <div className="space-y-2">
-              <p className="text-xs text-slate-500">
-                Connected wallet:{" "}
-                <span className="font-mono text-slate-300">
-                  {address.slice(0, 8)}…{address.slice(-6)}
-                </span>
-              </p>
-              <Button
-                size="sm"
-                onClick={linkWallet}
-                disabled={saving}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
-              >
-                <Wallet className="h-3.5 w-3.5 mr-1.5" />
-                {saving ? "Linking…" : "Link this wallet to account"}
-              </Button>
-            </div>
-          )}
-          {msg && <p className="text-xs text-emerald-400">{msg}</p>}
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [activeTab, setActiveTab] = useState("overview")
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -174,6 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [walletOnboardingOpen, setWalletOnboardingOpen] = useState(false)
   // Guard so the onboarding modal only auto-fires once per page load
   const [onboardingShown, setOnboardingShown] = useState(false)
+  const profileDropdownRef = useRef<HTMLDivElement>(null)
   const { data: session } = useSession()
   const { isConnected } = useAccount()
   const searchParams = useSearchParams()
@@ -181,6 +82,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // @ts-ignore
   const sessionWalletTop = session?.user?.walletAddress as string | null | undefined
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   // Auto-show the onboarding modal for first-time users:
   // trigger when the session is loaded, the user has no linked wallet,
@@ -203,10 +115,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       router.replace("/dashboard")
     }
   }, [searchParams, router])
-
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" })
-  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -282,12 +190,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem onClick={() => setProfileOpen(true)}>
-                  <Wallet className="mr-2 h-4 w-4" />
-                  <span>Profile & Wallet</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -297,7 +200,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </header>
 
-      <ProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} />
       <WalletSetupModal open={walletSetupOpen} onClose={() => setWalletSetupOpen(false)} />
       <WalletOnboardingModal
         open={walletOnboardingOpen}
@@ -310,8 +212,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className="flex">
         {/* Sidebar */}
         {sidebarOpen && (
-          <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)]">
-            <nav className="p-4 space-y-4">
+          <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)] flex flex-col">
+            <nav className="p-4 space-y-4 flex-1">
               {groups.map((group) => (
                 <div key={group.label} className="space-y-0.5">
                   <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
@@ -341,6 +243,77 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
               ))}
             </nav>
+
+            {/* Profile section at bottom of sidebar */}
+            <div className="relative" ref={profileDropdownRef}>
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors border-t border-slate-100"
+              >
+                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-semibold text-sm shrink-0">
+                  {initials}
+                </div>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
+                </div>
+                <ChevronUp className={cn("w-4 h-4 text-slate-400 transition-transform", profileOpen ? "rotate-180" : "")} />
+              </button>
+
+              {/* Dropdown */}
+              {profileOpen && (
+                <div className="absolute bottom-full left-4 right-4 mb-2 bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden z-50">
+                  {/* User info header */}
+                  <div className="px-4 py-5 flex flex-col items-center border-b border-slate-100">
+                    <div className="w-14 h-14 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-xl mb-3">
+                      {initials}
+                    </div>
+                    <p className="font-semibold text-slate-900 text-sm">{session?.user?.name}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{session?.user?.email}</p>
+                  </div>
+
+                  {/* Menu items */}
+                  <div className="py-1">
+                    <Link
+                      href="/dashboard/settings"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-slate-400" />
+                      Settings
+                    </Link>
+                    <Link
+                      href="https://docs.hashkeychain.net"
+                      target="_blank"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <Newspaper className="w-4 h-4 text-slate-400" />
+                      Product &amp; News
+                    </Link>
+                    <Link
+                      href="https://docs.hashkeychain.net/docs/Build-on-HashKey-Chain/Tools/Faucet"
+                      target="_blank"
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <HelpCircle className="w-4 h-4 text-slate-400" />
+                      FAQ
+                    </Link>
+                  </div>
+
+                  <div className="border-t border-slate-100 py-1">
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/login" })}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-emerald-600 hover:bg-emerald-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </aside>
         )}
 
