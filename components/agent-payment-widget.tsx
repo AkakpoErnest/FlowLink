@@ -49,8 +49,8 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-          <Bot className="w-5 h-5 text-blue-600" />
+        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+          <Bot className="w-5 h-5 text-emerald-600" />
         </div>
         <div>
           <h3 className="font-semibold text-slate-900">Agent Payments</h3>
@@ -82,8 +82,8 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
             onClick={() => setToType('human')}
             className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${
               toType === 'human'
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
             }`}
           >
             → Human
@@ -92,8 +92,8 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
             onClick={() => setToType('agent')}
             className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${
               toType === 'agent'
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                ? 'bg-emerald-600 text-white border-emerald-600'
+                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
             }`}
           >
             → Agent <Zap className="inline w-3 h-3" />
@@ -157,7 +157,7 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
         <button
           onClick={handlePay}
           disabled={loading || !fromAgent || !amount}
-          className="w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? (
             'Sending on HashKey...'

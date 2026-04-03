@@ -69,7 +69,7 @@ const statusConfig = {
 }
 
 const networkConfig = {
-  hashkey: { label: "HashKey Chain", color: "text-blue-400", badge: "bg-blue-500/20 text-blue-300 border-blue-500/30" },
+  hashkey: { label: "HashKey Chain", color: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
   polygon: { label: "Polygon", color: "text-purple-400", badge: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
   ethereum: { label: "Ethereum", color: "text-slate-400", badge: "bg-slate-500/20 text-slate-300 border-slate-500/30" },
 }
@@ -283,7 +283,7 @@ export function AIInvoiceModule() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Invoices", value: stats.total, icon: FileText, color: "text-blue-400" },
+          { label: "Total Invoices", value: stats.total, icon: FileText, color: "text-emerald-400" },
           { label: "Pending", value: stats.pending, icon: Clock, color: "text-yellow-400" },
           { label: "Paid", value: stats.paid, icon: CheckCircle, color: "text-emerald-400" },
           { label: "Total Value", value: `$${parseFloat(stats.totalValue).toLocaleString()}`, icon: DollarSign, color: "text-purple-400" },
@@ -307,8 +307,8 @@ export function AIInvoiceModule() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Bot className="h-5 w-5 text-blue-400" />
+              <div className="p-2 bg-emerald-500/20 rounded-lg">
+                <Bot className="h-5 w-5 text-emerald-400" />
               </div>
               <div>
                 <CardTitle className="text-white">AI Agent Invoices</CardTitle>
@@ -354,7 +354,7 @@ export function AIInvoiceModule() {
                   <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="text-white flex items-center gap-2">
-                        <Bot className="h-5 w-5 text-blue-400" />
+                        <Bot className="h-5 w-5 text-emerald-400" />
                         Create AI Agent Invoice
                       </DialogTitle>
                       <DialogDescription>Issue a crypto invoice from an AI agent</DialogDescription>
@@ -362,8 +362,8 @@ export function AIInvoiceModule() {
 
                     <div className="space-y-4 mt-2">
                       {/* Agent Selector */}
-                      <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                        <p className="text-blue-400 text-xs font-medium mb-2 flex items-center gap-1"><Bot className="h-3 w-3" /> Agent Details</p>
+                      <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                        <p className="text-emerald-400 text-xs font-medium mb-2 flex items-center gap-1"><Bot className="h-3 w-3" /> Agent Details</p>
                         <div className="space-y-3">
                           <div>
                             <Label className="text-slate-300 text-xs">Select Agent</Label>
@@ -593,8 +593,8 @@ export function AIInvoiceModule() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-500/10 rounded-lg">
-                              <Bot className="h-4 w-4 text-blue-400" />
+                            <div className="p-2 bg-emerald-500/10 rounded-lg">
+                              <Bot className="h-4 w-4 text-emerald-400" />
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
@@ -603,7 +603,7 @@ export function AIInvoiceModule() {
                                 {invoice.paymentLinkCode && (
                                   <button
                                     onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(`${window.location.origin}/l/${invoice.paymentLinkCode}`) }}
-                                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 hover:bg-blue-500/30 transition-colors"
+                                    className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
                                   >
                                     <Copy className="h-2.5 w-2.5" /> Copy Link
                                   </button>
@@ -635,7 +635,7 @@ export function AIInvoiceModule() {
                 <p className="text-slate-400 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
                 <Dialog open={showRegisterAgent} onOpenChange={setShowRegisterAgent}>
                   <DialogTrigger asChild>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
+                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
                       <Plus className="h-4 w-4" />
                       Register Agent
                     </Button>
@@ -643,7 +643,7 @@ export function AIInvoiceModule() {
                   <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
                     <DialogHeader>
                       <DialogTitle className="text-white flex items-center gap-2">
-                        <Bot className="h-5 w-5 text-blue-400" />
+                        <Bot className="h-5 w-5 text-emerald-400" />
                         Register Agent
                       </DialogTitle>
                       <DialogDescription>Register an agent with a wallet address to issue invoices on-chain</DialogDescription>
@@ -688,7 +688,7 @@ export function AIInvoiceModule() {
                         />
                       </div>
                       <Button
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                         onClick={registerAgent}
                         disabled={agentLoading || !agentForm.name}
                       >
@@ -712,8 +712,8 @@ export function AIInvoiceModule() {
                     <div key={agent.id} className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-500/10 rounded-lg">
-                            <Bot className="h-4 w-4 text-blue-400" />
+                          <div className="p-2 bg-emerald-500/10 rounded-lg">
+                            <Bot className="h-4 w-4 text-emerald-400" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
@@ -777,8 +777,8 @@ export function AIInvoiceModule() {
               <div className="space-y-4 mt-2">
                 {/* Agent + Client */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <p className="text-blue-400 text-xs font-medium mb-1 flex items-center gap-1"><Bot className="h-3 w-3" /> From Agent</p>
+                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                    <p className="text-emerald-400 text-xs font-medium mb-1 flex items-center gap-1"><Bot className="h-3 w-3" /> From Agent</p>
                     <p className="text-white font-medium">{selectedInvoice.agentName}</p>
                     <p className="text-slate-400 text-xs">{selectedInvoice.agentDescription}</p>
                   </div>
@@ -875,7 +875,7 @@ export function AIInvoiceModule() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2">
+                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
                         <ExternalLink className="h-4 w-4" />
                         Pay Now — {selectedInvoice.currency} on HashKey Chain
                       </Button>

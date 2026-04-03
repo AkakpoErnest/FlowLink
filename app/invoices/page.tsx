@@ -34,7 +34,7 @@ export default function InvoicesPage() {
     <ThemeProvider>
       <DashboardLayout>
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+          <div className="bg-gradient-to-r from-emerald-500/10 to-purple-500/10 border border-emerald-500/20 rounded-lg p-6">
             <h1 className="text-3xl font-bold text-white mb-2">AI Agent Invoices</h1>
             <p className="text-slate-300">
               Issue and manage crypto-native invoices for AI agents and automated services. Pay via HashKey Chain.

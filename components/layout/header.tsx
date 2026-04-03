@@ -22,7 +22,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
               <Link2 className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-lg text-[#0F1B2D] tracking-tight">FlowLink</span>
@@ -48,7 +48,7 @@ export default function Header() {
             <Button asChild variant="ghost" className="text-slate-700 hover:text-slate-900 hover:bg-slate-100 font-medium text-sm">
               <Link href="/login">Sign In</Link>
             </Button>
-            <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5">
+            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5">
               <Link href="/login">Get Started Free</Link>
             </Button>
           </div>
@@ -88,7 +88,7 @@ export default function Header() {
               <Button asChild variant="outline" className="w-full justify-center">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
               </Button>
-              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 justify-center">
+              <Button asChild className="w-full bg-emerald-600 hover:bg-emerald-700 justify-center">
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Get Started Free</Link>
               </Button>
             </div>

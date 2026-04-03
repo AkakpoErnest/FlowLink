@@ -152,14 +152,14 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
                 size="sm"
                 onClick={linkWallet}
                 disabled={saving}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
               >
                 <Wallet className="h-3.5 w-3.5 mr-1.5" />
                 {saving ? "Linking…" : "Link this wallet to account"}
               </Button>
             </div>
           )}
-          {msg && <p className="text-xs text-blue-400">{msg}</p>}
+          {msg && <p className="text-xs text-emerald-400">{msg}</p>}
         </div>
       </DialogContent>
     </Dialog>
@@ -246,12 +246,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center p-1.5">
+              <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center p-1.5">
                 <Link2 className="w-full h-full text-white" />
               </div>
               <div>
                 <h1 className="text-[15px] font-bold tracking-tight">
-                  <span className="text-slate-900">Flow</span><span className="text-blue-600">Link</span>
+                  <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
                 </h1>
                 <p className="text-[11px] text-slate-500 leading-none mt-0.5">Compliant Payment Infrastructure</p>
               </div>
@@ -262,12 +262,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* HashKey Chain indicator */}
             <button
               onClick={() => setActiveTab("hashkey-chain")}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full hover:bg-blue-100 transition-all"
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition-all"
             >
-              <div className="h-2 w-2 bg-blue-600 rounded-full animate-pulse" />
-              <span className="text-blue-600 text-xs font-medium">HashKey Chain</span>
+              <div className="h-2 w-2 bg-emerald-600 rounded-full animate-pulse" />
+              <span className="text-emerald-600 text-xs font-medium">HashKey Chain</span>
             </button>
-            <Badge className="hidden md:flex bg-blue-50 text-blue-600 border border-blue-200 text-xs font-medium">
+            <Badge className="hidden md:flex bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-medium">
               Compliant
             </Badge>
             <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
@@ -276,8 +276,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 border border-blue-200">
-                    <span className="text-sm font-semibold text-blue-600">{initials}</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
+                    <span className="text-sm font-semibold text-emerald-600">{initials}</span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -325,14 +325,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${
                           activeTab === item.id
-                            ? "bg-blue-50 text-blue-600 border border-blue-200 shadow-sm"
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm"
                             : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                         }`}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
                         <span>{item.name}</span>
                         {item.badge && (
-                          <Badge className="ml-auto bg-blue-50 text-blue-600 border border-blue-200 text-[10px] font-semibold px-1.5 py-0">
+                          <Badge className="ml-auto bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-1.5 py-0">
                             {item.badge}
                           </Badge>
                         )}

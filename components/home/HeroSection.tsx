@@ -29,8 +29,8 @@ export default function HeroSection() {
           <div className="space-y-8">
             {/* Badge */}
             <motion.div {...fadeUp(0)}>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Now live on HashKey Chain
               </div>
             </motion.div>
@@ -41,7 +41,7 @@ export default function HeroSection() {
                 {...fadeUp(0)}
               >
                 Enterprise Crypto Payments,{' '}
-                <span className="text-blue-600">Built for Compliance</span>
+                <span className="text-emerald-600">Built for Compliance</span>
               </motion.h1>
               <motion.p
                 className="text-xl text-slate-500 leading-relaxed max-w-xl"
@@ -57,7 +57,7 @@ export default function HeroSection() {
               {...fadeUp(0.3)}
             >
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base px-8 h-12 shadow-sm">
+                <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-base px-8 h-12 shadow-sm">
                   <Link href="/login">
                     Get Started Free
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -128,7 +128,7 @@ export default function HeroSection() {
                 <div className="p-5 space-y-4">
                   {/* Merchant header */}
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm shrink-0">
                       EK
                     </div>
                     <div>
@@ -169,7 +169,7 @@ export default function HeroSection() {
                   </div>
 
                   {/* Pay CTA */}
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors">
+                  <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-colors">
                     Pay 500 USDC
                   </button>
                 </div>
@@ -198,8 +198,8 @@ export default function HeroSection() {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                  <Shield className="h-4 w-4 text-blue-600" />
+                <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <Shield className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-slate-900">AML Screened</div>

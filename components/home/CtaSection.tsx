@@ -24,7 +24,7 @@ const itemVariants = {
 
 export default function CtaSection() {
   return (
-    <section className="bg-blue-600 py-24">
+    <section className="bg-emerald-600 py-24">
       <div className="container mx-auto px-6">
         <motion.div
           className="max-w-xl space-y-6"
@@ -42,7 +42,7 @@ export default function CtaSection() {
 
           <motion.div variants={itemVariants}>
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-              <Button asChild size="lg" className="bg-white hover:bg-slate-50 text-blue-600 font-bold text-base px-8 h-12">
+              <Button asChild size="lg" className="bg-white hover:bg-slate-50 text-emerald-600 font-bold text-base px-8 h-12">
                 <Link href="/login">
                   Create a payment link
                   <ArrowRight className="ml-2 h-4 w-4" />

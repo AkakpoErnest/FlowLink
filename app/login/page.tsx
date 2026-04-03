@@ -158,12 +158,12 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center p-2.5">
+            <div className="h-12 w-12 rounded-xl bg-emerald-600 flex items-center justify-center p-2.5">
               <Link2 className="w-full h-full text-white" />
             </div>
           </div>
           <h1 className="text-2xl font-bold">
-            <span className="text-slate-900">Flow</span><span className="text-blue-600">Link</span>
+            <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
           </h1>
           <p className="text-slate-500 mt-1 text-sm">Compliant crypto payments on HashKey Chain</p>
         </div>
@@ -171,9 +171,9 @@ export default function LoginPage() {
         {/* Auth Options */}
         <Tabs defaultValue="email" className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-white border border-slate-200">
-            <TabsTrigger value="email" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Email</TabsTrigger>
-            <TabsTrigger value="google" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Google</TabsTrigger>
-            <TabsTrigger value="wallet" className="text-slate-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white">Wallet</TabsTrigger>
+            <TabsTrigger value="email" className="text-slate-600 data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Email</TabsTrigger>
+            <TabsTrigger value="google" className="text-slate-600 data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Google</TabsTrigger>
+            <TabsTrigger value="wallet" className="text-slate-600 data-[state=active]:bg-emerald-600 data-[state=active]:text-white">Wallet</TabsTrigger>
           </TabsList>
 
           {/* Email / Password Tab */}
@@ -248,7 +248,7 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     disabled={emailLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                     size="lg"
                   >
                     {emailLoading ? (
@@ -269,7 +269,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => { setMode("register"); setPassword(""); setConfirmPassword("") }}
-                        className="text-blue-600 hover:underline"
+                        className="text-emerald-600 hover:underline"
                       >
                         Register
                       </button>
@@ -280,7 +280,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => { setMode("login"); setPassword(""); setConfirmPassword("") }}
-                        className="text-blue-600 hover:underline"
+                        className="text-emerald-600 hover:underline"
                       >
                         Sign in
                       </button>
@@ -344,7 +344,7 @@ export default function LoginPage() {
                   <Button
                     onClick={handleWalletSignIn}
                     disabled={walletLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
                     size="lg"
                   >
                     {walletLoading ? (
@@ -368,11 +368,11 @@ export default function LoginPage() {
         {/* Trust badges */}
         <div className="mt-6 grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Shield className="h-4 w-4 text-blue-600" />
+            <Shield className="h-4 w-4 text-emerald-600" />
             <span>KYC / AML screening</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Wallet className="h-4 w-4 text-blue-600" />
+            <Wallet className="h-4 w-4 text-emerald-600" />
             <span>HashKey Chain</span>
           </div>
         </div>

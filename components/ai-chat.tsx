@@ -333,8 +333,8 @@ export default function AiChat({ className }: AiChatProps) {
                     </div>
 
                     {message.role === 'user' && (
-                      <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-500/20 to-purple-500/20 flex-shrink-0 animate-pulse">
-                        <User className="h-3 w-3 text-blue-400" />
+                      <div className="p-1.5 rounded-lg bg-gradient-to-r from-emerald-500/20 to-purple-500/20 flex-shrink-0 animate-pulse">
+                        <User className="h-3 w-3 text-emerald-400" />
                       </div>
                     )}
                   </div>

@@ -100,8 +100,8 @@ export function DashboardOverview() {
 
   const statCards = stats
     ? [
-        { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: CreditCard, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { title: 'Total Payments', value: stats.totalPayments.toString(), icon: Zap, color: 'text-violet-600', bg: 'bg-violet-50' },
         { title: 'Pending Invoices', value: stats.pendingInvoices.toString(), icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
       ]
@@ -116,7 +116,7 @@ export function DashboardOverview() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-500 text-white">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white">
               <Download className="h-3.5 w-3.5 mr-1.5" />
               Export Report
               <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
@@ -183,7 +183,7 @@ export function DashboardOverview() {
               recent.map((p) => (
                 <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="flex items-center gap-3">
-                    <div className={`h-2 w-2 rounded-full ${p.status === 'completed' ? 'bg-blue-600' : p.status === 'pending' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                    <div className={`h-2 w-2 rounded-full ${p.status === 'completed' ? 'bg-emerald-600' : p.status === 'pending' ? 'bg-amber-500' : 'bg-slate-400'}`} />
                     <div>
                       <p className="text-sm font-medium text-slate-900">{p.payer ? `${p.payer.slice(0, 6)}…${p.payer.slice(-4)}` : 'Unknown'}</p>
                       <p className="text-xs text-slate-500 capitalize">{p.status}</p>
@@ -212,8 +212,8 @@ export function DashboardOverview() {
               </div>
             ) : compliance ? (
               <>
-                <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                  <div className="text-4xl font-black text-blue-600">{compliance.score}</div>
+                <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                  <div className="text-4xl font-black text-emerald-600">{compliance.score}</div>
                   <div>
                     <p className="font-semibold text-slate-900">Compliance Score</p>
                     <p className="text-sm text-slate-500">Based on {stats?.totalPayments ?? 0} payments</p>

@@ -84,7 +84,7 @@ export function PaymentLinksTable() {
               Create and manage your payment links
             </p>
           </div>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button className="bg-gradient-to-r from-emerald-600 to-purple-600 hover:from-emerald-700 hover:to-purple-700">
             <Plus className="h-4 w-4 mr-2" />
             Create Link
           </Button>
@@ -225,7 +225,7 @@ export function PaymentLinksTable() {
               {searchTerm ? "Try adjusting your search criteria" : "Create your first payment link to get started"}
             </p>
             {!searchTerm && (
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button className="bg-gradient-to-r from-emerald-600 to-purple-600 hover:from-emerald-700 hover:to-purple-700">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Payment Link
               </Button>

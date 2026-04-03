@@ -68,13 +68,13 @@ export default function FeaturesSection() {
           {features.map((f) => (
             <motion.div
               key={f.title}
-              className={`rounded-2xl p-7 border ${f.featured ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}
+              className={`rounded-2xl p-7 border ${f.featured ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-slate-200'}`}
               variants={cardVariants}
               whileHover={{ y: -4, boxShadow: f.featured ? '0 20px 40px rgba(15,27,45,0.3)' : '0 20px 40px rgba(0,0,0,0.08)' }}
               transition={{ duration: 0.2 }}
             >
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 ${f.featured ? 'bg-white/10' : 'bg-blue-50'}`}>
-                <f.icon className={`h-5 w-5 ${f.featured ? 'text-white' : 'text-blue-600'}`} />
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-5 ${f.featured ? 'bg-white/10' : 'bg-emerald-50'}`}>
+                <f.icon className={`h-5 w-5 ${f.featured ? 'text-white' : 'text-emerald-600'}`} />
               </div>
               <h3 className={`text-base font-bold mb-2 ${f.featured ? 'text-white' : 'text-slate-900'}`}>{f.title}</h3>
               <p className={`text-sm leading-relaxed ${f.featured ? 'text-slate-400' : 'text-slate-500'}`}>{f.desc}</p>

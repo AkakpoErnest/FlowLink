@@ -72,11 +72,11 @@ export function HashKeyModule() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-xl p-6">
+      <div className="bg-gradient-to-r from-emerald-500/10 to-indigo-500/10 border border-emerald-500/20 rounded-xl p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/20 rounded-xl">
-              <Layers className="h-6 w-6 text-blue-400" />
+            <div className="p-3 bg-emerald-500/20 rounded-xl">
+              <Layers className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -125,10 +125,10 @@ export function HashKeyModule() {
             href={hashkeyChain.blockExplorers.default.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-1.5 hover:bg-blue-500/20 transition-all"
+            className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5 hover:bg-emerald-500/20 transition-all"
           >
-            <ExternalLink className="h-3.5 w-3.5 text-blue-400" />
-            <span className="text-blue-400 text-xs">Open Explorer</span>
+            <ExternalLink className="h-3.5 w-3.5 text-emerald-400" />
+            <span className="text-emerald-400 text-xs">Open Explorer</span>
           </a>
         </div>
       </div>
@@ -220,7 +220,7 @@ export function HashKeyModule() {
       <Card className="bg-slate-800/50 border-slate-700/50">
         <CardHeader>
           <CardTitle className="text-white text-base flex items-center gap-2">
-            <Activity className="h-4 w-4 text-blue-400" />
+            <Activity className="h-4 w-4 text-emerald-400" />
             Recent Transactions on HashKey Chain
           </CardTitle>
           <CardDescription>Your latest on-chain activity</CardDescription>
@@ -258,7 +258,7 @@ export function HashKeyModule() {
                 href={`${hashkeyChain.blockExplorers.default.url}/tx/${tx.hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-500 hover:text-blue-400 shrink-0"
+                className="text-slate-500 hover:text-emerald-400 shrink-0"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>

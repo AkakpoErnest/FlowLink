@@ -116,7 +116,7 @@ export default function StatsBar() {
                   whileHover={{ y: -1 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <div className="w-6 h-6 rounded bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-700 flex items-center justify-center text-xs font-bold text-slate-600 transition-colors duration-150">
+                  <div className="w-6 h-6 rounded bg-slate-200 group-hover:bg-emerald-100 group-hover:text-emerald-700 flex items-center justify-center text-xs font-bold text-slate-600 transition-colors duration-150">
                     {partner.name[0]}
                   </div>
                   <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-900 transition-colors duration-150">{partner.name}</span>
@@ -145,7 +145,7 @@ export default function StatsBar() {
                 whileHover={{ scale: 1.03 }}
                 transition={{ duration: 0.15 }}
               >
-                <div className="text-3xl font-extrabold text-slate-900 mb-0.5 group-hover:text-blue-600 transition-colors duration-200">
+                <div className="text-3xl font-extrabold text-slate-900 mb-0.5 group-hover:text-emerald-600 transition-colors duration-200">
                   {/* Only animate purely numeric stats */}
                   {/^[<>]/.test(item.stat) ? item.stat : <AnimatedCounter stat={item.stat} />}
                 </div>

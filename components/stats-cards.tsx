@@ -37,7 +37,7 @@ export function StatsCards() {
 
   const stats = data
     ? [
-        { title: 'Payment Links', value: data.links.toString(), icon: Link2, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { title: 'Payment Links', value: data.links.toString(), icon: Link2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { title: 'Total Volume', value: `$${data.volume.toLocaleString()}`, icon: DollarSign, color: 'text-teal-600', bg: 'bg-teal-50' },
         { title: 'Payments Processed', value: data.payments.toString(), icon: TrendingUp, color: 'text-violet-600', bg: 'bg-violet-50' },
         { title: 'Avg Compliance Score', value: `${data.compliance}%`, icon: Shield, color: 'text-emerald-600', bg: 'bg-emerald-50' },

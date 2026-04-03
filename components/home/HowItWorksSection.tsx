@@ -71,7 +71,7 @@ export default function HowItWorksSection() {
           {steps.map((s, i) => (
             <motion.div
               key={i}
-              className={`relative rounded-2xl p-7 border ${s.featured ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}
+              className={`relative rounded-2xl p-7 border ${s.featured ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-slate-200'}`}
               variants={cardVariants}
               whileHover={{ y: -4, boxShadow: s.featured ? '0 20px 40px rgba(15,27,45,0.3)' : '0 20px 40px rgba(0,0,0,0.08)' }}
               transition={{ duration: 0.2 }}
@@ -79,8 +79,8 @@ export default function HowItWorksSection() {
               <div className={`text-xs font-mono font-semibold mb-4 ${s.featured ? 'text-slate-500' : 'text-slate-300'}`}>
                 {s.step}
               </div>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${s.featured ? 'bg-white/10' : 'bg-blue-50'}`}>
-                <s.icon className={`h-6 w-6 ${s.featured ? 'text-white' : 'text-blue-600'}`} />
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${s.featured ? 'bg-white/10' : 'bg-emerald-50'}`}>
+                <s.icon className={`h-6 w-6 ${s.featured ? 'text-white' : 'text-emerald-600'}`} />
               </div>
               <h3 className={`text-lg font-bold mb-2 ${s.featured ? 'text-white' : 'text-slate-900'}`}>{s.title}</h3>
               <p className={`text-sm leading-relaxed ${s.featured ? 'text-slate-400' : 'text-slate-500'}`}>{s.desc}</p>

@@ -56,13 +56,13 @@ export default function SecuritySection() {
           {securityItems.map((item, i) => (
             <motion.div
               key={i}
-              className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 hover:border-blue-100 hover:bg-blue-50/30 transition-colors duration-150 cursor-default"
+              className="flex items-start gap-4 p-5 rounded-xl border border-slate-100 hover:border-emerald-100 hover:bg-emerald-50/30 transition-colors duration-150 cursor-default"
               variants={itemVariants}
               whileHover={{ x: 4 }}
               transition={{ duration: 0.15 }}
             >
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                <item.icon className="h-5 w-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                <item.icon className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
                 <div className="text-sm font-semibold text-slate-900 mb-0.5">{item.title}</div>

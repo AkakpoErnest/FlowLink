@@ -115,11 +115,11 @@ export default function AndroidDownloadPage() {
                       <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-xl border-2 border-emerald-400/30">
                         <div className="relative w-16 h-16">
                           {/* Circular design */}
-                          <div className="absolute inset-0 rounded-full border-4 border-blue-500/60"></div>
+                          <div className="absolute inset-0 rounded-full border-4 border-emerald-500/60"></div>
                           <div className="absolute inset-2 rounded-full border-4 border-emerald-400/60"></div>
                           {/* FL Letters */}
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-blue-500 font-bold text-lg">FL</span>
+                            <span className="text-emerald-500 font-bold text-lg">FL</span>
                           </div>
                         </div>
                       </div>

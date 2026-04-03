@@ -12,11 +12,11 @@ export default function Footer() {
           {/* Brand col — spans 2 */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center p-1.5">
+              <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center p-1.5">
                 <Link2 className="w-full h-full text-white" />
               </div>
               <span className="font-bold text-lg">
-                <span className="text-slate-900">Flow</span><span className="text-blue-600">Link</span>
+                <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
               </span>
             </Link>
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs">
@@ -94,7 +94,7 @@ export default function Footer() {
           <a
             href="/flowlink-android-app.apk"
             download="FlowLink-Android-App.apk"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             Download APK
           </a>
