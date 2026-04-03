@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   CreditCard, Shield, Users, Menu, Bell,
-  LogOut, Bot, Layers, Home, Wallet, X, Link2
+  LogOut, Bot, Layers, Home, Wallet, X, Link2, Settings
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -18,6 +18,7 @@ import { ComplianceVaultsModule } from "@/components/compliance-vaults-module"
 import { PayrollRailsModule } from "@/components/payroll-rails-module"
 import { AIInvoiceModule } from "@/components/ai-invoice-module"
 import { HashKeyModule } from "@/components/hashkey-module"
+import { SettingsModule } from "@/components/settings-module"
 import { WalletSetupModal } from "@/components/wallet-setup-modal"
 import { WalletOnboardingModal } from "@/components/wallet-onboarding-modal"
 import { useSession, signOut } from "next-auth/react"
@@ -35,6 +36,7 @@ const navigation = [
   { id: "payroll-rails", name: "Payroll Rails", icon: Users, group: "payments" },
   { id: "compliance-vaults", name: "Compliance Vaults", icon: Shield, group: "compliance" },
   { id: "hashkey-chain", name: "HashKey Chain", icon: Layers, group: "networks", badge: "HSK" },
+  { id: "settings", name: "Settings", icon: Settings, group: "account" },
 ]
 
 function WalletBanner({ onSetup }: { onSetup: () => void }) {
@@ -215,6 +217,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       case "payroll-rails": return <PayrollRailsModule />
       case "ai-invoices": return <AIInvoiceModule />
       case "hashkey-chain": return <HashKeyModule />
+      case "settings": return <SettingsModule />
       default: return children
     }
   }
@@ -229,6 +232,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     { label: "Payments", ids: ["payment-links", "ai-invoices", "payroll-rails"] },
     { label: "Compliance", ids: ["compliance-vaults"] },
     { label: "Networks", ids: ["hashkey-chain"] },
+    { label: "Account", ids: ["settings"] },
   ]
 
   return (
