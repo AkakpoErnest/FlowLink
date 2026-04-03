@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, CreditCard, Zap, CheckCircle, Clock, DollarSign, Loader2, Download, ChevronDown } from "lucide-react"
+import { Shield, Zap, CheckCircle, Clock, DollarSign, Loader2, Download, ChevronDown, Link2, FileText, Wallet } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
+import { useSession } from "next-auth/react"
+import { cn } from "@/lib/utils"
 
 interface Stats {
   totalVolume: number
@@ -43,11 +45,19 @@ function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
 }
 
 export function DashboardOverview() {
+  const { data: session } = useSession()
   const [stats, setStats] = useState<Stats | null>(null)
   const [recent, setRecent] = useState<RecentPayment[]>([])
   const [compliance, setCompliance] = useState<ComplianceMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [agents, setAgents] = useState<{ id: string; name: string; walletAddress?: string | null }[]>([])
+  const [hasPaymentLink, setHasPaymentLink] = useState(false)
+  const [hasInvoice, setHasInvoice] = useState(false)
+  const [dismissedOnboarding, setDismissedOnboarding] = useState(false)
+
+  // @ts-ignore
+  const walletAddress = session?.user?.walletAddress as string | null | undefined
+  const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
 
   useEffect(() => {
     async function load() {
@@ -68,9 +78,14 @@ export function DashboardOverview() {
         ])
         setAgents(agentsData.data ?? [])
 
-        const activeLinks = links.data?.filter((l: any) => l.status === 'active').length ?? 0
-        const totalVolume = links.data?.reduce((sum: number, l: any) => sum + (l.totalVolume ?? 0), 0) ?? 0
+        const allLinks = links.data ?? []
+        const activeLinks = allLinks.filter((l: any) => l.status === 'active').length
+        const totalVolume = allLinks.reduce((sum: number, l: any) => sum + (l.totalVolume ?? 0), 0)
         const pendingInvoices = invoices.stats?.pending ?? 0
+        const totalInvoices = (invoices.stats?.pending ?? 0) + (invoices.stats?.paid ?? 0) + (invoices.stats?.draft ?? 0)
+
+        setHasPaymentLink(allLinks.length > 0)
+        setHasInvoice(totalInvoices > 0)
 
         setStats({
           totalVolume,
@@ -101,18 +116,47 @@ export function DashboardOverview() {
   const statCards = stats
     ? [
         { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: Link2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
         { title: 'Total Payments', value: stats.totalPayments.toString(), icon: Zap, color: 'text-violet-600', bg: 'bg-violet-50' },
         { title: 'Pending Invoices', value: stats.pendingInvoices.toString(), icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
       ]
     : []
 
+  const hasCompletedSetup = hasPaymentLink && hasInvoice && !!walletAddress
+  const onboardingSteps = [
+    {
+      step: 1,
+      title: "Create your first payment link",
+      desc: "Share it with anyone to receive crypto payments instantly.",
+      icon: Link2,
+      done: hasPaymentLink,
+    },
+    {
+      step: 2,
+      title: "Link your wallet",
+      desc: "Connect your wallet so you can receive funds on HashKey Chain.",
+      icon: Wallet,
+      done: !!walletAddress,
+    },
+    {
+      step: 3,
+      title: "Create an invoice",
+      desc: "Professional invoices with built-in KYC/AML compliance.",
+      icon: FileText,
+      done: hasInvoice,
+    },
+  ]
+  const completedSteps = onboardingSteps.filter(s => s.done).length
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Greeting */}
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Dashboard</h2>
-          <p className="text-slate-500 mt-0.5 text-sm">Your compliance payment activity</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            👋 Hey {firstName}!
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">Here&apos;s what&apos;s happening with your payments today.</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -135,6 +179,53 @@ export function DashboardOverview() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      {/* Onboarding steps — shown until all 3 are complete or dismissed */}
+      {!hasCompletedSetup && !dismissedOnboarding && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base font-semibold text-slate-900">Let&apos;s get you started!</h2>
+              <p className="text-sm text-slate-500 mt-0.5">
+                {completedSteps} of 3 steps complete
+              </p>
+            </div>
+            <button
+              onClick={() => setDismissedOnboarding(true)}
+              className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              I&apos;ll do this later
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {onboardingSteps.map(({ step, title, desc, icon: Icon, done }) => (
+              <div
+                key={step}
+                className={cn(
+                  "rounded-xl border p-5 transition-shadow hover:shadow-sm",
+                  done ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3",
+                    done ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600"
+                  )}
+                >
+                  {done ? "✓" : step}
+                </div>
+                <h3 className="font-semibold text-slate-900 text-sm mb-1">{title}</h3>
+                <p className="text-xs text-slate-500">{desc}</p>
+                {!done && (
+                  <span className="text-xs text-emerald-600 font-medium mt-3 block">
+                    Do it now →
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
