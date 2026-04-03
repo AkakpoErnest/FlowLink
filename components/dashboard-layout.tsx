@@ -4,10 +4,10 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
-  CreditCard, Shield, Users, Menu, Bell,
-  LogOut, Bot, Layers, Home, Wallet, X, Link2, Settings
+  Shield, Users, Bell,
+  LogOut, Layers, Wallet, X, Link2,
+  LayoutDashboard, FileText, Send, Settings
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -24,19 +24,20 @@ import { WalletOnboardingModal } from "@/components/wallet-onboarding-modal"
 import { useSession, signOut } from "next-auth/react"
 import { useAccount } from "wagmi"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
+import { cn } from "@/lib/utils"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
 const navigation = [
-  { id: "overview", name: "Overview", icon: Home, group: "main" },
-  { id: "payment-links", name: "Payment Links", icon: CreditCard, group: "payments" },
-  { id: "ai-invoices", name: "AI Invoices", icon: Bot, group: "payments", badge: "New" },
-  { id: "payroll-rails", name: "Payroll Rails", icon: Users, group: "payments" },
-  { id: "compliance-vaults", name: "Compliance Vaults", icon: Shield, group: "compliance" },
-  { id: "hashkey-chain", name: "HashKey Chain", icon: Layers, group: "networks", badge: "HSK" },
-  { id: "settings", name: "Settings", icon: Settings, group: "account" },
+  { id: "overview", name: "Dashboard", icon: LayoutDashboard },
+  { id: "payment-links", name: "Payment Links", icon: Link2 },
+  { id: "ai-invoices", name: "Invoicing", icon: FileText, badge: "AI" },
+  { id: "payroll-rails", name: "Payroll", icon: Users },
+  { id: "compliance-vaults", name: "Vaults", icon: Shield },
+  { id: "hashkey-chain", name: "HashKey Chain", icon: Layers, badge: "HSK" },
+  { id: "settings", name: "Settings", icon: Settings },
 ]
 
 function WalletBanner({ onSetup }: { onSetup: () => void }) {
@@ -90,7 +91,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
       })
       const data = await res.json()
       if (data.success) {
-        // Use the canonical (lowercased) address the server stored in the DB
         await update({ walletAddress: data.data?.walletAddress ?? address.toLowerCase() })
         setMsg("Wallet linked successfully.")
       } else {
@@ -127,7 +127,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             />
           </div>
 
-          {/* Connect via RainbowKit if not yet connected */}
           {!isConnected && !sessionWallet && (
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
@@ -141,7 +140,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             </div>
           )}
 
-          {/* Show link button when RainbowKit wallet differs from linked wallet */}
           {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
             <div className="space-y-2">
               <p className="text-xs text-slate-500">
@@ -170,11 +168,9 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [activeTab, setActiveTab] = useState("overview")
-  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [profileOpen, setProfileOpen] = useState(false)
   const [walletSetupOpen, setWalletSetupOpen] = useState(false)
   const [walletOnboardingOpen, setWalletOnboardingOpen] = useState(false)
-  // Guard so the onboarding modal only auto-fires once per page load
   const [onboardingShown, setOnboardingShown] = useState(false)
   const { data: session } = useSession()
   const { isConnected } = useAccount()
@@ -184,9 +180,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // @ts-ignore
   const sessionWalletTop = session?.user?.walletAddress as string | null | undefined
 
-  // Auto-show the onboarding modal for first-time users:
-  // trigger when the session is loaded, the user has no linked wallet,
-  // and they have not connected a wallet via RainbowKit yet.
   useEffect(() => {
     if (
       !onboardingShown &&
@@ -227,79 +220,121 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     ? name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "FL"
 
-  const groups = [
-    { label: "Dashboard", ids: ["overview"] },
-    { label: "Payments", ids: ["payment-links", "ai-invoices", "payroll-rails"] },
-    { label: "Compliance", ids: ["compliance-vaults"] },
-    { label: "Networks", ids: ["hashkey-chain"] },
-    { label: "Account", ids: ["settings"] },
-  ]
-
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white sticky top-0 z-50">
-        <div className="flex h-16 items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-slate-600 hover:text-slate-900"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center p-1.5">
-                <Link2 className="w-full h-full text-white" />
-              </div>
-              <div>
-                <h1 className="text-[15px] font-bold tracking-tight">
-                  <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
-                </h1>
-                <p className="text-[11px] text-slate-500 leading-none mt-0.5">Compliant Payment Infrastructure</p>
-              </div>
+      {/* Fixed sidebar */}
+      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 z-40">
+        {/* Logo */}
+        <div className="p-5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+              <Link2 className="w-4 h-4 text-white" />
             </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {/* HashKey Chain indicator */}
-            <button
-              onClick={() => setActiveTab("hashkey-chain")}
-              className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition-all"
-            >
-              <div className="h-2 w-2 bg-emerald-600 rounded-full animate-pulse" />
-              <span className="text-emerald-600 text-xs font-medium">HashKey Chain</span>
-            </button>
-            <Badge className="hidden md:flex bg-emerald-50 text-emerald-600 border border-emerald-200 text-xs font-medium">
-              Compliant
-            </Badge>
-            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-900">
-              <Bell className="h-5 w-5" />
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 border border-emerald-200">
-                    <span className="text-sm font-semibold text-emerald-600">{initials}</span>
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuItem onClick={() => setProfileOpen(true)}>
-                  <Wallet className="mr-2 h-4 w-4" />
-                  <span>Profile & Wallet</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <span className="font-bold text-slate-900 text-[15px]">
+              Flow<span className="text-emerald-600">Link</span>
+            </span>
           </div>
         </div>
-      </header>
+
+        {/* Primary action */}
+        <div className="p-4">
+          <button
+            onClick={() => setActiveTab("payment-links")}
+            className="w-full bg-emerald-600 text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
+          >
+            <Send className="w-4 h-4" />
+            Send Payment
+          </button>
+        </div>
+
+        {/* Nav items */}
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+          {navigation.map((item) => {
+            const isActive = activeTab === item.id
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-600 pl-[10px]"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                )}
+              >
+                <item.icon className="w-4 h-4 shrink-0" />
+                {item.name}
+                {item.badge && (
+                  <span className="ml-auto text-xs bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* User section */}
+        <div className="p-4 border-t border-slate-100">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="w-full flex items-center gap-3 hover:bg-slate-50 rounded-lg p-1.5 transition-colors text-left">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0">
+                  {initials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
+                  <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" side="top" align="start">
+              <DropdownMenuItem onClick={() => setProfileOpen(true)}>
+                <Wallet className="mr-2 h-4 w-4" />
+                <span>Profile &amp; Wallet</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </aside>
+
+      {/* Main content — offset by sidebar width */}
+      <div className="ml-64 flex flex-col min-h-screen">
+        {/* Slim topbar */}
+        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-30">
+          <button
+            onClick={() => setActiveTab("hashkey-chain")}
+            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition-all"
+          >
+            <div className="h-2 w-2 bg-emerald-600 rounded-full animate-pulse" />
+            <span className="text-emerald-600 text-xs font-medium">HashKey Chain</span>
+          </button>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 h-8 w-8 p-0">
+              <Bell className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
+                {initials}
+              </div>
+              <span className="text-sm font-medium text-slate-900 hidden md:block">{session?.user?.name}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Wallet setup banner */}
+        <WalletBanner onSetup={() => setWalletSetupOpen(true)} />
+
+        {/* Page content */}
+        <main className="flex-1 p-6">
+          {renderContent()}
+        </main>
+      </div>
 
       <ProfileDialog open={profileOpen} onClose={() => setProfileOpen(false)} />
       <WalletSetupModal open={walletSetupOpen} onClose={() => setWalletSetupOpen(false)} />
@@ -307,52 +342,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         open={walletOnboardingOpen}
         onClose={() => setWalletOnboardingOpen(false)}
       />
-
-      {/* Wallet setup banner — shown to users without a linked wallet */}
-      <WalletBanner onSetup={() => setWalletSetupOpen(true)} />
-
-      <div className="flex">
-        {/* Sidebar */}
-        {sidebarOpen && (
-          <aside className="w-64 bg-white border-r border-slate-200 min-h-[calc(100vh-4rem)]">
-            <nav className="p-4 space-y-4">
-              {groups.map((group) => (
-                <div key={group.label} className="space-y-0.5">
-                  <h3 className="px-3 pt-2 pb-1 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-                    {group.label}
-                  </h3>
-                  {navigation
-                    .filter((item) => group.ids.includes(item.id))
-                    .map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${
-                          activeTab === item.id
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm"
-                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
-                        }`}
-                      >
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        <span>{item.name}</span>
-                        {item.badge && (
-                          <Badge className="ml-auto bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-semibold px-1.5 py-0">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </button>
-                    ))}
-                </div>
-              ))}
-            </nav>
-          </aside>
-        )}
-
-        {/* Main Content */}
-        <main className="flex-1 p-6 bg-slate-50">
-          {renderContent()}
-        </main>
-      </div>
     </div>
   )
 }
