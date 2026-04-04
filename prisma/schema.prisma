@@ -212,9 +212,23 @@ model Agent {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]
   payments Payment[]
+  rules    AgentRule[]
+}
+
+model AgentRule {
+  id        String    @id @default(cuid())
+  agentId   String
+  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  type      String    // 'scheduled' | 'conditional' | 'multistep'
+  config    Json
+  status    String    @default("active")
+  lastRun   DateTime?
+  nextRun   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model AuditLog {

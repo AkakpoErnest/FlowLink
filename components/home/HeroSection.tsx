@@ -16,7 +16,7 @@ import {
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1], delay },
+  transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number], delay },
 })
 
 export default function HeroSection() {
@@ -91,7 +91,7 @@ export default function HeroSection() {
             className="relative flex justify-center lg:justify-end"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number], delay: 0.4 }}
           >
             {/* Light background panel */}
             <div className="absolute inset-0 bg-slate-50 rounded-3xl" />
@@ -180,7 +180,7 @@ export default function HeroSection() {
                 className="absolute -top-3 -right-3 bg-white rounded-xl shadow-lg border border-slate-100 px-3.5 py-2 flex items-center gap-2"
                 initial={{ opacity: 0, scale: 0.8, y: 8 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, delay: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               >
                 <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                   <CheckCircle className="h-4 w-4 text-green-600" />
@@ -196,7 +196,7 @@ export default function HeroSection() {
                 className="absolute -bottom-3 -left-3 bg-white rounded-xl shadow-lg border border-slate-100 px-3.5 py-2 flex items-center gap-2"
                 initial={{ opacity: 0, scale: 0.8, y: -8 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, delay: 0.85, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
               >
                 <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <Shield className="h-4 w-4 text-emerald-600" />

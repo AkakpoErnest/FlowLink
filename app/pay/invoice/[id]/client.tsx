@@ -139,8 +139,8 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
       return
     }
 
-    const native = isNativeToken(invoice.network, invoice.currency)
     const tokenInfo = getToken(invoice.network, invoice.currency)
+    const native = tokenInfo ? isNativeToken(tokenInfo) : false
 
     try {
       if (native) {

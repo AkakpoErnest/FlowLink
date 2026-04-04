@@ -45,10 +45,12 @@ import {
   Eye,
   MoreHorizontal,
   ChevronDown,
+  Plus,
 } from "lucide-react"
 import type { Invoice } from "@/app/api/invoices/route"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 import { toast } from "sonner"
+import { AgentRulesWidget } from "@/components/agent-rules-widget"
 
 // All chains (including testnet for hackathon)
 const CHAINS = SUPPORTED_CHAINS
@@ -910,6 +912,10 @@ export function InvoiceModule() {
                 <span className="ml-1.5 bg-slate-200 text-slate-600 text-xs rounded-full px-1.5 py-0.5">{agents.length}</span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="rules" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-600">
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              Rules
+            </TabsTrigger>
           </TabsList>
           <Button
             className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-sm"
@@ -1130,6 +1136,11 @@ export function InvoiceModule() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* ── Rules Tab ── */}
+        <TabsContent value="rules" className="mt-0">
+          <AgentRulesWidget agents={agents} />
         </TabsContent>
       </Tabs>
 
