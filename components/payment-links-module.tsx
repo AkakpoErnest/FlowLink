@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, AlertTriangle, Loader2, ExternalLink, Link2, LinkOff, Share2 } from "lucide-react"
+import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, AlertTriangle, Loader2, ExternalLink, Link2, Unlink, Share2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface PaymentLink {
@@ -69,25 +69,29 @@ export function PaymentLinksModule() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Payment Links</h2>
-          <p className="text-slate-500 mt-0.5 text-sm">Create and share compliant payment links</p>
+      {/* Header banner */}
+      <div className="relative rounded-2xl overflow-hidden bg-slate-900 min-h-[96px] flex items-center px-6">
+        <img src="/image5.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 scale-x-[-1]" />
+        <div className="relative z-10 flex items-center justify-between w-full">
+          <div>
+            <h2 className="text-2xl font-bold text-white">Payment Links</h2>
+            <p className="text-slate-400 mt-0.5 text-sm">Create and share compliant payment links</p>
+          </div>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="bg-teal-600 hover:bg-teal-500 text-white shrink-0">
+                <Plus className="h-4 w-4 mr-2" /> Create Link
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>New Payment Link</DialogTitle>
+                <DialogDescription>Create a compliant payment link on HashKey Testnet</DialogDescription>
+              </DialogHeader>
+              <CreateLinkForm onSuccess={() => { setShowCreateDialog(false); fetchLinks() }} />
+            </DialogContent>
+          </Dialog>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button className="bg-teal-600 hover:bg-teal-500 text-white">
-              <Plus className="h-4 w-4 mr-2" /> Create Link
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>New Payment Link</DialogTitle>
-              <DialogDescription>Create a compliant payment link on HashKey Testnet</DialogDescription>
-            </DialogHeader>
-            <CreateLinkForm onSuccess={() => { setShowCreateDialog(false); fetchLinks() }} />
-          </DialogContent>
-        </Dialog>
       </div>
 
       <Tabs defaultValue="active">
@@ -140,7 +144,7 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
               <Badge className={`flex items-center gap-1 ${link.status === 'active' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                 {link.status === 'active'
                   ? <Link2 className="h-3 w-3 text-emerald-600" />
-                  : <LinkOff className="h-3 w-3 text-slate-400" />}
+                  : <Unlink className="h-3 w-3 text-slate-400" />}
                 {link.status}
               </Badge>
             </div>

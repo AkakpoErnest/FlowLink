@@ -542,12 +542,12 @@ export function AIInvoiceModule() {
 
             {/* ── AI Assistant tab ── */}
             <TabsContent value="ai" className="mt-0">
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <Sparkles className="h-4 w-4 text-indigo-500" />
+              <div className="mb-4 flex items-center gap-3">
+                <img src="/ai-assistant-icon.png" alt="AI" className="w-10 h-10 rounded-xl object-cover shadow-sm shrink-0" />
+                <div>
                   <span className="font-semibold text-slate-900 text-sm">AI Invoice Assistant</span>
+                  <p className="text-xs text-slate-500">Describe your invoice and the AI will help you draft and send it to clients.</p>
                 </div>
-                <p className="text-xs text-slate-500">Describe your invoice and the AI will help you draft and send it to clients.</p>
               </div>
               <AIAssistantPanel />
             </TabsContent>

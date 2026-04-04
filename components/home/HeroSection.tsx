@@ -97,9 +97,9 @@ export default function HeroSection() {
             <div className="absolute inset-0 bg-slate-50 rounded-3xl" />
 
             {/* Side image */}
-            <div className="absolute inset-0 rounded-3xl overflow-hidden opacity-10">
+            <div className="absolute inset-0 rounded-3xl overflow-hidden opacity-20">
               <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80"
+                src="/image6.jpeg"
                 alt=""
                 className="w-full h-full object-cover"
               />

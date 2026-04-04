@@ -350,9 +350,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Logo */}
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-              <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
+            <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
             <span className="font-bold text-xl tracking-tight">
               <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
             </span>

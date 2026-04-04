@@ -248,14 +248,17 @@ export function DashboardOverview() {
               </Card>
             ))
           : statCards.map((s) => (
-              <Card key={s.title}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-slate-500">{s.title}</CardTitle>
+              <Card key={s.title} className={s.title === 'Total Volume' ? 'relative overflow-hidden' : ''}>
+                {s.title === 'Total Volume' && (
+                  <img src="/image7.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" />
+                )}
+                <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
+                  <CardTitle className={`text-sm font-medium ${s.title === 'Total Volume' ? 'text-slate-700' : 'text-slate-500'}`}>{s.title}</CardTitle>
                   <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${s.bgFrom} ${s.bgTo} flex items-center justify-center`}>
                     <s.icon className={`w-5 h-5 ${s.color}`} strokeWidth={1.5} />
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="relative">
                   <div className="text-2xl font-bold text-slate-900">{s.value}</div>
                 </CardContent>
               </Card>
