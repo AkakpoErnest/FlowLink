@@ -22,10 +22,12 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
-              <Link2 className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+              <Link2 className="w-5 h-5 text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-bold text-lg text-[#0F1B2D] tracking-tight">FlowLink</span>
+            <span className="font-bold text-xl tracking-tight">
+              <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
+            </span>
           </Link>
 
           {/* Desktop Nav */}

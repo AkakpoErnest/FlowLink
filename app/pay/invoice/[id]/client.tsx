@@ -10,7 +10,7 @@ import {
 } from "wagmi"
 import { parseEther, parseUnits } from "viem"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { CheckCircle, AlertTriangle, Clock, ExternalLink, Loader2 } from "lucide-react"
+import { CheckCircle, AlertTriangle, Clock, ExternalLink, Loader2, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { getChain, getToken, isNativeToken } from "@/lib/chains"
@@ -181,7 +181,14 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
       {/* Header */}
       <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <span className="font-bold text-slate-800 text-lg tracking-tight">FlowLink</span>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+              <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
+            </div>
+            <span className="font-bold text-xl tracking-tight">
+              <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
+            </span>
+          </div>
           <Badge className={`text-xs border ${cfg.color} flex items-center gap-1`}>
             <StatusIcon className="h-3 w-3" />
             {cfg.label}

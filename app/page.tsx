@@ -19,10 +19,12 @@ export default function LandingPage() {
       {/* ── Header ── */}
       <header className="flex items-center justify-between px-8 py-5">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-full bg-emerald-500 flex items-center justify-center">
-            <Link2 className="w-5 h-5 text-white" />
+          <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+            <Link2 className="w-6 h-6 text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-white font-bold text-lg">FlowLink</span>
+          <span className="font-bold text-xl tracking-tight">
+            <span className="text-white">Flow</span><span className="text-emerald-400">Link</span>
+          </span>
         </div>
         <nav className="hidden md:flex items-center gap-8 text-sm text-slate-400">
           <a href="#features" className="hover:text-white transition-colors">Features</a>
@@ -413,10 +415,12 @@ export default function LandingPage() {
       <footer className="border-t border-white/10 py-8 px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center">
-              <Link2 className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+              <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="text-white font-bold text-sm">FlowLink</span>
+            <span className="font-bold text-sm tracking-tight">
+              <span className="text-white">Flow</span><span className="text-emerald-400">Link</span>
+            </span>
           </div>
           <p className="text-xs text-slate-500">
             © {new Date().getFullYear()} FlowLink. Built on HashKey Chain.

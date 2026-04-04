@@ -158,8 +158,8 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-xl bg-emerald-600 flex items-center justify-center p-2.5">
-              <Link2 className="w-full h-full text-white" />
+            <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+              <Link2 className="w-7 h-7 text-white" strokeWidth={2.5} />
             </div>
           </div>
           <h1 className="text-2xl font-bold">

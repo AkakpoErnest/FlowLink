@@ -12,8 +12,8 @@ export default function Footer() {
           {/* Brand col — spans 2 */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center p-1.5">
-                <Link2 className="w-full h-full text-white" />
+              <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+                <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
               </div>
               <span className="font-bold text-lg">
                 <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
