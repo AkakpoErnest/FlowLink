@@ -131,10 +131,14 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         // @ts-ignore — custom field
         token.walletAddress = user.walletAddress ?? null
+        // @ts-ignore — custom field
+        token.picture = user.image ?? null
       }
-      // Handle session.update({ walletAddress }) calls from the client
-      if (trigger === 'update' && session?.walletAddress !== undefined) {
-        token.walletAddress = session.walletAddress
+      // Handle session.update() calls from the client
+      if (trigger === 'update') {
+        if (session?.walletAddress !== undefined) token.walletAddress = session.walletAddress
+        if (session?.name !== undefined) token.name = session.name
+        if (session?.picture !== undefined) token.picture = session.picture
       }
       return token
     },
@@ -145,6 +149,8 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         // @ts-ignore — custom field
         session.user.walletAddress = token.walletAddress as string | null
+        if (token.name) session.user.name = token.name as string
+        if (token.picture) session.user.image = token.picture as string
       }
       return session
     },

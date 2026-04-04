@@ -1,13 +1,12 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Shield, Users, Bell,
   LogOut, Layers, Wallet, X, Link2,
-  LayoutDashboard, FileText, Send, Settings
+  LayoutDashboard, FileText, Send, Settings, Camera, Loader2
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -74,10 +73,72 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
   const { data: session, update } = useSession()
   const { address, isConnected } = useAccount()
   const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [msg, setMsg] = useState("")
+  const [editName, setEditName] = useState("")
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // @ts-ignore
   const sessionWallet = session?.user?.walletAddress as string | null | undefined
+  const currentAvatar = avatarPreview ?? session?.user?.image ?? null
+  const currentName = session?.user?.name ?? ""
+
+  useEffect(() => {
+    if (open) {
+      setEditName(session?.user?.name ?? "")
+      setAvatarPreview(null)
+      setMsg("")
+    }
+  }, [open, session?.user?.name])
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) { setMsg("Please select an image file."); return }
+    if (file.size > 750_000) { setMsg("Image must be under 750KB."); return }
+    const reader = new FileReader()
+    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  const saveProfile = async () => {
+    setSaving(true)
+    setMsg("")
+    try {
+      // Save avatar if changed
+      if (avatarPreview) {
+        setUploadingAvatar(true)
+        const avatarRes = await fetch('/api/user/avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: avatarPreview }),
+        })
+        const avatarData = await avatarRes.json()
+        setUploadingAvatar(false)
+        if (!avatarData.success) { setMsg(avatarData.error ?? "Failed to upload avatar."); return }
+        await update({ picture: avatarPreview })
+      }
+      // Save name if changed
+      if (editName !== currentName) {
+        const res = await fetch('/api/user', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: editName }),
+        })
+        const data = await res.json()
+        if (!data.success) { setMsg(data.error ?? "Failed to save name."); return }
+        await update({ name: editName })
+      }
+      setMsg("Profile updated!")
+      setAvatarPreview(null)
+    } catch {
+      setMsg("Something went wrong.")
+    } finally {
+      setSaving(false)
+      setUploadingAvatar(false)
+    }
+  }
 
   const linkWallet = async () => {
     if (!address) return
@@ -103,63 +164,117 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
     }
   }
 
+  const initials = currentName
+    ? currentName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "FL"
+
+  const isDirty = avatarPreview !== null || editName !== currentName
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Profile &amp; Wallet</DialogTitle>
+          <DialogTitle>Profile Settings</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-1">
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Name</Label>
-            <Input value={session?.user?.name ?? ""} readOnly className="bg-slate-50 border-slate-200" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Email</Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50 border-slate-200" />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Linked wallet</Label>
-            <Input
-              value={sessionWallet ?? "No wallet linked"}
-              readOnly
-              className="bg-slate-50 font-mono text-xs"
+        <div className="space-y-5 pt-1">
+          {/* Avatar */}
+          <div className="flex flex-col items-center gap-3">
+            <div className="relative group">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center border-2 border-white shadow-sm">
+                {currentAvatar ? (
+                  <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-emerald-700 font-bold text-2xl">{initials}</span>
+                )}
+              </div>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Camera className="h-5 w-5 text-white" />
+              </button>
+            </div>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              Change photo
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarChange}
             />
           </div>
 
-          {!isConnected && !sessionWallet && (
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
-              <div className="flex justify-center pt-1">
-                <ConnectButton
-                  label="Connect Wallet"
-                  accountStatus="address"
-                  showBalance={false}
-                />
-              </div>
-            </div>
+          {/* Name */}
+          <div className="space-y-1">
+            <Label className="text-xs text-slate-500">Display Name</Label>
+            <Input
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              placeholder="Your name"
+              className="border-slate-200"
+            />
+          </div>
+
+          {/* Email (read-only) */}
+          <div className="space-y-1">
+            <Label className="text-xs text-slate-500">Email <span className="text-slate-400">(read-only)</span></Label>
+            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50 border-slate-200 text-slate-500" />
+          </div>
+
+          {/* Save button */}
+          {isDirty && (
+            <Button
+              onClick={saveProfile}
+              disabled={saving}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+            >
+              {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{uploadingAvatar ? "Uploading…" : "Saving…"}</> : "Save Changes"}
+            </Button>
           )}
 
-          {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
-            <div className="space-y-2">
-              <p className="text-xs text-slate-500">
-                Connected wallet:{" "}
-                <span className="font-mono text-slate-300">
-                  {address.slice(0, 8)}…{address.slice(-6)}
-                </span>
-              </p>
-              <Button
-                size="sm"
-                onClick={linkWallet}
-                disabled={saving}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
-              >
-                <Wallet className="h-3.5 w-3.5 mr-1.5" />
-                {saving ? "Linking…" : "Link this wallet to account"}
-              </Button>
+          {/* Wallet */}
+          <div className="pt-2 border-t border-slate-100 space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-slate-500">Linked wallet</Label>
+              <Input
+                value={sessionWallet ?? "No wallet linked"}
+                readOnly
+                className="bg-slate-50 font-mono text-xs"
+              />
             </div>
+
+            {!isConnected && !sessionWallet && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
+                <div className="flex justify-center pt-1">
+                  <ConnectButton label="Connect Wallet" accountStatus="address" showBalance={false} />
+                </div>
+              </div>
+            )}
+
+            {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
+              <div className="space-y-2">
+                <p className="text-xs text-slate-500">
+                  Connected:{" "}
+                  <span className="font-mono text-slate-700">{address.slice(0, 8)}…{address.slice(-6)}</span>
+                </p>
+                <Button size="sm" onClick={linkWallet} disabled={saving}
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white">
+                  <Wallet className="h-3.5 w-3.5 mr-1.5" />
+                  {saving ? "Linking…" : "Link this wallet"}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {msg && (
+            <p className={`text-xs ${msg.includes("!") ? "text-emerald-600" : "text-red-500"}`}>{msg}</p>
           )}
-          {msg && <p className="text-xs text-emerald-400">{msg}</p>}
         </div>
       </DialogContent>
     </Dialog>
@@ -279,8 +394,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center gap-3 hover:bg-slate-50 rounded-lg p-1.5 transition-colors text-left">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0">
-                  {initials}
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0 overflow-hidden">
+                  {session?.user?.image ? (
+                    <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : initials}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
