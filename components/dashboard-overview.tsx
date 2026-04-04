@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, Zap, CheckCircle, Clock, DollarSign, Loader2, Download, ChevronDown, Link2, FileText, Wallet } from "lucide-react"
+import { Shield, Zap, CheckCircle, Loader2, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, QrCode, ArrowLeftRight, Receipt } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -124,10 +124,10 @@ export function DashboardOverview() {
 
   const statCards = stats
     ? [
-        { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: Link2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { title: 'Total Payments', value: stats.totalPayments.toString(), icon: Zap, color: 'text-violet-600', bg: 'bg-violet-50' },
-        { title: 'Pending Invoices', value: stats.pendingInvoices.toString(), icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+        { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600', bgFrom: 'from-emerald-50', bgTo: 'to-emerald-100' },
+        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: QrCode, color: 'text-blue-600', bgFrom: 'from-blue-50', bgTo: 'to-blue-100' },
+        { title: 'Total Payments', value: stats.totalPayments.toString(), icon: ArrowLeftRight, color: 'text-violet-600', bgFrom: 'from-violet-50', bgTo: 'to-violet-100' },
+        { title: 'Pending Invoices', value: stats.pendingInvoices.toString(), icon: Receipt, color: 'text-amber-600', bgFrom: 'from-amber-50', bgTo: 'to-amber-100' },
       ]
     : []
 
@@ -251,8 +251,8 @@ export function DashboardOverview() {
               <Card key={s.title}>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-slate-500">{s.title}</CardTitle>
-                  <div className={`p-2 rounded-lg ${s.bg}`}>
-                    <s.icon className={`h-4 w-4 ${s.color}`} />
+                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${s.bgFrom} ${s.bgTo} flex items-center justify-center`}>
+                    <s.icon className={`w-5 h-5 ${s.color}`} strokeWidth={1.5} />
                   </div>
                 </CardHeader>
                 <CardContent>

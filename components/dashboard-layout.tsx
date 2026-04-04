@@ -385,7 +385,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 )}
               >
-                <item.icon className="w-4 h-4 shrink-0" />
+                <item.icon className="w-4 h-4 shrink-0" strokeWidth={1.5} />
                 {item.name}
                 {item.badge && (
                   <span className="ml-auto text-xs bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">

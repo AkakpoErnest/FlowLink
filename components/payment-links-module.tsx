@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, AlertTriangle, Loader2, ExternalLink } from "lucide-react"
+import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, AlertTriangle, Loader2, ExternalLink, Link2, LinkOff, Share2 } from "lucide-react"
 import { toast } from "sonner"
 
 interface PaymentLink {
@@ -137,7 +137,10 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <p className="font-semibold text-slate-900 truncate">{link.name ?? link.code}</p>
-              <Badge className={link.status === 'active' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-600 border-slate-200'}>
+              <Badge className={`flex items-center gap-1 ${link.status === 'active' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                {link.status === 'active'
+                  ? <Link2 className="h-3 w-3 text-emerald-600" />
+                  : <LinkOff className="h-3 w-3 text-slate-400" />}
                 {link.status}
               </Badge>
             </div>
@@ -158,6 +161,11 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
             <Button variant="outline" size="sm" onClick={() => onCopy(link.code)}>
               <Copy className="h-3.5 w-3.5 mr-1" /> Copy
             </Button>
+            {typeof navigator !== 'undefined' && navigator.share && (
+              <Button variant="outline" size="sm" onClick={() => navigator.share({ url: `${window.location.origin}/l/${link.code}`, title: link.name ?? link.code })}>
+                <Share2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
             <a href={`/l/${link.code}`} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-3.5 w-3.5" />

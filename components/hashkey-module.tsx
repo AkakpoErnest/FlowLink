@@ -76,7 +76,11 @@ export function HashKeyModule() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-emerald-500/20 rounded-xl">
-              <Layers className="h-6 w-6 text-emerald-400" />
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="#059669" fillOpacity="0.2"/>
+                <path d="M16 4L25.526 9.5V20.5L16 26L6.474 20.5V9.5L16 4Z" fill="none" stroke="#059669" strokeWidth="1.5"/>
+                <path d="M11 16L16 12L21 16L16 20L11 16Z" fill="#059669"/>
+              </svg>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -147,8 +151,24 @@ export function HashKeyModule() {
             {hashkeyTokens.stablecoins.map(token => (
               <div key={token.symbol} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <span className="text-emerald-700 text-xs font-bold">{token.symbol[0]}</span>
+                  <div className="h-8 w-8 rounded-full overflow-hidden flex items-center justify-center shrink-0">
+                    {token.symbol === "USDC" ? (
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#2775CA"/>
+                        <path d="M17.333 22.6V24H14.667V22.6C12.8 22.2 11.333 20.933 11.333 19.2H13.333C13.333 20 14.533 20.667 16 20.667C17.467 20.667 18.667 20 18.667 19.2C18.667 18.4 17.867 18 16 17.6C13.6 17.067 11.333 16.267 11.333 14C11.333 12.267 12.8 11 14.667 10.6V9.333H17.333V10.6C19.2 11 20.667 12.267 20.667 14H18.667C18.667 13.2 17.467 12.533 16 12.533C14.533 12.533 13.333 13.2 13.333 14C13.333 14.8 14.133 15.2 16 15.6C18.4 16.133 20.667 16.933 20.667 19.2C20.667 20.933 19.2 22.2 17.333 22.6Z" fill="white"/>
+                      </svg>
+                    ) : token.symbol === "USDT" ? (
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#26A17B"/>
+                        <path d="M17.25 17.312v-.002c-.082.006-.504.031-1.244.031-.647 0-1.103-.022-1.265-.031v.003C11.323 17.175 9 16.619 9 15.947c0-.671 2.323-1.228 5.741-1.367v2.178c.165.012.629.039 1.275.039.775 0 1.165-.031 1.234-.039v-2.177c3.41.138 5.727.696 5.727 1.366 0 .671-2.317 1.228-5.727 1.365zM17.25 13.376v-1.94H21V9H11v2.436h3.741v1.938C10.88 13.553 8 14.282 8 15.947c0 1.665 2.88 2.394 6.741 2.571V23h2.509v-4.484c3.853-.175 6.727-.904 6.727-2.569 0-1.665-2.874-2.394-6.727-2.571z" fill="white"/>
+                      </svg>
+                    ) : (
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <circle cx="16" cy="16" r="16" fill="#059669"/>
+                        <path d="M16 5L25.526 10.5V21.5L16 27L6.474 21.5V10.5L16 5Z" fill="#059669" stroke="white" strokeWidth="1.5"/>
+                        <path d="M11 16L16 12.5L21 16L16 19.5L11 16Z" fill="white"/>
+                      </svg>
+                    )}
                   </div>
                   <div>
                     <p className="text-slate-900 text-sm font-medium">{token.name}</p>

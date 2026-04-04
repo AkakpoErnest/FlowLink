@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -26,10 +26,13 @@ import {
 } from "@/components/ui/table"
 import {
   Bot,
-  Plus,
+  FilePlus,
   FileText,
+  FileEdit,
   CheckCircle,
+  CheckCircle2,
   Clock,
+  AlertCircle,
   AlertTriangle,
   DollarSign,
   Send,
@@ -69,12 +72,12 @@ interface LineItem {
   total: string
 }
 
-const statusConfig: Record<string, { label: string; color: string }> = {
-  draft: { label: "Draft", color: "bg-slate-100 text-slate-600 border-slate-200" },
-  pending: { label: "Pending", color: "bg-yellow-50 text-yellow-700 border-yellow-200" },
-  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  overdue: { label: "Overdue", color: "bg-red-50 text-red-700 border-red-200" },
-  cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-500 border-slate-200" },
+const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  draft: { label: "Draft", color: "bg-slate-100 text-slate-600 border-slate-200", icon: FileEdit },
+  pending: { label: "Pending", color: "bg-yellow-50 text-yellow-700 border-yellow-200", icon: Clock },
+  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+  overdue: { label: "Overdue", color: "bg-red-50 text-red-700 border-red-200", icon: AlertCircle },
+  cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-500 border-slate-200", icon: AlertTriangle },
 }
 
 const CURRENCIES = ["USDC", "USDT", "HSK", "cUSD"]
@@ -591,7 +594,7 @@ function InvoiceDetailModal({ invoice, onClose, onMarkPaid }: InvoiceDetailModal
               <FileText className="h-5 w-5 text-emerald-600" />
               {invoice.invoiceNumber}
             </span>
-            <Badge className={`text-xs border ${cfg.color}`}>{cfg.label}</Badge>
+            <Badge className={`text-xs border ${cfg.color} flex items-center gap-1`}><cfg.icon className="h-3 w-3" />{cfg.label}</Badge>
           </DialogTitle>
         </DialogHeader>
 
@@ -912,7 +915,7 @@ export function InvoiceModule() {
             className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-sm"
             onClick={() => setShowCreate(true)}
           >
-            <Plus className="h-4 w-4" />
+            <FilePlus className="h-4 w-4" />
             New Invoice
           </Button>
         </div>
@@ -1005,7 +1008,7 @@ export function InvoiceModule() {
                           <span className="text-xs text-slate-400 ml-1">{inv.currency}</span>
                         </TableCell>
                         <TableCell>
-                          <Badge className={`text-xs border ${cfg.color}`}>{cfg.label}</Badge>
+                          <Badge className={`text-xs border ${cfg.color} flex items-center gap-1`}><cfg.icon className="h-3 w-3" />{cfg.label}</Badge>
                         </TableCell>
                         <TableCell className="text-slate-500 text-sm">
                           {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : "—"}
