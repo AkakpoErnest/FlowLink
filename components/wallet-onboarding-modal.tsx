@@ -187,8 +187,8 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
                   <Plus className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Create new wallet</p>
-                  <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  <p className="text-sm font-semibold text-slate-900">Create new wallet</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-snug">
                     Generate a secure wallet with a 12-word seed phrase
                   </p>
                 </div>
@@ -197,14 +197,14 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
               {/* Import */}
               <button
                 onClick={() => setStep("import")}
-                className="flex flex-col items-center gap-3 rounded-xl border border-slate-600/40 bg-slate-800/40 p-5 text-left hover:bg-slate-800/70 hover:border-slate-500/60 transition-all group"
+                className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-5 text-left hover:bg-slate-100 hover:border-slate-300 transition-all group"
               >
-                <div className="h-10 w-10 rounded-full bg-slate-700/60 border border-slate-600/40 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-                  <Download className="h-5 w-5 text-slate-300" />
+                <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                  <Download className="h-5 w-5 text-slate-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">Import existing</p>
-                  <p className="text-xs text-slate-400 mt-0.5 leading-snug">
+                  <p className="text-sm font-semibold text-slate-900">Import existing</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-snug">
                     Restore a wallet using your seed phrase or private key
                   </p>
                 </div>
@@ -227,7 +227,7 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
               <div className="flex items-center gap-2">
                 <button
                   onClick={goBack}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
@@ -241,11 +241,11 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
             <div className="space-y-4 mt-1">
               {/* Address preview */}
               {createdAddress && (
-                <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-[10px] text-slate-500 mb-1 uppercase tracking-wider">
                     Wallet Address
                   </p>
-                  <p className="font-mono text-xs text-emerald-400 break-all">
+                  <p className="font-mono text-xs text-emerald-600 break-all">
                     {createdAddress}
                   </p>
                 </div>
@@ -291,10 +291,10 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
                     {mnemonicWords.map((word, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-1 bg-slate-800 rounded px-2 py-1"
+                        className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1"
                       >
-                        <span className="text-[10px] text-slate-500 w-4 shrink-0">{i + 1}.</span>
-                        <span className="text-xs text-white font-mono">{word}</span>
+                        <span className="text-[10px] text-slate-400 w-4 shrink-0">{i + 1}.</span>
+                        <span className="text-xs text-slate-900 font-mono">{word}</span>
                       </div>
                     ))}
                   </div>
@@ -363,7 +363,7 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
               <div className="flex items-center gap-2">
                 <button
                   onClick={goBack}
-                  className="text-slate-400 hover:text-white transition-colors"
+                  className="text-slate-400 hover:text-slate-700 transition-colors"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
@@ -403,11 +403,11 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
                 </Button>
               ) : (
                 <div className="space-y-3">
-                  <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <p className="text-[10px] text-slate-500 mb-1 uppercase tracking-wider">
                       Derived Address
                     </p>
-                    <p className="font-mono text-xs text-emerald-400 break-all">
+                    <p className="font-mono text-xs text-emerald-600 break-all">
                       {importedAddress}
                     </p>
                   </div>
@@ -435,8 +435,8 @@ export function WalletOnboardingModal({ open, onClose }: WalletOnboardingModalPr
               )}
 
               {/* Privacy note */}
-              <div className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-3 flex gap-2">
-                <ShieldAlert className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex gap-2">
+                <ShieldAlert className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-slate-500">
                   Your seed phrase is processed locally in your browser — it is never sent to
                   FlowLink servers. Only the derived wallet address is stored.

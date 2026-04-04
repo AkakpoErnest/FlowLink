@@ -123,7 +123,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <Input
               value={sessionWallet ?? "No wallet linked"}
               readOnly
-              className="bg-slate-800 font-mono text-xs"
+              className="bg-slate-50 font-mono text-xs"
             />
           </div>
 

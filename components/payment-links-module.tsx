@@ -136,8 +136,8 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <p className="font-semibold text-slate-100 truncate">{link.name ?? link.code}</p>
-              <Badge className={link.status === 'active' ? 'bg-teal-500/20 text-teal-300 border-teal-500/30' : 'bg-slate-700/60 text-slate-400 border-slate-600/40'}>
+              <p className="font-semibold text-slate-900 truncate">{link.name ?? link.code}</p>
+              <Badge className={link.status === 'active' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-600 border-slate-200'}>
                 {link.status}
               </Badge>
             </div>

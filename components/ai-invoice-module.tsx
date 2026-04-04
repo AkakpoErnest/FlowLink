@@ -61,17 +61,17 @@ interface Agent {
 }
 
 const statusConfig = {
-  draft: { label: "Draft", color: "bg-slate-500/20 text-slate-300 border-slate-500/30", icon: FileText },
-  pending: { label: "Pending", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30", icon: Clock },
-  paid: { label: "Paid", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", icon: CheckCircle },
-  overdue: { label: "Overdue", color: "bg-red-500/20 text-red-300 border-red-500/30", icon: AlertTriangle },
-  cancelled: { label: "Cancelled", color: "bg-slate-600/20 text-slate-400 border-slate-600/30", icon: X },
+  draft: { label: "Draft", color: "bg-slate-100 text-slate-600 border-slate-200", icon: FileText },
+  pending: { label: "Pending", color: "bg-yellow-50 text-yellow-700 border-yellow-200", icon: Clock },
+  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle },
+  overdue: { label: "Overdue", color: "bg-red-50 text-red-700 border-red-200", icon: AlertTriangle },
+  cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-500 border-slate-200", icon: X },
 }
 
 const networkConfig = {
-  hashkey: { label: "HashKey Chain", color: "text-emerald-400", badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" },
-  polygon: { label: "Polygon", color: "text-purple-400", badge: "bg-purple-500/20 text-purple-300 border-purple-500/30" },
-  ethereum: { label: "Ethereum", color: "text-slate-400", badge: "bg-slate-500/20 text-slate-300 border-slate-500/30" },
+  hashkey: { label: "HashKey Chain", color: "text-emerald-600", badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  polygon: { label: "Polygon", color: "text-purple-600", badge: "bg-purple-50 text-purple-700 border-purple-200" },
+  ethereum: { label: "Ethereum", color: "text-slate-600", badge: "bg-slate-100 text-slate-600 border-slate-200" },
 }
 
 interface LineItem {
@@ -283,19 +283,19 @@ export function AIInvoiceModule() {
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Invoices", value: stats.total, icon: FileText, color: "text-emerald-400" },
-          { label: "Pending", value: stats.pending, icon: Clock, color: "text-yellow-400" },
-          { label: "Paid", value: stats.paid, icon: CheckCircle, color: "text-emerald-400" },
-          { label: "Total Value", value: `$${parseFloat(stats.totalValue).toLocaleString()}`, icon: DollarSign, color: "text-purple-400" },
+          { label: "Total Invoices", value: stats.total, icon: FileText, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Pending", value: stats.pending, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
+          { label: "Paid", value: stats.paid, icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Total Value", value: `$${parseFloat(stats.totalValue).toLocaleString()}`, icon: DollarSign, color: "text-purple-600", bg: "bg-purple-50" },
         ].map((s) => (
-          <Card key={s.label} className="bg-slate-800/50 border-slate-700/50">
+          <Card key={s.label}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-slate-700/50`}>
+              <div className={`p-2 rounded-lg ${s.bg}`}>
                 <s.icon className={`h-5 w-5 ${s.color}`} />
               </div>
               <div>
-                <p className="text-slate-400 text-xs">{s.label}</p>
-                <p className="text-white font-bold text-lg">{s.value}</p>
+                <p className="text-slate-500 text-xs">{s.label}</p>
+                <p className="text-slate-900 font-bold text-lg">{s.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -303,15 +303,15 @@ export function AIInvoiceModule() {
       </div>
 
       {/* Main Card with Tabs */}
-      <Card className="bg-slate-800/50 border-slate-700/50">
+      <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/20 rounded-lg">
-                <Bot className="h-5 w-5 text-emerald-400" />
+              <div className="p-2 bg-emerald-50 rounded-lg">
+                <Bot className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
-                <CardTitle className="text-white">AI Agent Invoices</CardTitle>
+                <CardTitle className="text-slate-900">AI Agent Invoices</CardTitle>
                 <CardDescription>Crypto-native invoicing for AI agents and automated services</CardDescription>
               </div>
             </div>
@@ -320,11 +320,11 @@ export function AIInvoiceModule() {
 
         <CardContent>
           <Tabs defaultValue="invoices" className="w-full">
-            <TabsList className="bg-slate-700/50 border-slate-600 mb-4">
-              <TabsTrigger value="invoices" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-400">
+            <TabsList className="mb-4">
+              <TabsTrigger value="invoices">
                 Invoices
               </TabsTrigger>
-              <TabsTrigger value="agents" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white text-slate-400">
+              <TabsTrigger value="agents">
                 Agents
               </TabsTrigger>
             </TabsList>
@@ -338,7 +338,7 @@ export function AIInvoiceModule() {
                     <button
                       key={s}
                       onClick={() => setFilterStatus(s)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${filterStatus === s ? "bg-emerald-600 text-white" : "bg-slate-700/50 text-slate-400 hover:text-white"}`}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${filterStatus === s ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:text-slate-900"}`}
                     >
                       {s.charAt(0).toUpperCase() + s.slice(1)}
                     </button>
@@ -351,9 +351,9 @@ export function AIInvoiceModule() {
                       New Invoice
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                      <DialogTitle className="text-white flex items-center gap-2">
+                      <DialogTitle className="flex items-center gap-2">
                         <Bot className="h-5 w-5 text-emerald-400" />
                         Create AI Agent Invoice
                       </DialogTitle>
@@ -366,15 +366,15 @@ export function AIInvoiceModule() {
                         <p className="text-emerald-400 text-xs font-medium mb-2 flex items-center gap-1"><Bot className="h-3 w-3" /> Agent Details</p>
                         <div className="space-y-3">
                           <div>
-                            <Label className="text-slate-300 text-xs">Select Agent</Label>
+                            <Label className="text-slate-700 text-xs">Select Agent</Label>
                             <Select
                               value={form.selectedAgentId}
                               onValueChange={handleAgentSelect}
                             >
-                              <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                              <SelectTrigger className="mt-1">
                                 <SelectValue placeholder="Choose a registered agent..." />
                               </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-slate-600">
+                              <SelectContent className="">
                                 {agents.length === 0 && (
                                   <SelectItem value="__none__" disabled>No agents registered yet</SelectItem>
                                 )}
@@ -389,20 +389,20 @@ export function AIInvoiceModule() {
                           {form.selectedAgentId && (
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <Label className="text-slate-300 text-xs">Agent Name</Label>
+                                <Label className="text-slate-700 text-xs">Agent Name</Label>
                                 <Input
                                   value={form.agentName}
                                   onChange={e => setForm({ ...form, agentName: e.target.value })}
-                                  className="bg-slate-800 border-slate-600 text-white mt-1"
+                                  className="mt-1"
                                   readOnly
                                 />
                               </div>
                               <div>
-                                <Label className="text-slate-300 text-xs">Agent Description</Label>
+                                <Label className="text-slate-700 text-xs">Agent Description</Label>
                                 <Input
                                   value={form.agentDescription}
                                   onChange={e => setForm({ ...form, agentDescription: e.target.value })}
-                                  className="bg-slate-800 border-slate-600 text-white mt-1"
+                                  className="mt-1"
                                   readOnly
                                 />
                               </div>
@@ -414,32 +414,32 @@ export function AIInvoiceModule() {
                       {/* Client Info */}
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <Label className="text-slate-300 text-xs">Invoice To (Name)</Label>
+                          <Label className="text-slate-700 text-xs">Invoice To (Name)</Label>
                           <Input
                             value={form.issuedTo}
                             onChange={e => setForm({ ...form, issuedTo: e.target.value })}
                             placeholder="Client name"
-                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                            className="mt-1"
                           />
                         </div>
                         <div>
-                          <Label className="text-slate-300 text-xs">Client Wallet Address</Label>
+                          <Label className="text-slate-700 text-xs">Client Wallet Address</Label>
                           <Input
                             value={form.issuedToAddress}
                             onChange={e => setForm({ ...form, issuedToAddress: e.target.value })}
                             placeholder="0x..."
-                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                            className="mt-1"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <Label className="text-slate-300 text-xs">Description</Label>
+                        <Label className="text-slate-700 text-xs">Description</Label>
                         <Textarea
                           value={form.description}
                           onChange={e => setForm({ ...form, description: e.target.value })}
                           placeholder="Invoice description / service rendered"
-                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          className="mt-1"
                           rows={2}
                         />
                       </div>
@@ -447,7 +447,7 @@ export function AIInvoiceModule() {
                       {/* Payment Settings */}
                       <div className="grid grid-cols-3 gap-3">
                         <div>
-                          <Label className="text-slate-300 text-xs">Network</Label>
+                          <Label className="text-slate-700 text-xs">Network</Label>
                           <Select
                             value={form.network}
                             onValueChange={v => {
@@ -455,10 +455,10 @@ export function AIInvoiceModule() {
                               setForm({ ...form, network: v, currency: chain?.tokens[0]?.symbol ?? 'cUSD' })
                             }}
                           >
-                            <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                            <SelectTrigger className="mt-1">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-600">
+                            <SelectContent className="">
                               {CHAINS.map(c => (
                                 <SelectItem key={c.key} value={c.key}>{c.name}</SelectItem>
                               ))}
@@ -466,12 +466,12 @@ export function AIInvoiceModule() {
                           </Select>
                         </div>
                         <div>
-                          <Label className="text-slate-300 text-xs">Token</Label>
+                          <Label className="text-slate-700 text-xs">Token</Label>
                           <Select value={form.currency} onValueChange={v => setForm({ ...form, currency: v })}>
-                            <SelectTrigger className="bg-slate-800 border-slate-600 text-white mt-1">
+                            <SelectTrigger className="mt-1">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-800 border-slate-600">
+                            <SelectContent className="">
                               {(CHAINS.find(c => c.key === form.network)?.tokens ?? []).map(t => (
                                 <SelectItem key={t.symbol} value={t.symbol}>{t.symbol}</SelectItem>
                               ))}
@@ -479,22 +479,22 @@ export function AIInvoiceModule() {
                           </Select>
                         </div>
                         <div>
-                          <Label className="text-slate-300 text-xs">Due Date</Label>
+                          <Label className="text-slate-700 text-xs">Due Date</Label>
                           <Input
                             type="date"
                             value={form.dueAt}
                             onChange={e => setForm({ ...form, dueAt: e.target.value })}
-                            className="bg-slate-800 border-slate-600 text-white mt-1"
+                            className="mt-1"
                           />
                         </div>
                       </div>
 
                       {/* KYC Toggle */}
-                      <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
-                        <Shield className="h-4 w-4 text-emerald-400" />
+                      <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                        <Shield className="h-4 w-4 text-emerald-600" />
                         <div className="flex-1">
-                          <p className="text-white text-sm">Require KYC</p>
-                          <p className="text-slate-400 text-xs">Payer must complete KYC before payment</p>
+                          <p className="text-slate-900 text-sm">Require KYC</p>
+                          <p className="text-slate-500 text-xs">Payer must complete KYC before payment</p>
                         </div>
                         <Switch
                           checked={form.kycRequired}
@@ -505,7 +505,7 @@ export function AIInvoiceModule() {
                       {/* Line Items */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <Label className="text-slate-300 text-xs">Line Items</Label>
+                          <Label className="text-slate-700 text-xs">Line Items</Label>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -519,20 +519,20 @@ export function AIInvoiceModule() {
                           {lineItems.map((item, idx) => (
                             <div key={idx} className="grid grid-cols-12 gap-2 items-center">
                               <Input
-                                className="col-span-5 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                className="col-span-5 text-xs h-8"
                                 placeholder="Description"
                                 value={item.description}
                                 onChange={e => updateLineItem(idx, "description", e.target.value)}
                               />
                               <Input
-                                className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                className="col-span-2 text-xs h-8"
                                 placeholder="Qty"
                                 type="number"
                                 value={item.quantity}
                                 onChange={e => updateLineItem(idx, "quantity", parseInt(e.target.value) || 1)}
                               />
                               <Input
-                                className="col-span-2 bg-slate-800 border-slate-600 text-white text-xs h-8"
+                                className="col-span-2 text-xs h-8"
                                 placeholder="Price"
                                 value={item.unitPrice}
                                 onChange={e => updateLineItem(idx, "unitPrice", e.target.value)}
@@ -552,10 +552,10 @@ export function AIInvoiceModule() {
                             </div>
                           ))}
                         </div>
-                        <div className="flex justify-end mt-3 pt-3 border-t border-slate-700">
+                        <div className="flex justify-end mt-3 pt-3 border-t border-slate-200">
                           <div className="text-right">
-                            <p className="text-slate-400 text-xs">Total Amount</p>
-                            <p className="text-emerald-400 font-bold text-xl font-mono">${totalAmount} <span className="text-sm">{form.currency}</span></p>
+                            <p className="text-slate-500 text-xs">Total Amount</p>
+                            <p className="text-emerald-600 font-bold text-xl font-mono">${totalAmount} <span className="text-sm">{form.currency}</span></p>
                           </div>
                         </div>
                       </div>
@@ -574,8 +574,8 @@ export function AIInvoiceModule() {
               </div>
 
               {invoices.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
-                  <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <div className="text-center py-12 text-slate-500">
+                  <Bot className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                   <p>No invoices found</p>
                   <p className="text-xs mt-1">Create your first AI agent invoice to get started</p>
                 </div>
@@ -588,7 +588,7 @@ export function AIInvoiceModule() {
                     return (
                       <div
                         key={invoice.id}
-                        className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg hover:border-slate-500/50 transition-all cursor-pointer group"
+                        className="p-4 bg-white border border-slate-200 rounded-lg hover:border-slate-300 transition-all cursor-pointer group"
                         onClick={() => setSelectedInvoice(invoice)}
                       >
                         <div className="flex items-center justify-between">
@@ -598,7 +598,7 @@ export function AIInvoiceModule() {
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
-                                <p className="text-white font-medium text-sm">{invoice.invoiceNumber}</p>
+                                <p className="text-slate-900 font-medium text-sm">{invoice.invoiceNumber}</p>
                                 <Badge className={`text-xs border ${network.badge}`}>{network.label}</Badge>
                                 {invoice.paymentLinkCode && (
                                   <button
@@ -609,7 +609,7 @@ export function AIInvoiceModule() {
                                   </button>
                                 )}
                               </div>
-                              <p className="text-slate-400 text-xs">{invoice.agentName} → {invoice.issuedTo}</p>
+                              <p className="text-slate-600 text-xs">{invoice.agentName} → {invoice.issuedTo}</p>
                               <p className="text-slate-500 text-xs mt-0.5 truncate max-w-sm">{invoice.description}</p>
                             </div>
                           </div>
@@ -618,7 +618,7 @@ export function AIInvoiceModule() {
                               <StatusIcon className="h-3 w-3" />
                               {status.label}
                             </Badge>
-                            <p className="text-emerald-400 font-bold font-mono">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
+                            <p className="text-emerald-600 font-bold font-mono">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
                             <p className="text-slate-500 text-xs">Due: {new Date(invoice.dueAt).toLocaleDateString()}</p>
                           </div>
                         </div>
@@ -632,7 +632,7 @@ export function AIInvoiceModule() {
             {/* ── Agents Tab ── */}
             <TabsContent value="agents" className="mt-0">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-slate-400 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
+                <p className="text-slate-600 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
                 <Dialog open={showRegisterAgent} onOpenChange={setShowRegisterAgent}>
                   <DialogTrigger asChild>
                     <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
@@ -640,51 +640,51 @@ export function AIInvoiceModule() {
                       Register Agent
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-slate-900 border-slate-700 max-w-lg">
+                  <DialogContent className="max-w-lg">
                     <DialogHeader>
-                      <DialogTitle className="text-white flex items-center gap-2">
-                        <Bot className="h-5 w-5 text-emerald-400" />
+                      <DialogTitle className="flex items-center gap-2">
+                        <Bot className="h-5 w-5 text-emerald-600" />
                         Register Agent
                       </DialogTitle>
                       <DialogDescription>Register an agent with a wallet address to issue invoices on-chain</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 mt-2">
                       <div>
-                        <Label className="text-slate-300 text-xs">Agent Name *</Label>
+                        <Label className="text-slate-700 text-xs">Agent Name *</Label>
                         <Input
                           value={agentForm.name}
                           onChange={e => setAgentForm({ ...agentForm, name: e.target.value })}
                           placeholder="e.g. Analytics Agent"
-                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          className="mt-1"
                         />
                       </div>
                       <div>
-                        <Label className="text-slate-300 text-xs">Description</Label>
+                        <Label className="text-slate-700 text-xs">Description</Label>
                         <Textarea
                           value={agentForm.description}
                           onChange={e => setAgentForm({ ...agentForm, description: e.target.value })}
                           placeholder="What does this agent do?"
-                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          className="mt-1"
                           rows={2}
                         />
                       </div>
                       <div>
-                        <Label className="text-slate-300 text-xs">Wallet Address</Label>
+                        <Label className="text-slate-700 text-xs">Wallet Address</Label>
                         <Input
                           value={agentForm.walletAddress}
                           onChange={e => setAgentForm({ ...agentForm, walletAddress: e.target.value })}
                           placeholder="0x... (payments will be sent here)"
-                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          className="mt-1"
                         />
                         <p className="text-slate-500 text-xs mt-1">Payments from invoices issued by this agent will go directly to this wallet.</p>
                       </div>
                       <div>
-                        <Label className="text-slate-300 text-xs">Capabilities (comma-separated)</Label>
+                        <Label className="text-slate-700 text-xs">Capabilities (comma-separated)</Label>
                         <Input
                           value={agentForm.capabilitiesText}
                           onChange={e => setAgentForm({ ...agentForm, capabilitiesText: e.target.value })}
                           placeholder="data-analysis, reporting, automation"
-                          className="bg-slate-800 border-slate-600 text-white mt-1"
+                          className="mt-1"
                         />
                       </div>
                       <Button
@@ -701,35 +701,35 @@ export function AIInvoiceModule() {
               </div>
 
               {agents.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
-                  <Bot className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                <div className="text-center py-12 text-slate-500">
+                  <Bot className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                   <p>No agents registered</p>
                   <p className="text-xs mt-1">Register an agent with a wallet address to start issuing on-chain invoices</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {agents.map(agent => (
-                    <div key={agent.id} className="p-4 bg-slate-700/30 border border-slate-600/30 rounded-lg">
+                    <div key={agent.id} className="p-4 bg-white border border-slate-200 rounded-lg">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 bg-emerald-500/10 rounded-lg">
-                            <Bot className="h-4 w-4 text-emerald-400" />
+                          <div className="p-2 bg-emerald-50 rounded-lg">
+                            <Bot className="h-4 w-4 text-emerald-600" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="text-white font-medium text-sm">{agent.name}</p>
-                              <Badge className={`text-xs border ${agent.status === "active" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-slate-500/20 text-slate-300 border-slate-500/30"}`}>
+                              <p className="text-slate-900 font-medium text-sm">{agent.name}</p>
+                              <Badge className={`text-xs border ${agent.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
                                 {agent.status}
                               </Badge>
                             </div>
-                            {agent.description && <p className="text-slate-400 text-xs mt-0.5">{agent.description}</p>}
+                            {agent.description && <p className="text-slate-500 text-xs mt-0.5">{agent.description}</p>}
                             {agent.walletAddress && (
                               <div className="flex items-center gap-1 mt-1">
-                                <Wallet className="h-3 w-3 text-slate-500" />
-                                <span className="text-slate-400 text-xs font-mono">
+                                <Wallet className="h-3 w-3 text-slate-400" />
+                                <span className="text-slate-600 text-xs font-mono">
                                   {agent.walletAddress.slice(0, 10)}...{agent.walletAddress.slice(-6)}
                                 </span>
-                                <button onClick={() => copyToClipboard(agent.walletAddress!)} className="text-slate-500 hover:text-slate-300">
+                                <button onClick={() => copyToClipboard(agent.walletAddress!)} className="text-slate-400 hover:text-slate-600">
                                   <Copy className="h-3 w-3" />
                                 </button>
                               </div>
@@ -737,12 +737,12 @@ export function AIInvoiceModule() {
                           </div>
                         </div>
                         <div className="text-right space-y-1">
-                          <p className="text-slate-400 text-xs">{agent.invoiceCount} invoice{agent.invoiceCount !== 1 ? "s" : ""}</p>
-                          <p className="text-emerald-400 text-xs font-mono">${agent.totalEarned.toLocaleString()} earned</p>
+                          <p className="text-slate-500 text-xs">{agent.invoiceCount} invoice{agent.invoiceCount !== 1 ? "s" : ""}</p>
+                          <p className="text-emerald-600 text-xs font-mono">${agent.totalEarned.toLocaleString()} earned</p>
                           {(agent.capabilities as string[]).length > 0 && (
                             <div className="flex flex-wrap gap-1 justify-end">
                               {(agent.capabilities as string[]).slice(0, 3).map(cap => (
-                                <span key={cap} className="text-xs bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">{cap}</span>
+                                <span key={cap} className="text-xs bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">{cap}</span>
                               ))}
                             </div>
                           )}
@@ -759,12 +759,12 @@ export function AIInvoiceModule() {
 
       {/* Invoice Detail Dialog */}
       <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           {selectedInvoice && (
             <>
               <DialogHeader>
                 <div className="flex items-center justify-between">
-                  <DialogTitle className="text-white flex items-center gap-2">
+                  <DialogTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5 text-emerald-400" />
                     {selectedInvoice.invoiceNumber}
                   </DialogTitle>
@@ -777,18 +777,18 @@ export function AIInvoiceModule() {
               <div className="space-y-4 mt-2">
                 {/* Agent + Client */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                    <p className="text-emerald-400 text-xs font-medium mb-1 flex items-center gap-1"><Bot className="h-3 w-3" /> From Agent</p>
-                    <p className="text-white font-medium">{selectedInvoice.agentName}</p>
-                    <p className="text-slate-400 text-xs">{selectedInvoice.agentDescription}</p>
+                  <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+                    <p className="text-emerald-600 text-xs font-medium mb-1 flex items-center gap-1"><Bot className="h-3 w-3" /> From Agent</p>
+                    <p className="text-slate-900 font-medium">{selectedInvoice.agentName}</p>
+                    <p className="text-slate-500 text-xs">{selectedInvoice.agentDescription}</p>
                   </div>
-                  <div className="p-3 bg-slate-700/30 rounded-lg">
-                    <p className="text-slate-400 text-xs font-medium mb-1">Billed To</p>
-                    <p className="text-white font-medium">{selectedInvoice.issuedTo}</p>
+                  <div className="p-3 bg-slate-50 rounded-lg">
+                    <p className="text-slate-500 text-xs font-medium mb-1">Billed To</p>
+                    <p className="text-slate-900 font-medium">{selectedInvoice.issuedTo}</p>
                     {selectedInvoice.issuedToAddress && (
                       <div className="flex items-center gap-1 mt-1">
-                        <p className="text-slate-400 text-xs font-mono">{selectedInvoice.issuedToAddress.slice(0, 10)}...{selectedInvoice.issuedToAddress.slice(-6)}</p>
-                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress!)} className="text-slate-500 hover:text-slate-300">
+                        <p className="text-slate-600 text-xs font-mono">{selectedInvoice.issuedToAddress.slice(0, 10)}...{selectedInvoice.issuedToAddress.slice(-6)}</p>
+                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress!)} className="text-slate-400 hover:text-slate-600">
                           <Copy className="h-3 w-3" />
                         </button>
                       </div>
@@ -797,37 +797,37 @@ export function AIInvoiceModule() {
                 </div>
 
                 <div>
-                  <p className="text-slate-400 text-xs mb-2">Description</p>
-                  <p className="text-white text-sm">{selectedInvoice.description}</p>
+                  <p className="text-slate-500 text-xs mb-2">Description</p>
+                  <p className="text-slate-900 text-sm">{selectedInvoice.description}</p>
                 </div>
 
                 {/* Line Items */}
                 <div>
-                  <p className="text-slate-400 text-xs mb-2">Line Items</p>
+                  <p className="text-slate-500 text-xs mb-2">Line Items</p>
                   <Table>
                     <TableHeader>
-                      <TableRow className="border-slate-700">
-                        <TableHead className="text-slate-400 text-xs">Description</TableHead>
-                        <TableHead className="text-slate-400 text-xs text-center">Qty</TableHead>
-                        <TableHead className="text-slate-400 text-xs text-right">Unit Price</TableHead>
-                        <TableHead className="text-slate-400 text-xs text-right">Total</TableHead>
+                      <TableRow className="border-slate-200">
+                        <TableHead className="text-slate-500 text-xs">Description</TableHead>
+                        <TableHead className="text-slate-500 text-xs text-center">Qty</TableHead>
+                        <TableHead className="text-slate-500 text-xs text-right">Unit Price</TableHead>
+                        <TableHead className="text-slate-500 text-xs text-right">Total</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {selectedInvoice.lineItems.map((item, idx) => (
-                        <TableRow key={idx} className="border-slate-700">
-                          <TableCell className="text-white text-sm">{item.description}</TableCell>
-                          <TableCell className="text-slate-300 text-sm text-center">{item.quantity}</TableCell>
-                          <TableCell className="text-slate-300 text-sm text-right font-mono">${item.unitPrice}</TableCell>
-                          <TableCell className="text-emerald-400 text-sm text-right font-mono font-bold">${item.total}</TableCell>
+                        <TableRow key={idx} className="border-slate-100">
+                          <TableCell className="text-slate-900 text-sm">{item.description}</TableCell>
+                          <TableCell className="text-slate-700 text-sm text-center">{item.quantity}</TableCell>
+                          <TableCell className="text-slate-700 text-sm text-right font-mono">${item.unitPrice}</TableCell>
+                          <TableCell className="text-emerald-600 text-sm text-right font-mono font-bold">${item.total}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                  <div className="flex justify-end mt-2 pt-2 border-t border-slate-700">
+                  <div className="flex justify-end mt-2 pt-2 border-t border-slate-200">
                     <div className="text-right">
-                      <p className="text-slate-400 text-xs">Total Due</p>
-                      <p className="text-emerald-400 font-bold text-2xl font-mono">${parseFloat(String(selectedInvoice.amount)).toLocaleString()} {selectedInvoice.currency}</p>
+                      <p className="text-slate-500 text-xs">Total Due</p>
+                      <p className="text-emerald-600 font-bold text-2xl font-mono">${parseFloat(String(selectedInvoice.amount)).toLocaleString()} {selectedInvoice.currency}</p>
                       <p className="text-slate-500 text-xs">on {(networkConfig[selectedInvoice.network as keyof typeof networkConfig] ?? networkConfig.hashkey).label}</p>
                     </div>
                   </div>
@@ -835,13 +835,13 @@ export function AIInvoiceModule() {
 
                 {/* Dates */}
                 <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div className="p-2 bg-slate-700/30 rounded">
+                  <div className="p-2 bg-slate-50 rounded">
                     <p className="text-slate-500">Issued</p>
-                    <p className="text-white">{new Date(selectedInvoice.createdAt).toLocaleDateString()}</p>
+                    <p className="text-slate-900">{new Date(selectedInvoice.createdAt).toLocaleDateString()}</p>
                   </div>
-                  <div className="p-2 bg-slate-700/30 rounded">
+                  <div className="p-2 bg-slate-50 rounded">
                     <p className="text-slate-500">Due</p>
-                    <p className={selectedInvoice.status === "overdue" ? "text-red-400" : "text-white"}>
+                    <p className={selectedInvoice.status === "overdue" ? "text-red-600" : "text-slate-900"}>
                       {new Date(selectedInvoice.dueAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -861,7 +861,7 @@ export function AIInvoiceModule() {
                       <p className="text-emerald-400 text-xs font-medium">Payment Confirmed</p>
                       <p className="text-slate-400 text-xs font-mono truncate">{selectedInvoice.txHash}</p>
                     </div>
-                    <button onClick={() => copyToClipboard(selectedInvoice.txHash!)} className="text-slate-400 hover:text-white shrink-0">
+                    <button onClick={() => copyToClipboard(selectedInvoice.txHash!)} className="text-slate-400 hover:text-slate-600 shrink-0">
                       <Copy className="h-3 w-3" />
                     </button>
                   </div>
@@ -882,7 +882,7 @@ export function AIInvoiceModule() {
                     </a>
                     <Button
                       variant="outline"
-                      className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 gap-2"
+                      className="w-full border-slate-200 text-slate-700 hover:bg-slate-50 gap-2"
                       onClick={() => copyToClipboard(`${window.location.origin}/l/${selectedInvoice.paymentLinkCode}`)}
                     >
                       <Copy className="h-4 w-4" />
@@ -903,7 +903,7 @@ export function AIInvoiceModule() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-slate-600 text-slate-300 hover:bg-slate-700 gap-2"
+                      className="border-slate-200 text-slate-700 hover:bg-slate-50 gap-2"
                       onClick={() => copyToClipboard(selectedInvoice.invoiceNumber)}
                     >
                       <Copy className="h-4 w-4" />

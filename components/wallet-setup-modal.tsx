@@ -183,9 +183,9 @@ export function WalletSetupModal({ open, onClose }: WalletSetupModalProps) {
             ) : (
               <div className="space-y-4">
                 {/* Address preview */}
-                <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-[10px] text-slate-500 mb-1 uppercase tracking-wider">Wallet Address</p>
-                  <p className="font-mono text-xs text-emerald-400 break-all">{createdAddress}</p>
+                  <p className="font-mono text-xs text-emerald-600 break-all">{createdAddress}</p>
                 </div>
 
                 {/* Seed phrase display */}
@@ -216,9 +216,9 @@ export function WalletSetupModal({ open, onClose }: WalletSetupModalProps) {
                   {seedVisible ? (
                     <div className="grid grid-cols-3 gap-1.5">
                       {mnemonicWords.map((word, i) => (
-                        <div key={i} className="flex items-center gap-1 bg-slate-800 rounded px-2 py-1">
-                          <span className="text-[10px] text-slate-500 w-4">{i + 1}.</span>
-                          <span className="text-xs text-white font-mono">{word}</span>
+                        <div key={i} className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1">
+                          <span className="text-[10px] text-slate-400 w-4">{i + 1}.</span>
+                          <span className="text-xs text-slate-900 font-mono">{word}</span>
                         </div>
                       ))}
                     </div>
@@ -300,9 +300,9 @@ export function WalletSetupModal({ open, onClose }: WalletSetupModalProps) {
               </Button>
             ) : (
               <div className="space-y-3">
-                <div className="rounded-lg border border-slate-700 bg-slate-900 p-3">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-[10px] text-slate-500 mb-1 uppercase tracking-wider">Derived Address</p>
-                  <p className="font-mono text-xs text-emerald-400 break-all">{importedAddress}</p>
+                  <p className="font-mono text-xs text-emerald-600 break-all">{importedAddress}</p>
                 </div>
                 <Button
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
@@ -323,8 +323,8 @@ export function WalletSetupModal({ open, onClose }: WalletSetupModalProps) {
               </div>
             )}
 
-            <div className="rounded-lg border border-slate-700/50 bg-slate-900/50 p-3 flex gap-2">
-              <ShieldAlert className="h-4 w-4 text-slate-500 shrink-0 mt-0.5" />
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 flex gap-2">
+              <ShieldAlert className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
               <p className="text-xs text-slate-500">
                 Your seed phrase is processed locally — it is never sent to FlowLink servers. Only the derived address is stored.
               </p>

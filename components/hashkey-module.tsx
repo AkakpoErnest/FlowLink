@@ -79,16 +79,16 @@ export function HashKeyModule() {
               <Layers className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                 HashKey Chain
-                <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">Testnet</Badge>
+                <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 text-xs">Testnet</Badge>
               </h2>
-              <p className="text-slate-400 text-sm">Compliance-ready blockchain for regulated finance</p>
+              <p className="text-slate-600 text-sm">Compliance-ready blockchain for regulated finance</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
-            <span className={`text-sm font-medium ${isConnected ? 'text-emerald-400' : 'text-slate-400'}`}>
+            <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
+            <span className={`text-sm font-medium ${isConnected ? 'text-emerald-600' : 'text-slate-500'}`}>
               {isConnected ? (chain?.id === 133 ? 'HashKey Testnet' : `Wrong network`) : 'Not connected'}
             </span>
           </div>
@@ -102,22 +102,22 @@ export function HashKeyModule() {
             { label: "Block Explorer", value: "Blockscout", icon: ExternalLink },
             { label: "KYC Required", value: hashkeyCompliance.kycRequired ? "Yes" : "No", icon: Shield },
           ].map(stat => (
-            <div key={stat.label} className="bg-slate-800/50 rounded-lg p-3">
+            <div key={stat.label} className="bg-white/60 rounded-lg p-3 border border-white/40">
               <div className="flex items-center gap-2 mb-1">
                 <stat.icon className="h-3.5 w-3.5 text-slate-500" />
                 <p className="text-slate-500 text-xs">{stat.label}</p>
               </div>
-              <p className="text-white font-semibold text-sm">{stat.value}</p>
+              <p className="text-slate-900 font-semibold text-sm">{stat.value}</p>
             </div>
           ))}
         </div>
 
         {/* RPC + Explorer links */}
         <div className="flex flex-wrap gap-2 mt-4">
-          <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg px-3 py-1.5">
-            <Globe className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-slate-300 text-xs font-mono">{hashkeyChain.rpcUrls.default.http[0]}</span>
-            <button onClick={() => copy(hashkeyChain.rpcUrls.default.http[0], "rpc")} className="text-slate-500 hover:text-slate-300">
+          <div className="flex items-center gap-2 bg-white/60 border border-white/40 rounded-lg px-3 py-1.5">
+            <Globe className="h-3.5 w-3.5 text-slate-500" />
+            <span className="text-slate-700 text-xs font-mono">{hashkeyChain.rpcUrls.default.http[0]}</span>
+            <button onClick={() => copy(hashkeyChain.rpcUrls.default.http[0], "rpc")} className="text-slate-400 hover:text-slate-600">
               {copied === "rpc" ? <CheckCircle className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
             </button>
           </div>
@@ -135,24 +135,24 @@ export function HashKeyModule() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Supported Tokens */}
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white text-base flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-emerald-400" />
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-emerald-600" />
               Supported Tokens
             </CardTitle>
             <CardDescription>Stablecoins and assets on HashKey Chain</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {hashkeyTokens.stablecoins.map(token => (
-              <div key={token.symbol} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+              <div key={token.symbol} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                    <span className="text-emerald-400 text-xs font-bold">{token.symbol[0]}</span>
+                  <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <span className="text-emerald-700 text-xs font-bold">{token.symbol[0]}</span>
                   </div>
                   <div>
-                    <p className="text-white text-sm font-medium">{token.name}</p>
-                    <p className="text-slate-400 text-xs font-mono">
+                    <p className="text-slate-900 text-sm font-medium">{token.name}</p>
+                    <p className="text-slate-500 text-xs font-mono">
                       {token.address
                         ? `${token.address.slice(0, 10)}...${token.address.slice(-6)}`
                         : 'Address TBD — check HashKey testnet explorer'}
@@ -160,7 +160,7 @@ export function HashKeyModule() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs">{token.symbol}</Badge>
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">{token.symbol}</Badge>
                   <p className="text-slate-500 text-xs mt-1">{token.decimals} decimals</p>
                 </div>
               </div>
@@ -169,10 +169,10 @@ export function HashKeyModule() {
         </Card>
 
         {/* Compliance Info */}
-        <Card className="bg-slate-800/50 border-slate-700/50">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white text-base flex items-center gap-2">
-              <Shield className="h-4 w-4 text-emerald-400" />
+            <CardTitle className="text-slate-900 text-base flex items-center gap-2">
+              <Shield className="h-4 w-4 text-emerald-600" />
               Compliance Framework
             </CardTitle>
             <CardDescription>HashKey Chain regulatory standards</CardDescription>
@@ -185,31 +185,31 @@ export function HashKeyModule() {
                 { label: "Travel Rule Compliant", status: true, detail: "FATF Travel Rule compliance" },
                 { label: "AML Monitoring", status: true, detail: "Automated transaction monitoring" },
               ].map(item => (
-                <div key={item.label} className="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
+                <div key={item.label} className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                  <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
                   <div>
-                    <p className="text-white text-sm font-medium">{item.label}</p>
-                    <p className="text-slate-400 text-xs">{item.detail}</p>
+                    <p className="text-slate-900 text-sm font-medium">{item.label}</p>
+                    <p className="text-slate-500 text-xs">{item.detail}</p>
                   </div>
                 </div>
               ))}
             </div>
             <div>
-              <p className="text-slate-400 text-xs mb-2">Supported Jurisdictions</p>
+              <p className="text-slate-500 text-xs mb-2">Supported Jurisdictions</p>
               <div className="flex flex-wrap gap-2">
                 {hashkeyCompliance.supportedJurisdictions.map(j => (
-                  <Badge key={j} className="bg-slate-700 text-slate-300 border-slate-600 text-xs">{j}</Badge>
+                  <Badge key={j} className="bg-slate-100 text-slate-700 border-slate-200 text-xs">{j}</Badge>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="p-2 bg-slate-700/30 rounded">
+              <div className="p-2 bg-slate-50 rounded">
                 <p className="text-slate-500">Daily Limit</p>
-                <p className="text-white font-medium">$1,000,000</p>
+                <p className="text-slate-900 font-medium">$1,000,000</p>
               </div>
-              <div className="p-2 bg-slate-700/30 rounded">
+              <div className="p-2 bg-slate-50 rounded">
                 <p className="text-slate-500">Monthly Limit</p>
-                <p className="text-white font-medium">$10,000,000</p>
+                <p className="text-slate-900 font-medium">$10,000,000</p>
               </div>
             </div>
           </CardContent>
@@ -217,39 +217,39 @@ export function HashKeyModule() {
       </div>
 
       {/* Recent Transactions */}
-      <Card className="bg-slate-800/50 border-slate-700/50">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-white text-base flex items-center gap-2">
-            <Activity className="h-4 w-4 text-emerald-400" />
+          <CardTitle className="text-slate-900 text-base flex items-center gap-2">
+            <Activity className="h-4 w-4 text-emerald-600" />
             Recent Transactions on HashKey Chain
           </CardTitle>
           <CardDescription>Your latest on-chain activity</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {loadingTx ? (
-            <div className="text-center py-8 text-slate-400">Loading transactions…</div>
+            <div className="text-center py-8 text-slate-500">Loading transactions…</div>
           ) : transactions.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">No transactions yet</div>
+            <div className="text-center py-8 text-slate-500">No transactions yet</div>
           ) : null}
           {transactions.map((tx, idx) => (
-            <div key={idx} className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-all">
-              <div className={`p-2 rounded-full ${tx.direction === "in" ? "bg-emerald-500/20" : "bg-red-500/20"}`}>
+            <div key={idx} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-all">
+              <div className={`p-2 rounded-full ${tx.direction === "in" ? "bg-emerald-100" : "bg-red-100"}`}>
                 {tx.direction === "in"
-                  ? <ArrowDownLeft className="h-4 w-4 text-emerald-400" />
-                  : <ArrowUpRight className="h-4 w-4 text-red-400" />}
+                  ? <ArrowDownLeft className="h-4 w-4 text-emerald-600" />
+                  : <ArrowUpRight className="h-4 w-4 text-red-500" />}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-white text-sm font-medium">{tx.type}</p>
-                  <Badge className={`text-xs border ${tx.status === "confirmed" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-yellow-500/20 text-yellow-300 border-yellow-500/30"}`}>
+                  <p className="text-slate-900 text-sm font-medium">{tx.type}</p>
+                  <Badge className={`text-xs border ${tx.status === "confirmed" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-yellow-50 text-yellow-700 border-yellow-200"}`}>
                     {tx.status === "confirmed" ? <CheckCircle className="h-2.5 w-2.5 mr-1" /> : <Clock className="h-2.5 w-2.5 mr-1" />}
                     {tx.status}
                   </Badge>
                 </div>
-                <p className="text-slate-400 text-xs font-mono truncate">{tx.hash.slice(0, 20)}...{tx.hash.slice(-8)}</p>
+                <p className="text-slate-500 text-xs font-mono truncate">{tx.hash.slice(0, 20)}...{tx.hash.slice(-8)}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className={`font-bold text-sm font-mono ${tx.direction === "in" ? "text-emerald-400" : "text-red-400"}`}>
+                <p className={`font-bold text-sm font-mono ${tx.direction === "in" ? "text-emerald-600" : "text-red-500"}`}>
                   {tx.direction === "in" ? "+" : "-"}{tx.amount} {tx.token}
                 </p>
                 <p className="text-slate-500 text-xs">{tx.time}</p>
@@ -258,7 +258,7 @@ export function HashKeyModule() {
                 href={`${hashkeyChain.blockExplorers.default.url}/tx/${tx.hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-slate-500 hover:text-emerald-400 shrink-0"
+                className="text-slate-400 hover:text-emerald-600 shrink-0"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
