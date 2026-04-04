@@ -432,10 +432,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-30">
           <button
             onClick={() => setActiveTab("hashkey-chain")}
-            className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-all shadow-sm"
           >
-            <div className="h-2 w-2 bg-emerald-600 rounded-full animate-pulse" />
-            <span className="text-emerald-600 text-xs font-medium">HashKey Chain</span>
+            <div className="h-1.5 w-1.5 bg-emerald-400 rounded-full animate-pulse" />
+            <span className="text-xs font-semibold tracking-wide">HSK</span>
+            <span className="text-slate-400 text-xs hidden sm:inline">Mainnet</span>
           </button>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 h-8 w-8 p-0">
