@@ -247,6 +247,15 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               />
             </div>
 
+            {!isConnected && sessionWallet && (
+              <div className="space-y-1.5">
+                <Label className="text-xs text-slate-500">Wallet saved — reconnect for on-chain actions</Label>
+                <div className="flex justify-center pt-1">
+                  <ConnectButton label="Reconnect Wallet" accountStatus="address" showBalance={false} />
+                </div>
+              </div>
+            )}
+
             {!isConnected && !sessionWallet && (
               <div className="space-y-1.5">
                 <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>

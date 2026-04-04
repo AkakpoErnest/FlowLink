@@ -130,9 +130,21 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         // @ts-ignore — custom field
-        token.walletAddress = user.walletAddress ?? null
-        // @ts-ignore — custom field
         token.picture = user.image ?? null
+        // @ts-ignore — custom field
+        const walletFromUser = (user as any).walletAddress ?? null
+        if (walletFromUser) {
+          // Credentials providers (email/password, siwe, google-one-tap) include walletAddress
+          token.walletAddress = walletFromUser
+        } else {
+          // Google OAuth does not include custom fields — always fetch from DB so
+          // the wallet address is never lost on re-login.
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { walletAddress: true },
+          })
+          token.walletAddress = dbUser?.walletAddress ?? null
+        }
       }
       // Handle session.update() calls from the client
       if (trigger === 'update') {
