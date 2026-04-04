@@ -8,7 +8,6 @@ import {
   LogOut, Layers, Wallet, X, Link2,
   LayoutDashboard, FileText, Send, Settings, Camera, Loader2
 } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -391,32 +390,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* User section */}
         <div className="p-4 border-t border-slate-100">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-3 hover:bg-slate-50 rounded-lg p-1.5 transition-colors text-left">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0 overflow-hidden">
-                  {session?.user?.image ? (
-                    <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : initials}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
-                  <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
-                </div>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" side="top" align="start">
-              <DropdownMenuItem onClick={() => setProfileOpen(true)}>
-                <Wallet className="mr-2 h-4 w-4" />
-                <span>Profile &amp; Wallet</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="flex-1 flex items-center gap-3 hover:bg-slate-50 rounded-lg p-1.5 transition-colors text-left cursor-pointer min-w-0"
+              title="Edit profile"
+            >
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0 overflow-hidden ring-2 ring-transparent hover:ring-emerald-200 transition-all">
+                {session?.user?.image ? (
+                  <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                ) : initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
+                <p className="text-xs text-slate-400 truncate">Edit profile</p>
+              </div>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
+              title="Log out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </aside>
 

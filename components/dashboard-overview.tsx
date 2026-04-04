@@ -35,13 +35,22 @@ interface ComplianceMetrics {
   score: number
 }
 
-function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
-  const a = document.createElement('a')
-  a.href = `/api/reports?type=${type}`
-  a.download = ''
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
+async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
+  try {
+    const res = await fetch(`/api/reports?type=${type}`)
+    if (!res.ok) return
+    const blob = await res.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `flowlink-${type}-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error('Export failed:', e)
+  }
 }
 
 export function DashboardOverview() {

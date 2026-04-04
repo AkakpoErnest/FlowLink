@@ -7,9 +7,9 @@ function unauth() {
   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
 }
 
-function toCsv(rows: Record<string, unknown>[]): string {
-  if (rows.length === 0) return ''
-  const headers = Object.keys(rows[0])
+function toCsv(rows: Record<string, unknown>[], fallbackHeaders?: string[]): string {
+  const headers = rows.length > 0 ? Object.keys(rows[0]) : (fallbackHeaders ?? [])
+  if (headers.length === 0) return ''
   const escape = (v: unknown) => {
     const s = v == null ? '' : String(v)
     return s.includes(',') || s.includes('"') || s.includes('\n')
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       payment_link_name: p.paymentLink?.name ?? '',
     }))
 
-    const csv = toCsv(rows)
+    const csv = toCsv(rows, ['id','date','payer','amount','currency','status','network','kyc_passed','sanctions_checked','compliance_score','tx_hash','payment_link','payment_link_name'])
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv',
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       payment_link: inv.paymentLinkCode ?? '',
     }))
 
-    const csv = toCsv(rows)
+    const csv = toCsv(rows, ['invoice_number','date','due_date','paid_date','agent','issued_to','amount','currency','network','status','compliance_status','tx_hash','payment_link'])
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv',
@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
       }))
     )
 
-    const csv = toCsv(rows)
+    const csv = toCsv(rows, ['batch_name','batch_status','batch_date','recipient_name','recipient_email','wallet_address','amount','currency','country','kyc_status','recipient_status','tx_hash'])
     return new NextResponse(csv, {
       headers: {
         'Content-Type': 'text/csv',
