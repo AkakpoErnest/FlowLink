@@ -14,11 +14,14 @@ export type Invoice = {
   issuedTo: string | null
   issuedToAddress: string | null
   amount: number
+  subtotal: number | null
   currency: string
   network: "hashkey" | "polygon" | "ethereum" | string
   status: "draft" | "pending" | "paid" | "overdue" | "cancelled"
   description: string | null
+  notes: string | null
   lineItems: Array<{ description: string; quantity: number; unitPrice: string; total: string }>
+  issueDate: string | null
   dueAt: string
   paidAt: string | null
   txHash: string | null
@@ -43,6 +46,7 @@ export async function GET(request: NextRequest) {
   const status = searchParams.get("status")
   const agentId = searchParams.get("agentId")
   const network = searchParams.get("network")
+  const creatorType = searchParams.get("creatorType") // "human" | "agent" | null
 
   const invoices = await prisma.invoice.findMany({
     where: {
@@ -50,6 +54,8 @@ export async function GET(request: NextRequest) {
       ...(status ? { status } : {}),
       ...(agentId ? { agentId } : {}),
       ...(network ? { network } : {}),
+      ...(creatorType === "human" ? { agentId: null } : {}),
+      ...(creatorType === "agent" ? { agentId: { not: null } } : {}),
     },
     orderBy: { createdAt: "desc" },
   })
@@ -79,9 +85,11 @@ export async function POST(request: NextRequest) {
 
   const count = await prisma.invoice.count({ where: { userId } })
   const year = new Date().getFullYear()
-  const invoiceNumber = `FL-${year}-${String(count + 1).padStart(3, "0")}`
+  const invoiceNumber = body.invoiceNumber || `FL-${year}-${String(count + 1).padStart(3, "0")}`
 
-  // Resolve recipient wallet: agent wallet > explicit recipientAddress > user's own wallet
+  // Resolve recipient wallet for payment link creation
+  // For human invoices the recipient address is the person paying (payer), so the
+  // recipientAddress on the payment link should be the SENDER (the logged-in user)
   let recipientAddress: string | null = null
   let agentName: string | null = body.agentName || null
 
@@ -102,16 +110,12 @@ export async function POST(request: NextRequest) {
     recipientAddress = user?.walletAddress ?? null
   }
 
-  if (!recipientAddress) {
-    return NextResponse.json(
-      { success: false, error: 'No wallet address found. Connect a wallet or provide a recipient address.' },
-      { status: 422 }
-    )
-  }
-
-  const network = body.network || 'celo'
-  const currency = body.currency || 'cUSD'
-  const amount = parseFloat(body.amount)
+  const network = body.network || 'hashkey-testnet'
+  const currency = body.currency || 'USDC'
+  const lineItems = body.lineItems || []
+  const subtotal = parseFloat(body.subtotal ?? body.amount ?? "0")
+  const amount = parseFloat(body.amount ?? body.subtotal ?? "0")
+  const status = body.status || 'pending'
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -119,37 +123,43 @@ export async function POST(request: NextRequest) {
       invoiceNumber,
       agentId: body.agentId || null,
       agentName,
-      issuedTo: body.issuedTo || null,
-      issuedToAddress: body.issuedToAddress || null,
+      issuedTo: body.issuedTo || body.recipientName || null,
+      issuedToAddress: body.issuedToAddress || body.recipientEmail || null,
       amount,
+      subtotal,
       currency,
       network,
-      status: 'pending',
+      status,
       description: body.description || null,
-      lineItems: body.lineItems || [],
+      notes: body.notes || null,
+      lineItems,
+      issueDate: body.issueDate ? new Date(body.issueDate) : new Date(),
       dueAt: body.dueAt ? new Date(body.dueAt) : new Date(Date.now() + 14 * 86400000),
       complianceStatus: 'pending',
     },
   })
 
-  // Always auto-create a payment link tied to this invoice
-  const linkCode = `inv-${invoice.id.slice(-8)}`
-  const link = await prisma.paymentLink.create({
-    data: {
-      userId,
-      code: linkCode,
-      name: `Invoice ${invoice.invoiceNumber}${body.issuedTo ? ` — ${body.issuedTo}` : ''}`,
-      network,
-      sourceToken: currency,
-      destStable: currency,
-      amountMin: amount,
-      amountMax: amount,
-      recipientAddress,
-      status: 'active',
-    },
-  })
-
-  await prisma.invoice.update({ where: { id: invoice.id }, data: { paymentLinkCode: link.code } })
+  // Auto-create a payment link if we have a recipient address and invoice is being sent
+  let paymentLinkCode: string | null = null
+  if (recipientAddress && status === 'pending') {
+    const linkCode = `inv-${invoice.id.slice(-8)}`
+    const link = await prisma.paymentLink.create({
+      data: {
+        userId,
+        code: linkCode,
+        name: `Invoice ${invoice.invoiceNumber}${body.issuedTo || body.recipientName ? ` — ${body.issuedTo || body.recipientName}` : ''}`,
+        network,
+        sourceToken: currency,
+        destStable: currency,
+        amountMin: amount,
+        amountMax: amount,
+        recipientAddress,
+        status: 'active',
+      },
+    })
+    paymentLinkCode = link.code
+    await prisma.invoice.update({ where: { id: invoice.id }, data: { paymentLinkCode: link.code } })
+  }
 
   if (body.agentId) {
     await prisma.agent.update({ where: { id: body.agentId }, data: { invoiceCount: { increment: 1 } } }).catch(() => {})
@@ -164,7 +174,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    data: { ...invoice, paymentLinkCode: link.code },
+    data: { ...invoice, paymentLinkCode },
   }, { status: 201 })
 }
 

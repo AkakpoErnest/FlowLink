@@ -131,11 +131,14 @@ model Invoice {
   issuedTo         String?
   issuedToAddress  String?
   amount           Float
+  subtotal         Float?
   currency         String    @default("USDC")
   network          String    @default("hashkey-testnet")
   status           String    @default("draft")
   description      String?
+  notes            String?
   lineItems        Json?
+  issueDate        DateTime?
   dueAt            DateTime?
   paidAt           DateTime?
   txHash           String?

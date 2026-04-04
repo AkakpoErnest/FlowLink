@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
-import { AIInvoiceModule } from '@/components/ai-invoice-module'
+import { InvoiceModule } from '@/components/invoice-module'
 import { ThemeProvider } from '@/components/theme-provider'
 
 export default function InvoicesPage() {
@@ -34,13 +34,17 @@ export default function InvoicesPage() {
     <ThemeProvider>
       <DashboardLayout>
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-emerald-500/10 to-purple-500/10 border border-emerald-500/20 rounded-lg p-6">
-            <h1 className="text-3xl font-bold text-white mb-2">AI Agent Invoices</h1>
-            <p className="text-slate-300">
-              Issue and manage crypto-native invoices for AI agents and automated services. Pay via HashKey Chain.
-            </p>
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">Invoices</h1>
+                <p className="text-slate-500 mt-0.5">
+                  Send and manage crypto-native invoices. Human or AI-generated.
+                </p>
+              </div>
+            </div>
           </div>
-          <AIInvoiceModule />
+          <InvoiceModule />
         </div>
       </DashboardLayout>
     </ThemeProvider>
