@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, Zap, CheckCircle, Loader2, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, QrCode, ArrowLeftRight, Receipt } from "lucide-react"
+import { Shield, Zap, CheckCircle, Loader2, Download, ChevronDown, Link2, FileText, Wallet } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -33,6 +33,17 @@ interface ComplianceMetrics {
   amlRate: number
   monitoringRate: number
   score: number
+}
+
+function StatIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
+      style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}
+    >
+      {children}
+    </div>
+  )
 }
 
 async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
@@ -124,10 +135,65 @@ export function DashboardOverview() {
 
   const statCards = stats
     ? [
-        { title: 'Total Volume', value: `$${stats.totalVolume.toLocaleString()}`, icon: TrendingUp, color: 'text-emerald-600', bgFrom: 'from-emerald-50', bgTo: 'to-emerald-100' },
-        { title: 'Active Payment Links', value: stats.activeLinks.toString(), icon: QrCode, color: 'text-blue-600', bgFrom: 'from-blue-50', bgTo: 'to-blue-100' },
-        { title: 'Total Payments', value: stats.totalPayments.toString(), icon: ArrowLeftRight, color: 'text-violet-600', bgFrom: 'from-violet-50', bgTo: 'to-violet-100' },
-        { title: 'Pending Invoices', value: stats.pendingInvoices.toString(), icon: Receipt, color: 'text-amber-600', bgFrom: 'from-amber-50', bgTo: 'to-amber-100' },
+        {
+          title: 'Total Volume',
+          value: `$${stats.totalVolume.toLocaleString()}`,
+          icon: (
+            <StatIcon>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3,20 8,14 12,17 17,9 22,12 25,7" />
+                <polyline points="21,7 25,7 25,11" />
+              </svg>
+            </StatIcon>
+          ),
+        },
+        {
+          title: 'Active Payment Links',
+          value: stats.activeLinks.toString(),
+          icon: (
+            <StatIcon>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+                <rect x="5.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+                <rect x="17" y="3" width="8" height="8" rx="1.5"/>
+                <rect x="19.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+                <rect x="3" y="17" width="8" height="8" rx="1.5"/>
+                <rect x="5.5" y="19.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+                <path d="M19 20 L22 17 M17 22 C16 22 14.5 20.5 14.5 19 C14.5 17.5 16 16 17.5 16 L19 16 M22 19 C23 19 24.5 20.5 24.5 22 C24.5 23.5 23 25 21.5 25 L20 25"/>
+              </svg>
+            </StatIcon>
+          ),
+        },
+        {
+          title: 'Total Payments',
+          value: stats.totalPayments.toString(),
+          icon: (
+            <StatIcon>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="11" x2="23" y2="11"/>
+                <polyline points="17,6 23,11 17,16"/>
+                <line x1="23" y1="17" x2="5" y2="17"/>
+                <polyline points="11,22 5,17 11,12"/>
+              </svg>
+            </StatIcon>
+          ),
+        },
+        {
+          title: 'Pending Invoices',
+          value: stats.pendingInvoices.toString(),
+          icon: (
+            <StatIcon>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 4 L18 4 L22 8 L22 15 M6 4 L6 24 L15 24"/>
+                <polyline points="18,4 18,8 22,8"/>
+                <line x1="10" y1="11" x2="18" y2="11"/>
+                <line x1="10" y1="14" x2="15" y2="14"/>
+                <circle cx="20" cy="21" r="5"/>
+                <polyline points="20,18.5 20,21 22,22.5"/>
+              </svg>
+            </StatIcon>
+          ),
+        },
       ]
     : []
 
@@ -254,9 +320,7 @@ export function DashboardOverview() {
                 )}
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
                   <CardTitle className={`text-sm font-medium ${s.title === 'Total Volume' ? 'text-slate-700' : 'text-slate-500'}`}>{s.title}</CardTitle>
-                  <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${s.bgFrom} ${s.bgTo} flex items-center justify-center`}>
-                    <s.icon className={`w-5 h-5 ${s.color}`} strokeWidth={1.5} />
-                  </div>
+                  {s.icon}
                 </CardHeader>
                 <CardContent className="relative">
                   <div className="text-2xl font-bold text-slate-900">{s.value}</div>
