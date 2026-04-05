@@ -86,7 +86,7 @@ export function PaymentLinksModule() {
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>New Payment Link</DialogTitle>
-                <DialogDescription>Create a compliant payment link on HashKey Testnet</DialogDescription>
+                <DialogDescription>Create a compliant payment link on Celo Mainnet</DialogDescription>
               </DialogHeader>
               <CreateLinkForm onSuccess={() => { setShowCreateDialog(false); fetchLinks() }} />
             </DialogContent>
@@ -102,8 +102,30 @@ export function PaymentLinksModule() {
 
         <TabsContent value="active" className="mt-4 space-y-3">
           {loading ? (
-            <div className="flex items-center gap-2 text-slate-400 py-8 justify-center">
-              <Loader2 className="h-5 w-5 animate-spin" /> Loading…
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="rounded-xl border border-slate-200 bg-white p-5 animate-pulse">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-36 bg-slate-200 rounded" />
+                        <div className="h-4 w-16 bg-slate-100 rounded" />
+                      </div>
+                      <div className="h-3 w-64 bg-slate-100 rounded" />
+                      <div className="flex gap-4 mt-2">
+                        <div className="h-3 w-16 bg-slate-100 rounded" />
+                        <div className="h-3 w-20 bg-slate-100 rounded" />
+                        <div className="h-3 w-16 bg-slate-100 rounded" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="h-8 w-16 bg-slate-100 rounded" />
+                      <div className="h-8 w-8 bg-slate-100 rounded" />
+                      <div className="h-8 w-20 bg-slate-100 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : activeLinks.length === 0 ? (
             <div className="text-center py-12 text-slate-400">
@@ -192,7 +214,7 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
 
 function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
   const [name, setName] = useState('')
-  const [token, setToken] = useState('HSK')
+  const [token, setToken] = useState('USDC')
   const [amountMin, setAmountMin] = useState('')
   const [amountMax, setAmountMax] = useState('')
   const [loading, setLoading] = useState(false)
@@ -238,9 +260,10 @@ function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
         <Select value={token} onValueChange={setToken}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="HSK">HSK (HashKey Native)</SelectItem>
-            <SelectItem value="USDC">USDC</SelectItem>
-            <SelectItem value="USDT">USDT</SelectItem>
+            <SelectItem value="USDC">USDC (Celo)</SelectItem>
+            <SelectItem value="USDT">USDT (Celo)</SelectItem>
+            <SelectItem value="cUSD">cUSD (Celo Dollar)</SelectItem>
+            <SelectItem value="CELO">CELO (native)</SelectItem>
           </SelectContent>
         </Select>
       </div>

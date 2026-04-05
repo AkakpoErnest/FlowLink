@@ -21,7 +21,23 @@ export async function GET(request: NextRequest) {
       userId,
       ...(status ? { status } : {}),
     },
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      network: true,
+      sourceToken: true,
+      destStable: true,
+      amountMin: true,
+      amountMax: true,
+      recipientAddress: true,
+      status: true,
+      totalVolume: true,
+      transactions: true,
+      createdAt: true,
+    },
     orderBy: { createdAt: "desc" },
+    take: 20,
   })
 
   return NextResponse.json({ success: true, data: links, total: links.length })
@@ -35,6 +51,15 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
+  if (body.amountMin !== undefined && body.amountMin !== null) {
+    const min = parseFloat(body.amountMin)
+    if (isNaN(min) || min < 0) return NextResponse.json({ success: false, error: "amountMin must be a non-negative number" }, { status: 400 })
+  }
+  if (body.amountMax !== undefined && body.amountMax !== null) {
+    const max = parseFloat(body.amountMax)
+    if (isNaN(max) || max <= 0) return NextResponse.json({ success: false, error: "amountMax must be a positive number" }, { status: 400 })
+  }
+
   // Look up the authenticated user's wallet address to use as recipient
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -46,7 +71,7 @@ export async function POST(request: NextRequest) {
       userId,
       code: body.code || `pay-${Date.now()}`,
       name: body.name || null,
-      network: body.network || "hashkey-testnet",
+      network: body.network || "celo",
       sourceToken: body.sourceToken || "USDC",
       destStable: body.destStable || "USDC",
       amountMin: body.amountMin ? parseFloat(body.amountMin) : null,

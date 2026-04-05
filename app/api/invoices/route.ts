@@ -83,6 +83,25 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json()
 
+  const amount = parseFloat(body.amount ?? body.subtotal ?? "0")
+  if (isNaN(amount) || amount <= 0) {
+    return NextResponse.json({ success: false, error: "amount must be a positive number" }, { status: 400 })
+  }
+
+  if (body.recipientAddress) {
+    const walletRegex = /^0x[a-fA-F0-9]{40}$/
+    if (!walletRegex.test(body.recipientAddress)) {
+      return NextResponse.json({ success: false, error: "recipientAddress must be a valid wallet address" }, { status: 400 })
+    }
+  }
+
+  if (body.recipientEmail && body.recipientEmail.includes('@')) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(body.recipientEmail)) {
+      return NextResponse.json({ success: false, error: "recipientEmail must be a valid email address" }, { status: 400 })
+    }
+  }
+
   const count = await prisma.invoice.count({ where: { userId } })
   const year = new Date().getFullYear()
   const invoiceNumber = body.invoiceNumber || `FL-${year}-${String(count + 1).padStart(3, "0")}`
@@ -110,11 +129,10 @@ export async function POST(request: NextRequest) {
     recipientAddress = user?.walletAddress ?? null
   }
 
-  const network = body.network || 'hashkey-testnet'
+  const network = body.network || 'celo'
   const currency = body.currency || 'USDC'
   const lineItems = body.lineItems || []
   const subtotal = parseFloat(body.subtotal ?? body.amount ?? "0")
-  const amount = parseFloat(body.amount ?? body.subtotal ?? "0")
   const status = body.status || 'pending'
 
   const invoice = await prisma.invoice.create({

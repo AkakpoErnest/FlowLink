@@ -23,7 +23,7 @@ export function middleware(req: NextRequest) {
 
   // Rate limit payment endpoints: 20 requests per minute
   if (path.startsWith('/api/payments') || path.startsWith('/api/agents/pay')) {
-    const allowed = rateLimit(`${ip}:${path}`, 20, 60_000)
+    const allowed = rateLimit(`${ip}:payments`, 20, 60_000)
     if (!allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 })
     }
@@ -37,9 +37,28 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // Rate limit invoices, payment-links, avatar: 30 per minute
+  if (
+    path.startsWith('/api/invoices') ||
+    path.startsWith('/api/payment-links') ||
+    path.startsWith('/api/user/avatar')
+  ) {
+    const allowed = rateLimit(`${ip}:general-api`, 30, 60_000)
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 })
+    }
+  }
+
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/api/payments/:path*', '/api/agents/pay/:path*', '/api/auth/:path*'],
+  matcher: [
+    '/api/payments/:path*',
+    '/api/agents/pay/:path*',
+    '/api/auth/:path*',
+    '/api/invoices/:path*',
+    '/api/payment-links/:path*',
+    '/api/user/avatar/:path*',
+  ],
 }

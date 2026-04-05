@@ -45,6 +45,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'payer and amount are required' }, { status: 400 })
   }
 
+  const parsedAmount = parseFloat(body.amount)
+  if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    return NextResponse.json({ success: false, error: 'amount must be a positive number' }, { status: 400 })
+  }
+
+  const walletRegex = /^0x[a-fA-F0-9]{40}$/
+  if (!walletRegex.test(body.payer)) {
+    return NextResponse.json({ success: false, error: 'payer must be a valid wallet address' }, { status: 400 })
+  }
+
   // Resolve userId from the payment link owner
   let userId: string | undefined
   if (body.paymentLinkId) {
@@ -61,10 +71,10 @@ export async function POST(request: NextRequest) {
       paymentLinkId: body.paymentLinkId ?? null,
       payer: body.payer,
       amount: parseFloat(body.amount),
-      currency: body.currency || 'HSK',
+      currency: body.currency || 'USDC',
       txHash: body.txHash ?? null,
       status: body.status || 'pending',
-      network: body.network || 'hashkey-testnet',
+      network: body.network || 'celo',
       kycPassed: body.kycPassed ?? false,
       sanctionsChecked: body.sanctionsChecked ?? false,
       complianceScore: body.complianceScore ?? 0,
@@ -116,8 +126,8 @@ export async function POST(request: NextRequest) {
           issuedTo: body.payer ?? null,
           issuedToAddress: body.payer ?? null,
           amount: parseFloat(body.amount),
-          currency: body.currency || 'HSK',
-          network: body.network || 'hashkey-testnet',
+          currency: body.currency || 'USDC',
+          network: body.network || 'celo',
           status: 'paid',
           description: `Payment via link ${link.code}`,
           paymentLinkCode: link.code,
@@ -142,12 +152,20 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, data: payment }, { status: 201 })
 }
 
-// PUT — update a payment
+// PUT — update a payment (requires auth, user must own the payment)
 export async function PUT(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) return unauth()
+  // @ts-ignore
+  const userId = session.user.id as string
+
   const body = await request.json()
   const { id, ...updates } = body
 
   if (!id) return NextResponse.json({ success: false, error: 'id required' }, { status: 400 })
+
+  const existing = await prisma.payment.findFirst({ where: { id, userId } })
+  if (!existing) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
 
   const payment = await prisma.payment.update({
     where: { id },

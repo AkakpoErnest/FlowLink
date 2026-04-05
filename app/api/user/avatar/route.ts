@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'image field required' }, { status: 400 })
   }
 
-  // Only allow base64 data URLs or URLs
-  if (!image.startsWith('data:image/') && !image.startsWith('http')) {
-    return NextResponse.json({ success: false, error: 'Invalid image format' }, { status: 400 })
+  // Only allow base64 data URLs
+  if (!image.startsWith('data:image/')) {
+    return NextResponse.json({ success: false, error: 'Invalid image format. Must be a base64 data URL.' }, { status: 400 })
   }
 
   // Limit size: base64 data URLs for ~500KB images are ~700KB strings

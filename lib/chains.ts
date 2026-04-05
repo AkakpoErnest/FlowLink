@@ -144,4 +144,4 @@ export function isNativeToken(token: ChainToken): boolean {
 }
 
 // Default chain for new payment links
-export const DEFAULT_CHAIN_KEY = 'hashkey-testnet'
+export const DEFAULT_CHAIN_KEY = 'celo'

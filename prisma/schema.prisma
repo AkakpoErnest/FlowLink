@@ -80,8 +80,8 @@ model PaymentLink {
   code             String   @unique
   name             String?
   network          String   @default("celo")
-  sourceToken      String   @default("cUSD")
-  destStable       String   @default("cUSD")
+  sourceToken      String   @default("USDC")
+  destStable       String   @default("USDC")
   amountMin        Float?
   amountMax        Float?
   recipientAddress String?
@@ -93,6 +93,8 @@ model PaymentLink {
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments Payment[]
+
+  @@index([userId, createdAt])
 }
 
 model Payment {
@@ -106,7 +108,7 @@ model Payment {
   token            String?
   txHash           String?
   status           String   @default("pending")
-  network          String   @default("hashkey-testnet")
+  network          String   @default("celo")
   complianceScore  Int      @default(0)
   kycPassed        Boolean  @default(false)
   sanctionsChecked Boolean  @default(false)
@@ -120,6 +122,8 @@ model Payment {
   user        User?        @relation(fields: [userId], references: [id])
   paymentLink PaymentLink? @relation(fields: [paymentLinkId], references: [id])
   agent       Agent?       @relation(fields: [agentId], references: [id])
+
+  @@index([paymentLinkId, userId])
 }
 
 model Invoice {
@@ -133,7 +137,7 @@ model Invoice {
   amount           Float
   subtotal         Float?
   currency         String    @default("USDC")
-  network          String    @default("hashkey-testnet")
+  network          String    @default("celo")
   status           String    @default("draft")
   description      String?
   notes            String?
@@ -173,7 +177,7 @@ model PayrollBatch {
   totalAmount Float
   currency    String    @default("USDC")
   status      String    @default("pending")
-  network     String    @default("hashkey-testnet")
+  network     String    @default("celo")
   scheduledAt DateTime?
   completedAt DateTime?
   createdAt   DateTime  @default(now())

@@ -65,7 +65,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
               </Text>
             ),
           }}
-          initialChain={hashkeyTestnet}
+          initialChain={celo}
           showRecentTransactions={true}
         >
           {children}
