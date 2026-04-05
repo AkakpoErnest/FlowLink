@@ -80,22 +80,29 @@ export function DashboardOverview() {
   const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
 
   useEffect(() => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+
     async function load() {
       try {
+        const signal = controller.signal
         const [linksRes, paymentsRes, allPaymentsRes, invoicesRes, agentsRes] = await Promise.all([
-          fetch('/api/payment-links'),
-          fetch('/api/payments?limit=5'),
-          fetch('/api/payments?limit=100'),
-          fetch('/api/invoices'),
-          fetch('/api/agents'),
+          fetch('/api/payment-links', { signal }),
+          fetch('/api/payments?limit=5', { signal }),
+          fetch('/api/payments?limit=100', { signal }),
+          fetch('/api/invoices', { signal }),
+          fetch('/api/agents', { signal }),
         ])
+        clearTimeout(timeout)
+
         const [links, payments, allPayments, invoices, agentsData] = await Promise.all([
-          linksRes.json(),
-          paymentsRes.json(),
-          allPaymentsRes.json(),
-          invoicesRes.json(),
-          agentsRes.json(),
+          linksRes.ok ? linksRes.json() : Promise.resolve({}),
+          paymentsRes.ok ? paymentsRes.json() : Promise.resolve({}),
+          allPaymentsRes.ok ? allPaymentsRes.json() : Promise.resolve({}),
+          invoicesRes.ok ? invoicesRes.json() : Promise.resolve({}),
+          agentsRes.ok ? agentsRes.json() : Promise.resolve({}),
         ])
+
         setAgents(agentsData.data ?? [])
 
         const allLinks = links.data ?? []
@@ -126,76 +133,79 @@ export function DashboardOverview() {
         }
       } catch (e) {
         console.error('Dashboard load error:', e)
+        // Show zero-state stats so cards never stay stuck on loading
+        setStats({ totalVolume: 0, activeLinks: 0, totalPayments: 0, pendingInvoices: 0 })
       } finally {
+        clearTimeout(timeout)
         setLoading(false)
       }
     }
     load()
+    return () => { controller.abort(); clearTimeout(timeout) }
   }, [])
 
-  const statCards = stats
-    ? [
-        {
-          title: 'Total Volume',
-          value: `$${stats.totalVolume.toLocaleString()}`,
-          icon: (
-            <StatIcon>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3,20 8,14 12,17 17,9 22,12 25,7" />
-                <polyline points="21,7 25,7 25,11" />
-              </svg>
-            </StatIcon>
-          ),
-        },
-        {
-          title: 'Active Payment Links',
-          value: stats.activeLinks.toString(),
-          icon: (
-            <StatIcon>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-                <rect x="5.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-                <rect x="17" y="3" width="8" height="8" rx="1.5"/>
-                <rect x="19.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-                <rect x="3" y="17" width="8" height="8" rx="1.5"/>
-                <rect x="5.5" y="19.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-                <path d="M19 20 L22 17 M17 22 C16 22 14.5 20.5 14.5 19 C14.5 17.5 16 16 17.5 16 L19 16 M22 19 C23 19 24.5 20.5 24.5 22 C24.5 23.5 23 25 21.5 25 L20 25"/>
-              </svg>
-            </StatIcon>
-          ),
-        },
-        {
-          title: 'Total Payments',
-          value: stats.totalPayments.toString(),
-          icon: (
-            <StatIcon>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="11" x2="23" y2="11"/>
-                <polyline points="17,6 23,11 17,16"/>
-                <line x1="23" y1="17" x2="5" y2="17"/>
-                <polyline points="11,22 5,17 11,12"/>
-              </svg>
-            </StatIcon>
-          ),
-        },
-        {
-          title: 'Pending Invoices',
-          value: stats.pendingInvoices.toString(),
-          icon: (
-            <StatIcon>
-              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 4 L18 4 L22 8 L22 15 M6 4 L6 24 L15 24"/>
-                <polyline points="18,4 18,8 22,8"/>
-                <line x1="10" y1="11" x2="18" y2="11"/>
-                <line x1="10" y1="14" x2="15" y2="14"/>
-                <circle cx="20" cy="21" r="5"/>
-                <polyline points="20,18.5 20,21 22,22.5"/>
-              </svg>
-            </StatIcon>
-          ),
-        },
-      ]
-    : []
+  const s = stats ?? { totalVolume: 0, activeLinks: 0, totalPayments: 0, pendingInvoices: 0 }
+  const statCards = [
+    {
+      title: 'Total Volume',
+      value: `$${s.totalVolume.toLocaleString()}`,
+      icon: (
+        <StatIcon>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3,20 8,14 12,17 17,9 22,12 25,7" />
+            <polyline points="21,7 25,7 25,11" />
+          </svg>
+        </StatIcon>
+      ),
+    },
+    {
+      title: 'Active Payment Links',
+      value: s.activeLinks.toString(),
+      icon: (
+        <StatIcon>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="8" height="8" rx="1.5"/>
+            <rect x="5.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+            <rect x="17" y="3" width="8" height="8" rx="1.5"/>
+            <rect x="19.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+            <rect x="3" y="17" width="8" height="8" rx="1.5"/>
+            <rect x="5.5" y="19.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
+            <path d="M19 20 L22 17 M17 22 C16 22 14.5 20.5 14.5 19 C14.5 17.5 16 16 17.5 16 L19 16 M22 19 C23 19 24.5 20.5 24.5 22 C24.5 23.5 23 25 21.5 25 L20 25"/>
+          </svg>
+        </StatIcon>
+      ),
+    },
+    {
+      title: 'Total Payments',
+      value: s.totalPayments.toString(),
+      icon: (
+        <StatIcon>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="5" y1="11" x2="23" y2="11"/>
+            <polyline points="17,6 23,11 17,16"/>
+            <line x1="23" y1="17" x2="5" y2="17"/>
+            <polyline points="11,22 5,17 11,12"/>
+          </svg>
+        </StatIcon>
+      ),
+    },
+    {
+      title: 'Pending Invoices',
+      value: s.pendingInvoices.toString(),
+      icon: (
+        <StatIcon>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 4 L18 4 L22 8 L22 15 M6 4 L6 24 L15 24"/>
+            <polyline points="18,4 18,8 22,8"/>
+            <line x1="10" y1="11" x2="18" y2="11"/>
+            <line x1="10" y1="14" x2="15" y2="14"/>
+            <circle cx="20" cy="21" r="5"/>
+            <polyline points="20,18.5 20,21 22,22.5"/>
+          </svg>
+        </StatIcon>
+      ),
+    },
+  ]
 
   const hasCompletedSetup = hasPaymentLink && hasInvoice && !!walletAddress
   const onboardingSteps = [
