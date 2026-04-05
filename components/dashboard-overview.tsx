@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 
 interface Stats {
   totalVolume: number
-  activeLinks: number
+  activePaymentLinks: number
   totalPayments: number
   pendingInvoices: number
 }
@@ -80,71 +80,66 @@ export function DashboardOverview() {
   const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
 
   useEffect(() => {
+    let cancelled = false
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
 
-    async function load() {
+    async function loadAll() {
       try {
-        const signal = controller.signal
-        const [linksRes, paymentsRes, allPaymentsRes, invoicesRes, agentsRes] = await Promise.all([
-          fetch('/api/payment-links', { signal }),
-          fetch('/api/payments?limit=5', { signal }),
-          fetch('/api/payments?limit=100', { signal }),
-          fetch('/api/invoices', { signal }),
-          fetch('/api/agents', { signal }),
-        ])
-        clearTimeout(timeout)
-
-        const [links, payments, allPayments, invoices, agentsData] = await Promise.all([
-          linksRes.ok ? linksRes.json() : Promise.resolve({}),
-          paymentsRes.ok ? paymentsRes.json() : Promise.resolve({}),
-          allPaymentsRes.ok ? allPaymentsRes.json() : Promise.resolve({}),
-          invoicesRes.ok ? invoicesRes.json() : Promise.resolve({}),
-          agentsRes.ok ? agentsRes.json() : Promise.resolve({}),
+        const [statsRes, paymentsRes, linksRes] = await Promise.allSettled([
+          fetch('/api/dashboard/stats', { signal: controller.signal }),
+          fetch('/api/payments?limit=5', { signal: controller.signal }),
+          fetch('/api/payment-links', { signal: controller.signal }),
         ])
 
-        setAgents(agentsData.data ?? [])
+        if (cancelled) return
 
-        const allLinks = links.data ?? []
-        const activeLinks = allLinks.filter((l: any) => l.status === 'active').length
-        const totalVolume = allLinks.reduce((sum: number, l: any) => sum + (l.totalVolume ?? 0), 0)
-        const pendingInvoices = invoices.stats?.pending ?? 0
-        const totalInvoices = (invoices.stats?.pending ?? 0) + (invoices.stats?.paid ?? 0) + (invoices.stats?.draft ?? 0)
+        // Parse payments — API returns { success, data, total } wrapper
+        let recentPayments: RecentPayment[] = []
+        let totalPayments = 0
+        if (paymentsRes.status === 'fulfilled' && paymentsRes.value.ok) {
+          const json = await paymentsRes.value.json()
+          recentPayments = Array.isArray(json) ? json : (json.data ?? json.payments ?? [])
+          totalPayments = json.total ?? recentPayments.length
+        }
+        setRecent(recentPayments)
 
-        setHasPaymentLink(allLinks.length > 0)
-        setHasInvoice(totalInvoices > 0)
-
-        setStats({
-          totalVolume,
-          activeLinks,
-          totalPayments: payments.total ?? 0,
-          pendingInvoices,
-        })
-        setRecent(payments.data ?? [])
-
-        // Compute real compliance metrics
-        const all: RecentPayment[] = allPayments.data ?? []
-        if (all.length > 0) {
-          const kycRate = Math.round((all.filter(p => p.kycPassed).length / all.length) * 100)
-          const amlRate = Math.round((all.filter(p => p.sanctionsChecked).length / all.length) * 100)
-          const monitoringRate = Math.round((all.filter(p => p.status === 'completed').length / all.length) * 100)
-          const score = Math.round((kycRate + amlRate + monitoringRate) / 3)
-          setCompliance({ kycRate, amlRate, monitoringRate, score })
+        // Try dedicated stats route first; fall back to computing from links
+        if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
+          const data = await statsRes.value.json()
+          setStats({
+            totalVolume: data.totalVolume ?? 0,
+            activePaymentLinks: data.activePaymentLinks ?? 0,
+            totalPayments: data.totalPayments ?? totalPayments,
+            pendingInvoices: data.pendingInvoices ?? 0,
+          })
+        } else {
+          // Compute stats from payment-links (fallback)
+          let activePaymentLinks = 0
+          let totalVolume = 0
+          if (linksRes.status === 'fulfilled' && linksRes.value.ok) {
+            const json = await linksRes.value.json()
+            const links: any[] = Array.isArray(json) ? json : (json.data ?? [])
+            activePaymentLinks = links.filter((l: any) => l.status === 'active').length
+            totalVolume = links.reduce((s: number, l: any) => s + (Number(l.totalVolume) || 0), 0)
+            setHasPaymentLink(links.length > 0)
+          }
+          setStats({ totalVolume, activePaymentLinks, totalPayments, pendingInvoices: 0 })
         }
       } catch (e) {
+        if (cancelled) return
         console.error('Dashboard load error:', e)
-        // Show zero-state stats so cards never stay stuck on loading
-        setStats({ totalVolume: 0, activeLinks: 0, totalPayments: 0, pendingInvoices: 0 })
+        setStats({ totalVolume: 0, activePaymentLinks: 0, totalPayments: 0, pendingInvoices: 0 })
+        setRecent([])
       } finally {
-        clearTimeout(timeout)
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
-    load()
-    return () => { controller.abort(); clearTimeout(timeout) }
+
+    loadAll()
+    return () => { cancelled = true; controller.abort() }
   }, [])
 
-  const s = stats ?? { totalVolume: 0, activeLinks: 0, totalPayments: 0, pendingInvoices: 0 }
+  const s = stats ?? { totalVolume: 0, activePaymentLinks: 0, totalPayments: 0, pendingInvoices: 0 }
   const statCards = [
     {
       title: 'Total Volume',
@@ -160,7 +155,7 @@ export function DashboardOverview() {
     },
     {
       title: 'Active Payment Links',
-      value: s.activeLinks.toString(),
+      value: s.activePaymentLinks.toString(),
       icon: (
         <StatIcon>
           <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -219,7 +214,7 @@ export function DashboardOverview() {
     {
       step: 2,
       title: "Link your wallet",
-      desc: "Connect your wallet so you can receive funds on HashKey Chain.",
+      desc: "Connect your wallet so you can receive funds on Celo.",
       icon: Wallet,
       done: !!walletAddress,
     },
@@ -323,17 +318,17 @@ export function DashboardOverview() {
                 </CardContent>
               </Card>
             ))
-          : statCards.map((s) => (
-              <Card key={s.title} className={s.title === 'Total Volume' ? 'relative overflow-hidden' : ''}>
-                {s.title === 'Total Volume' && (
+          : statCards.map((card) => (
+              <Card key={card.title} className={card.title === 'Total Volume' ? 'relative overflow-hidden' : ''}>
+                {card.title === 'Total Volume' && (
                   <img src="/image7.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" />
                 )}
                 <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-                  <CardTitle className={`text-sm font-medium ${s.title === 'Total Volume' ? 'text-slate-700' : 'text-slate-500'}`}>{s.title}</CardTitle>
-                  {s.icon}
+                  <CardTitle className={`text-sm font-medium ${card.title === 'Total Volume' ? 'text-slate-700' : 'text-slate-500'}`}>{card.title}</CardTitle>
+                  {card.icon}
                 </CardHeader>
                 <CardContent className="relative">
-                  <div className="text-2xl font-bold text-slate-900">{s.value}</div>
+                  <div className="text-2xl font-bold text-slate-900">{card.value}</div>
                 </CardContent>
               </Card>
             ))}
@@ -380,7 +375,12 @@ export function DashboardOverview() {
         <Card>
           <CardHeader>
             <CardTitle className="text-slate-900">Compliance Status</CardTitle>
-            <CardDescription>HashKey Testnet · Live</CardDescription>
+            <CardDescription>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                Celo Mainnet · Live
+              </span>
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             {loading ? (
