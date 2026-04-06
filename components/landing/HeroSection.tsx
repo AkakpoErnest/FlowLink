@@ -79,7 +79,7 @@ export function HeroSection() {
             href="/auth/signin"
             className="inline-flex items-center gap-2 bg-white text-[#1a3530] font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 shadow-lg shadow-white/10"
           >
-            Try Demo
+            Try FlowLink
           </Link>
           <a
             href="#layers"
