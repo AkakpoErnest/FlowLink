@@ -1,27 +1,47 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { ArrowRight } from "lucide-react"
 
 export function HeroSection() {
+  const [mouse, setMouse] = useState({ x: 50, y: 50 })
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMouse({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    })
+  }
+
   return (
     <section
       id="home"
+      onMouseMove={handleMouseMove}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
       style={{
         background:
           "linear-gradient(135deg, #0f2420 0%, #1a3530 35%, #2a5248 65%, #1e3d35 100%)",
       }}
     >
-      {/* Radial glow */}
+      {/* Static bottom glow */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 50% 120%, rgba(52,211,153,0.12) 0%, transparent 70%)",
+            "radial-gradient(ellipse 80% 60% at 50% 120%, rgba(52,211,153,0.10) 0%, transparent 70%)",
         }}
       />
+
+      {/* Mouse-tracking glow */}
+      <div
+        className="pointer-events-none absolute inset-0 transition-all duration-300 ease-out"
+        style={{
+          background: `radial-gradient(ellipse 60% 50% at ${mouse.x}% ${mouse.y}%, rgba(52,211,153,0.18) 0%, transparent 70%)`,
+        }}
+      />
+
       {/* Grid overlay */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.03]"
@@ -49,12 +69,12 @@ export function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.22, duration: 0.75, ease: "easeOut" }}
-          className="font-bold text-white leading-[1.0] tracking-tight mb-8 max-w-4xl"
+          className="font-light text-white leading-[1.0] tracking-tight mb-8 max-w-4xl"
           style={{ fontSize: "clamp(4rem, 9vw, 8rem)" }}
         >
           Fast, audited,
           <br />
-          <span className="font-light text-white/65">fully compliant</span>
+          <span className="font-extralight text-white/65">fully compliant</span>
         </motion.h1>
 
         {/* Subtitle */}
@@ -64,9 +84,8 @@ export function HeroSection() {
           transition={{ delay: 0.38, duration: 0.7, ease: "easeOut" }}
           className="text-white/55 text-lg leading-relaxed max-w-xl mb-12"
         >
-          FlowLink is the compliance infrastructure for stablecoin payments —
-          from human-to-human today to agent-to-agent by 2027. Built-in KYC,
-          sanctions screening, and FATF Travel Rule compliance.
+          FlowLink is the regulatory-grade trust layer that makes stablecoin
+          payments safe for CFOs today and AI agents tomorrow.
         </motion.p>
 
         {/* CTAs */}
@@ -80,13 +99,13 @@ export function HeroSection() {
             href="/auth/signin"
             className="inline-flex items-center gap-2 bg-white text-[#1a3530] font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 shadow-lg shadow-white/10"
           >
-            Get Started Free <ArrowRight className="w-4 h-4" />
+            Try Demo
           </Link>
           <a
             href="#layers"
             className="inline-flex items-center gap-2 border border-white/25 text-white/80 font-medium text-sm px-7 py-3.5 rounded-full hover:bg-white/5 hover:border-white/40 transition-all duration-200"
           >
-            See how it works
+            Learn More
           </a>
         </motion.div>
       </div>
