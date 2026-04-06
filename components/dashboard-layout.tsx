@@ -427,12 +427,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content — offset by sidebar width */}
       <div className="ml-64 flex flex-col min-h-screen">
         {/* Slim topbar */}
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-30">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 text-white rounded-lg shadow-sm">
-            <div className="h-1.5 w-1.5 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-xs font-semibold tracking-wide text-emerald-400">🟢 Celo</span>
-            <span className="text-slate-400 text-xs hidden sm:inline">Mainnet</span>
-          </div>
+        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-end px-6 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 h-8 w-8 p-0">
               <Bell className="h-4 w-4" />
