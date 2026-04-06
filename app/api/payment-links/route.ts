@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       userId,
       code: body.code || `pay-${Date.now()}`,
       name: body.name || null,
-      network: body.network || "celo",
+      network: body.network || "hashkey-testnet",
       sourceToken: body.sourceToken || "USDC",
       destStable: body.destStable || "USDC",
       amountMin: body.amountMin ? parseFloat(body.amountMin) : null,

@@ -214,7 +214,7 @@ export function DashboardOverview() {
     {
       step: 2,
       title: "Link your wallet",
-      desc: "Connect your wallet so you can receive funds on Celo.",
+      desc: "Connect your wallet so you can receive funds on HashKey Chain.",
       icon: Wallet,
       done: !!walletAddress,
     },
@@ -383,7 +383,7 @@ export function DashboardOverview() {
             <CardDescription>
               <span className="inline-flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
-                Celo Mainnet · Live
+                HashKey Testnet · Live
               </span>
             </CardDescription>
           </CardHeader>
