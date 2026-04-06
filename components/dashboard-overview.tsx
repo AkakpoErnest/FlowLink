@@ -348,7 +348,12 @@ export function DashboardOverview() {
               </div>
             ) : recent.length === 0 ? (
               <div className="text-center py-8 text-slate-400">
-                <Zap className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                </div>
                 <p className="text-sm">No payments yet. Share a payment link to get started.</p>
               </div>
             ) : (
@@ -416,7 +421,12 @@ export function DashboardOverview() {
               </>
             ) : (
               <div className="text-center py-8 text-slate-400">
-                <Shield className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
+                </div>
                 <p className="text-sm">No payment data yet. Compliance metrics will appear here once you receive payments.</p>
               </div>
             )}
