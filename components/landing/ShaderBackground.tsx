@@ -1,0 +1,126 @@
+"use client"
+
+import { useEffect, useRef } from "react"
+
+export function ShaderBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+
+    // Non-nullable aliases captured by nested functions
+    const cv = canvas
+    const cx = ctx
+
+    let width = window.innerWidth
+    let height = window.innerHeight
+    cv.width = width
+    cv.height = height
+
+    const mouse = { x: width / 2, y: height / 2 }
+    let animId: number
+    let time = 0
+
+    const particles: {
+      x: number
+      y: number
+      vx: number
+      vy: number
+      size: number
+      alpha: number
+    }[] = []
+
+    for (let i = 0; i < 120; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        size: Math.random() * 2.5 + 0.5,
+        alpha: Math.random() * 0.5 + 0.1,
+      })
+    }
+
+    function noise(x: number, y: number, t: number) {
+      return (
+        Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t * 0.7) +
+        Math.sin(x * 0.02 - t * 0.5) * Math.cos(y * 0.015 + t * 0.3) * 0.5
+      )
+    }
+
+    function handleMouseMove(e: MouseEvent) {
+      mouse.x = e.clientX
+      mouse.y = e.clientY
+    }
+
+    function handleResize() {
+      width = window.innerWidth
+      height = window.innerHeight
+      cv.width = width
+      cv.height = height
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("resize", handleResize)
+
+    function draw() {
+      time += 0.003
+      cx.clearRect(0, 0, width, height)
+
+      for (const p of particles) {
+        const n = noise(p.x, p.y, time)
+        const angle = n * Math.PI * 2
+        p.vx += Math.cos(angle) * 0.015
+        p.vy += Math.sin(angle) * 0.015
+
+        const dx = mouse.x - p.x
+        const dy = mouse.y - p.y
+        const dist = Math.sqrt(dx * dx + dy * dy)
+        if (dist < 250) {
+          const force = (250 - dist) / 250
+          p.vx += (dx / dist) * force * 0.08
+          p.vy += (dy / dist) * force * 0.08
+        }
+
+        p.vx *= 0.96
+        p.vy *= 0.96
+        p.x += p.vx
+        p.y += p.vy
+
+        if (p.x < 0) p.x = width
+        if (p.x > width) p.x = 0
+        if (p.y < 0) p.y = height
+        if (p.y > height) p.y = 0
+
+        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4)
+        gradient.addColorStop(0, `rgba(52, 211, 153, ${p.alpha})`)
+        gradient.addColorStop(1, "rgba(52, 211, 153, 0)")
+        cx.beginPath()
+        cx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2)
+        cx.fillStyle = gradient
+        cx.fill()
+      }
+
+      animId = requestAnimationFrame(draw)
+    }
+
+    draw()
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none fixed inset-0 z-0"
+      style={{ opacity: 0.07 }}
+    />
+  )
+}

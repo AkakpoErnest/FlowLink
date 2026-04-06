@@ -1,3 +1,4 @@
+import { ShaderBackground } from "@/components/landing/ShaderBackground"
 import { Navbar } from "@/components/landing/Navbar"
 import { HeroSection } from "@/components/landing/HeroSection"
 import { LayersSection } from "@/components/landing/LayersSection"
@@ -9,6 +10,7 @@ import { Footer } from "@/components/landing/Footer"
 export default function LandingPage() {
   return (
     <main>
+      <ShaderBackground />
       <Navbar />
       <HeroSection />
       <LayersSection />
