@@ -25,15 +25,16 @@ export function Navbar() {
       style={{ transitionProperty: "background-color, border-color, opacity, transform" }}
     >
       {/* Logo */}
-      <Link href="/" className="shrink-0 group">
+      <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
         <Image
           src="/flowlink-logo-final.png"
           alt="FlowLink"
-          width={40}
-          height={40}
+          width={36}
+          height={36}
           className="rounded-xl opacity-95 group-hover:opacity-100 transition-opacity"
           priority
         />
+        <span className="font-semibold text-white text-lg leading-none">FlowLink</span>
       </Link>
 
       {/* Nav links */}
