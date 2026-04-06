@@ -31,39 +31,6 @@ const features = [
   },
 ]
 
-function FeatureItem({
-  feature,
-  style,
-  index,
-}: {
-  feature: (typeof features)[0]
-  style: Record<string, ReturnType<typeof useTransform>>
-  index: number
-}) {
-  return (
-    <motion.div style={style} className="group relative">
-      <div className="flex items-start gap-6 p-8 rounded-2xl border border-white/8 hover:border-emerald-500/30 bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-500">
-        <div className="shrink-0">
-          <span className="text-xs font-mono text-white/20 block mb-4">{feature.num}</span>
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors duration-300">
-            <feature.icon className="w-5 h-5 text-emerald-400" />
-          </div>
-        </div>
-        <div>
-          <h3 className="text-xl font-light text-white mb-3">{feature.title}</h3>
-          <p className="text-white/35 text-sm leading-relaxed">{feature.desc}</p>
-        </div>
-        {/* Right arrow indicator */}
-        <motion.div
-          className="absolute right-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        >
-          <span className="text-white/40 text-xs">→</span>
-        </motion.div>
-      </div>
-    </motion.div>
-  )
-}
-
 export function FeaturesSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
@@ -74,17 +41,23 @@ export function FeaturesSection() {
   const headerY = useTransform(scrollYProgress, [0, 0.1], [30, 0])
   const headerOp = useTransform(scrollYProgress, [0, 0.1], [0, 1])
 
-  // 4 items — stagger across the scroll range
-  const makeStyle = (start: number) => ({
-    y: useTransform(scrollYProgress, [start, start + 0.14], [45, 0]),
-    opacity: useTransform(scrollYProgress, [start, start + 0.14], [0, 1]),
-  })
+  const y0 = useTransform(scrollYProgress, [0.04, 0.18], [45, 0])
+  const op0 = useTransform(scrollYProgress, [0.04, 0.18], [0, 1])
 
-  const styles = [
-    makeStyle(0.04),
-    makeStyle(0.22),
-    makeStyle(0.42),
-    makeStyle(0.62),
+  const y1 = useTransform(scrollYProgress, [0.22, 0.36], [45, 0])
+  const op1 = useTransform(scrollYProgress, [0.22, 0.36], [0, 1])
+
+  const y2 = useTransform(scrollYProgress, [0.42, 0.56], [45, 0])
+  const op2 = useTransform(scrollYProgress, [0.42, 0.56], [0, 1])
+
+  const y3 = useTransform(scrollYProgress, [0.62, 0.76], [45, 0])
+  const op3 = useTransform(scrollYProgress, [0.62, 0.76], [0, 1])
+
+  const itemStyles = [
+    { y: y0, opacity: op0 },
+    { y: y1, opacity: op1 },
+    { y: y2, opacity: op2 },
+    { y: y3, opacity: op3 },
   ]
 
   return (
@@ -101,8 +74,25 @@ export function FeaturesSection() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {features.map((f, i) => (
-              <FeatureItem key={f.num} feature={f} style={styles[i]} index={i} />
+            {features.map((feature, i) => (
+              <motion.div
+                key={feature.num}
+                style={itemStyles[i]}
+                className="group relative"
+              >
+                <div className="flex items-start gap-6 p-8 rounded-2xl border border-white/8 hover:border-emerald-500/30 bg-white/[0.02] hover:bg-white/[0.04] transition-all duration-500">
+                  <div className="shrink-0">
+                    <span className="text-xs font-mono text-white/20 block mb-4">{feature.num}</span>
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-500/20 transition-colors duration-300">
+                      <feature.icon className="w-5 h-5 text-emerald-400" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-light text-white mb-3">{feature.title}</h3>
+                    <p className="text-white/35 text-sm leading-relaxed">{feature.desc}</p>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>

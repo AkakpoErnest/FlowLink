@@ -2,15 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.12, duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-  }),
-}
+import { ArrowRight } from "lucide-react"
 
 export function HeroSection() {
   return (
@@ -43,10 +35,9 @@ export function HeroSection() {
       <div className="relative z-10 container mx-auto px-8 pt-28 pb-24 max-w-6xl">
         {/* Badge */}
         <motion.div
-          custom={0}
-          initial="hidden"
-          animate="show"
-          variants={fadeUp}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.7, ease: "easeOut" }}
           className="inline-flex items-center gap-2.5 bg-white/8 border border-white/15 rounded-full px-4 py-1.5 text-sm text-white/80 mb-10"
         >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -55,23 +46,22 @@ export function HeroSection() {
 
         {/* Headline */}
         <motion.h1
-          custom={1}
-          initial="hidden"
-          animate="show"
-          variants={fadeUp}
-          className="text-[clamp(3rem,8vw,7rem)] font-light text-white leading-[1.0] tracking-tight mb-8 max-w-4xl"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22, duration: 0.75, ease: "easeOut" }}
+          className="font-bold text-white leading-[1.0] tracking-tight mb-8 max-w-4xl"
+          style={{ fontSize: "clamp(4rem, 9vw, 8rem)" }}
         >
           Fast, audited,
           <br />
-          <span className="font-extralight text-white/70">fully compliant</span>
+          <span className="font-light text-white/65">fully compliant</span>
         </motion.h1>
 
         {/* Subtitle */}
         <motion.p
-          custom={2}
-          initial="hidden"
-          animate="show"
-          variants={fadeUp}
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.38, duration: 0.7, ease: "easeOut" }}
           className="text-white/55 text-lg leading-relaxed max-w-xl mb-12"
         >
           FlowLink is the compliance infrastructure for stablecoin payments —
@@ -81,23 +71,22 @@ export function HeroSection() {
 
         {/* CTAs */}
         <motion.div
-          custom={3}
-          initial="hidden"
-          animate="show"
-          variants={fadeUp}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.52, duration: 0.7, ease: "easeOut" }}
           className="flex items-center gap-4 flex-wrap"
         >
           <Link
             href="/auth/signin"
             className="inline-flex items-center gap-2 bg-white text-[#1a3530] font-semibold text-sm px-7 py-3.5 rounded-full hover:bg-white/90 transition-all duration-200 shadow-lg shadow-white/10"
           >
-            Try Demo
+            Get Started Free <ArrowRight className="w-4 h-4" />
           </Link>
           <a
             href="#layers"
             className="inline-flex items-center gap-2 border border-white/25 text-white/80 font-medium text-sm px-7 py-3.5 rounded-full hover:bg-white/5 hover:border-white/40 transition-all duration-200"
           >
-            Learn More
+            See how it works
           </a>
         </motion.div>
       </div>
@@ -106,7 +95,7 @@ export function HeroSection() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 0.8 }}
+        transition={{ delay: 1.4, duration: 0.8 }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
       >
         <span className="text-xs text-white/35 tracking-widest uppercase font-medium">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion"
 
 const layers = [
   {
@@ -35,7 +35,7 @@ function LayerItem({
   style,
 }: {
   layer: (typeof layers)[0]
-  style: Record<string, ReturnType<typeof useTransform>>
+  style: { y: MotionValue<number>; opacity: MotionValue<number> }
 }) {
   return (
     <motion.div
