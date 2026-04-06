@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Link2 } from "lucide-react"
+import Image from "next/image"
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -25,14 +25,15 @@ export function Navbar() {
       style={{ transitionProperty: "background-color, border-color, opacity, transform" }}
     >
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-        <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow shrink-0">
-          <Link2 className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
-        </div>
-        <span className="font-bold text-lg tracking-tight leading-none">
-          <span className="text-white">Flow</span>
-          <span className="text-emerald-400">Link</span>
-        </span>
+      <Link href="/" className="shrink-0 group">
+        <Image
+          src="/flowlink-logo-final.png"
+          alt="FlowLink"
+          width={40}
+          height={40}
+          className="rounded-xl opacity-95 group-hover:opacity-100 transition-opacity"
+          priority
+        />
       </Link>
 
       {/* Nav links */}
@@ -49,13 +50,21 @@ export function Navbar() {
         ))}
       </nav>
 
-      {/* CTA */}
-      <Link
-        href="/auth/signin"
-        className="hidden md:inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white text-sm font-medium px-5 py-2 rounded-full transition-all duration-200 shrink-0"
-      >
-        Get Started
-      </Link>
+      {/* CTAs */}
+      <div className="hidden md:flex items-center gap-3 shrink-0">
+        <Link
+          href="/auth/signin"
+          className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/auth/signin"
+          className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white text-sm font-medium px-5 py-2 rounded-full transition-all duration-200"
+        >
+          Get Started Free
+        </Link>
+      </div>
     </header>
   )
 }
