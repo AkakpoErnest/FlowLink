@@ -482,14 +482,28 @@ export function AIInvoiceModule() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total", value: stats.total, icon: FileText, color: "text-slate-700", bg: "bg-slate-100" },
-          { label: "Pending", value: stats.pending, icon: Clock, color: "text-yellow-600", bg: "bg-yellow-50" },
-          { label: "Paid", value: stats.paid, icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
-          { label: "Total Value", value: `$${parseFloat(stats.totalValue).toLocaleString()}`, icon: DollarSign, color: "text-indigo-600", bg: "bg-indigo-50" },
+          {
+            label: "Total", value: stats.total,
+            svg: <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3 L17 3 L21 7 L21 23 L5 23 Z"/><polyline points="17,3 17,7 21,7"/><line x1="9" y1="11" x2="17" y2="11"/><line x1="9" y1="14" x2="14" y2="14"/></svg>
+          },
+          {
+            label: "Pending", value: stats.pending,
+            svg: <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="13" cy="13" r="9"/><polyline points="13,8 13,13 16,16"/></svg>
+          },
+          {
+            label: "Paid", value: stats.paid,
+            svg: <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="13" cy="13" r="9"/><polyline points="9,13 12,16 17,10"/></svg>
+          },
+          {
+            label: "Total Value", value: `$${parseFloat(stats.totalValue).toLocaleString()}`,
+            svg: <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="13" y1="3" x2="13" y2="23"/><path d="M18,7 H10.5 C8.5,7 7,8.5 7,10.5 C7,12.5 8.5,14 10.5,14 H15.5 C17.5,14 19,15.5 19,17.5 C19,19.5 17.5,21 15.5,21 H8"/></svg>
+          },
         ].map(s => (
           <Card key={s.label}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${s.bg}`}><s.icon className={`h-5 w-5 ${s.color}`} /></div>
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md shrink-0" style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}>
+                {s.svg}
+              </div>
               <div><p className="text-slate-500 text-xs">{s.label}</p><p className="text-slate-900 font-bold text-lg">{s.value}</p></div>
             </CardContent>
           </Card>
