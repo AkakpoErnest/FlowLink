@@ -54,13 +54,13 @@ export function Navbar() {
       {/* CTAs */}
       <div className="hidden md:flex items-center gap-3 shrink-0">
         <Link
-          href="/auth/signin"
+          href="/login"
           className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200"
         >
           Sign In
         </Link>
         <Link
-          href="/auth/signin"
+          href="/login"
           className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 text-white text-sm font-medium px-5 py-2 rounded-full transition-all duration-200"
         >
           Get Started Free

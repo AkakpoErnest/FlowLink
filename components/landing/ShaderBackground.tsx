@@ -33,14 +33,14 @@ export function ShaderBackground() {
       alpha: number
     }[] = []
 
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 150; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.4,
         vy: (Math.random() - 0.5) * 0.4,
-        size: Math.random() * 2.5 + 0.5,
-        alpha: Math.random() * 0.5 + 0.1,
+        size: Math.random() * 4 + 1.5,
+        alpha: Math.random() * 0.7 + 0.2,
       })
     }
 
@@ -95,11 +95,13 @@ export function ShaderBackground() {
         if (p.y < 0) p.y = height
         if (p.y > height) p.y = 0
 
-        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4)
+        const r = p.size * 8
+        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
         gradient.addColorStop(0, `rgba(52, 211, 153, ${p.alpha})`)
+        gradient.addColorStop(0.4, `rgba(52, 211, 153, ${p.alpha * 0.3})`)
         gradient.addColorStop(1, "rgba(52, 211, 153, 0)")
         cx.beginPath()
-        cx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2)
+        cx.arc(p.x, p.y, r, 0, Math.PI * 2)
         cx.fillStyle = gradient
         cx.fill()
       }
@@ -120,7 +122,7 @@ export function ShaderBackground() {
     <canvas
       ref={canvasRef}
       className="pointer-events-none fixed inset-0 z-0"
-      style={{ opacity: 0.07 }}
+      style={{ opacity: 0.18 }}
     />
   )
 }

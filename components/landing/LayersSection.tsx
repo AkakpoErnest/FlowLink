@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { useEffect, useRef } from "react"
 
 const layers = [
   {
@@ -10,6 +10,7 @@ const layers = [
     tag: "Live",
     tagStyle: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     live: true,
+    dim: false,
     desc: "Instant, compliant stablecoin payments between verified businesses. KYC, sanctions screening, and FATF Travel Rule built in from day one.",
   },
   {
@@ -17,8 +18,9 @@ const layers = [
     title: "Human-to-Agent & Agent-to-Human",
     subtitle: "AI-Assisted Transactions",
     tag: "Q1 2026",
-    tagStyle: "bg-white/8 text-white/50 border-white/15",
+    tagStyle: "bg-white/[0.08] text-white/50 border-white/15",
     live: false,
+    dim: true,
     desc: "Agents that pay and get paid on behalf of humans. Every transaction carries a verifiable compliance certificate.",
   },
   {
@@ -26,43 +28,69 @@ const layers = [
     title: "Agent-to-Agent",
     subtitle: "Autonomous Agentic Commerce",
     tag: "Q1 2026",
-    tagStyle: "bg-white/8 text-white/50 border-white/15",
+    tagStyle: "bg-white/[0.08] text-white/50 border-white/15",
     live: false,
+    dim: true,
     desc: "Fully autonomous agents transacting with each other. FlowLink's KYA framework ensures every agent identity is verified and auditable.",
   },
 ]
 
 export function LayersSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view")
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.12 }
+    )
+
+    const items = sectionRef.current?.querySelectorAll(".reveal-item")
+    items?.forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section id="layers" className="bg-black py-24 md:py-32">
-      <div className="container mx-auto px-8 max-w-5xl">
+      <style>{`
+        .reveal-item {
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .reveal-item.in-view {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .reveal-item:nth-child(2) { transition-delay: 0.08s; }
+        .reveal-item:nth-child(3) { transition-delay: 0.16s; }
+        .reveal-item:nth-child(4) { transition-delay: 0.24s; }
+      `}</style>
+
+      <div ref={sectionRef} className="container mx-auto px-8 max-w-5xl">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-16"
-        >
+        <div className="reveal-item mb-16">
           <p className="text-xs font-mono text-emerald-400/70 tracking-[0.2em] uppercase mb-5">
             / How FlowLink Scales Compliance
           </p>
           <h2 className="text-5xl md:text-6xl font-light text-white tracking-tight">
             Three Layers
           </h2>
-        </motion.div>
+        </div>
 
         {/* Rows */}
-        <div className="divide-y divide-white/8">
-          {layers.map((layer, i) => (
-            <motion.div
+        <div className="divide-y divide-white/[0.08]">
+          {layers.map((layer) => (
+            <div
               key={layer.num}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, delay: i * 0.08, ease: "easeOut" }}
-              className={`group py-10 flex items-start gap-8 transition-opacity duration-300 ${
-                i === 0 ? "opacity-100" : "opacity-60 hover:opacity-100"
+              className={`reveal-item group py-10 flex items-start gap-8 transition-opacity duration-300 ${
+                layer.dim ? "opacity-60 hover:opacity-100" : ""
               }`}
             >
               {/* Number */}
@@ -92,7 +120,7 @@ export function LayersSection() {
                   {layer.desc}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
