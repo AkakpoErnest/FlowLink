@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from "react"
 import Link from "next/link"
 import { motion, useInView } from "framer-motion"
+import { ArrowRight } from "lucide-react"
 
 function CountUp({
   to,
@@ -24,7 +25,6 @@ function CountUp({
     const start = performance.now()
     const tick = (now: number) => {
       const elapsed = Math.min((now - start) / (duration * 1000), 1)
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - elapsed, 3)
       setValue(Math.round(eased * to))
       if (elapsed < 1) requestAnimationFrame(tick)
@@ -61,7 +61,6 @@ export function AboutSection() {
           "linear-gradient(160deg, #0f2420 0%, #1a3530 50%, #2a5248 100%)",
       }}
     >
-      {/* Glow */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
@@ -76,16 +75,16 @@ export function AboutSection() {
           <div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               className="text-xs font-mono text-emerald-400/70 tracking-[0.2em] uppercase mb-6"
             >
               / About FlowLink
             </motion.p>
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: 0.1 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
               className="text-4xl md:text-5xl font-light text-white leading-tight mb-8"
             >
               Compliance for the
@@ -94,8 +93,8 @@ export function AboutSection() {
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: 0.2 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
               className="text-white/45 leading-relaxed mb-10 text-base"
             >
               As AI agents become economic actors, the compliance layer must
@@ -105,21 +104,21 @@ export function AboutSection() {
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.7, delay: 0.3 }}
+              animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
               className="flex gap-4 flex-wrap"
             >
               <Link
                 href="/auth/signin"
                 className="inline-flex items-center gap-2 bg-white text-[#1a3530] font-semibold text-sm px-6 py-3 rounded-full hover:bg-white/90 transition-all duration-200"
               >
-                Try Demo
+                Get Started Free <ArrowRight className="w-4 h-4" />
               </Link>
               <a
-                href="#demo"
+                href="#how-it-works"
                 className="inline-flex items-center gap-2 border border-white/25 text-white/70 text-sm px-6 py-3 rounded-full hover:bg-white/5 transition-all duration-200"
               >
-                See it in action
+                See how it works
               </a>
             </motion.div>
           </div>
@@ -130,8 +129,8 @@ export function AboutSection() {
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, x: 30 }}
-                animate={inView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.7, delay: 0.15 + i * 0.12 }}
+                animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
+                transition={{ duration: 0.7, delay: 0.15 + i * 0.12, ease: "easeOut" }}
                 className="flex items-center justify-between p-6 rounded-2xl border border-white/8 bg-white/[0.03]"
               >
                 <span className="text-white/45 text-sm font-medium">{stat.label}</span>

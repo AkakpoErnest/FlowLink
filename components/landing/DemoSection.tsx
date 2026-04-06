@@ -7,11 +7,10 @@ import { CheckCircle, Shield, FileText, ArrowRight } from "lucide-react"
 const steps = [
   {
     id: 0,
-    label: "Enter Payment",
+    label: "Initiate",
     icon: FileText,
-    color: "emerald",
     content: {
-      title: "Payment Details",
+      title: "Payment Initiated",
       body: (
         <div className="space-y-4">
           <div className="flex items-center justify-between py-3 border-b border-white/8">
@@ -38,22 +37,21 @@ const steps = [
     id: 1,
     label: "Compliance",
     icon: Shield,
-    color: "blue",
     content: {
-      title: "ProofLink Engine",
+      title: "ProofLink Engine Running",
       body: (
         <div className="space-y-3">
           {[
-            { label: "Sanctions Screening", status: "Clear", done: true },
-            { label: "KYC Verification", status: "Passed", done: true },
-            { label: "FATF Travel Rule", status: "Satisfied", done: true },
-            { label: "AML Monitoring", status: "No flags", done: true },
+            { label: "Sanctions Screening", status: "Clear" },
+            { label: "KYC Verification", status: "Passed" },
+            { label: "FATF Travel Rule", status: "Satisfied" },
+            { label: "AML Monitoring", status: "No flags" },
           ].map((check, i) => (
             <motion.div
               key={check.label}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.15 }}
+              transition={{ delay: i * 0.15, ease: "easeOut" }}
               className="flex items-center justify-between py-2.5 border-b border-white/8 last:border-0"
             >
               <span className="text-white/50 text-sm">{check.label}</span>
@@ -69,11 +67,10 @@ const steps = [
   },
   {
     id: 2,
-    label: "Confirmed",
+    label: "Settled",
     icon: CheckCircle,
-    color: "emerald",
     content: {
-      title: "Transaction Confirmed",
+      title: "Payment Settled On-Chain",
       body: (
         <div className="flex flex-col items-center justify-center py-4 gap-4">
           <motion.div
@@ -101,9 +98,8 @@ const steps = [
     id: 3,
     label: "Receipt",
     icon: FileText,
-    color: "purple",
     content: {
-      title: "Compliance Receipt",
+      title: "Compliance Receipt Issued",
       body: (
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2.5 border-b border-white/8">
@@ -134,12 +130,11 @@ export function DemoSection() {
   const inView = useInView(sectionRef, { once: true, margin: "-200px" })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Auto-advance when in view
   useEffect(() => {
     if (!inView) return
     timerRef.current = setTimeout(() => {
       setActiveStep((s) => (s + 1) % steps.length)
-    }, 2200)
+    }, 2400)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
@@ -149,7 +144,7 @@ export function DemoSection() {
 
   return (
     <section
-      id="demo"
+      id="how-it-works"
       ref={sectionRef}
       className="relative py-32 overflow-hidden"
       style={{
@@ -167,22 +162,22 @@ export function DemoSection() {
       <div className="relative z-10 container mx-auto px-8 max-w-5xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
           className="text-center mb-16"
         >
           <p className="text-xs font-mono text-emerald-400/70 tracking-[0.2em] uppercase mb-5">
-            / Interactive Walkthrough
+            / End-to-End Compliance Flow
           </p>
           <h2 className="text-4xl md:text-5xl font-light text-white tracking-tight">
-            Live Demo
+            How It Works
           </h2>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="max-w-lg mx-auto"
         >
           {/* Step tabs */}
@@ -209,7 +204,7 @@ export function DemoSection() {
             ))}
           </div>
 
-          {/* Step progress bar */}
+          {/* Progress bar */}
           <div className="h-0.5 bg-white/8 rounded-full mb-8 overflow-hidden">
             <motion.div
               className="h-full bg-emerald-400 rounded-full"
@@ -226,11 +221,11 @@ export function DemoSection() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.35 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
               >
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                    <step.icon className="w-4.5 h-4.5 text-emerald-400" />
+                    <step.icon className="w-4 h-4 text-emerald-400" />
                   </div>
                   <h3 className="text-white font-medium">{step.content.title}</h3>
                 </div>
@@ -259,8 +254,8 @@ export function DemoSection() {
                     if (timerRef.current) clearTimeout(timerRef.current)
                     setActiveStep(i)
                   }}
-                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                    i === activeStep ? "bg-emerald-400 w-4" : "bg-white/20"
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === activeStep ? "bg-emerald-400 w-4" : "bg-white/20 w-1.5"
                   }`}
                 />
               ))}
