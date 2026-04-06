@@ -1,24 +1,12 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 
 export function HeroSection() {
-  const [mouse, setMouse] = useState({ x: 50, y: 50 })
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    setMouse({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    })
-  }
-
   return (
     <section
       id="home"
-      onMouseMove={handleMouseMove}
       className="relative min-h-screen flex flex-col justify-center overflow-hidden"
       style={{
         background:
@@ -31,14 +19,6 @@ export function HeroSection() {
         style={{
           background:
             "radial-gradient(ellipse 80% 60% at 50% 120%, rgba(52,211,153,0.10) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Mouse-tracking glow */}
-      <div
-        className="pointer-events-none absolute inset-0 transition-all duration-300 ease-out"
-        style={{
-          background: `radial-gradient(ellipse 60% 50% at ${mouse.x}% ${mouse.y}%, rgba(52,211,153,0.18) 0%, transparent 70%)`,
         }}
       />
 
