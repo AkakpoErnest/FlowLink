@@ -54,7 +54,7 @@ export default function FeaturesSection() {
             What's built in
           </h2>
           <p className="text-lg text-slate-500">
-            The compliance layer is not an add-on. It's the product.
+            Compliance tools are part of the product, not a separate integration.
           </p>
         </motion.div>
 

@@ -58,7 +58,7 @@ export default function HowItWorksSection() {
           <h2 className="text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">
             How it works
           </h2>
-          <p className="text-lg text-slate-500">Three steps. No compliance team needed.</p>
+          <p className="text-lg text-slate-500">Three steps to send or receive crypto payments.</p>
         </motion.div>
 
         <motion.div

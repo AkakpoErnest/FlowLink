@@ -21,7 +21,7 @@ const itemVariants = {
 }
 
 const securityItems = [
-  { icon: UserCheck, title: 'AML / KYC screening', desc: 'Real-time checks against OFAC, UN, and EU sanctions lists. Every payer, every time.' },
+  { icon: UserCheck, title: 'KYC & sanctions screening', desc: 'Identity checks and screening against OFAC, UN, and EU sanctions lists on every payment.' },
   { icon: Lock,      title: 'Audit-ready records',  desc: 'Immutable on-chain trail with full transaction lineage. Your auditors can self-serve.' },
   { icon: Globe,     title: 'HashKey Chain native', desc: "Built natively on the only regulated blockchain designed for institutional finance." },
   { icon: Clock,     title: '24/7 monitoring',      desc: 'Automatic alerts for suspicious patterns. You sleep. We watch.' },
@@ -39,10 +39,10 @@ export default function SecuritySection() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
         >
           <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            Compliant by default
+            Compliance tools built in
           </h2>
           <p className="text-lg text-slate-500 leading-relaxed">
-            Whether you're a VASP, a treasury desk, or just a team that doesn't want to end up in a regulatory grey zone — FlowLink has you covered from day one.
+            Whether you're a VASP, a treasury desk, or a team navigating crypto payments — FlowLink gives you the screening and audit tools to get started on the right foot.
           </p>
         </motion.div>
 

@@ -56,10 +56,10 @@ function AnimatedCounter({ stat, duration = 1800 }: { stat: string; duration?: n
 }
 
 const stats = [
-  { stat: '$2.4M+', label: 'Processed compliantly', sub: 'and counting' },
-  { stat: '99.7%', label: 'Screening accuracy', sub: 'zero false negatives' },
   { stat: '< 1s', label: 'Settlement time', sub: 'on HashKey Chain' },
-  { stat: '6', label: 'Chains supported', sub: 'more coming soon' },
+  { stat: '3', label: 'Screening checks', sub: 'per payment' },
+  { stat: '6', label: 'Networks supported', sub: 'more coming soon' },
+  { stat: '100%', label: 'On-chain records', sub: 'immutable audit trail' },
 ]
 
 const partners = [
@@ -99,7 +99,7 @@ export default function StatsBar() {
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <p className="text-sm text-slate-500 font-medium">
-              Join 500+ businesses processing payments on HashKey Chain
+              Crypto payment infrastructure built on HashKey Chain
             </p>
             <motion.div
               className="flex items-center gap-8"

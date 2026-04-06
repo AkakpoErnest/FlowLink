@@ -122,11 +122,11 @@ export default function LoginPage() {
               Now live on HashKey Chain
             </div>
             <h2 className="text-4xl font-black text-white leading-tight tracking-tight mb-4">
-              Enterprise Crypto<br />Payments,{" "}
-              <span className="text-emerald-400">Built for<br />Compliance</span>
+              Crypto Payments with{" "}
+              <span className="text-emerald-400">Built-in<br />Compliance Tools</span>
             </h2>
             <p className="text-slate-400 text-lg leading-relaxed max-w-sm">
-              KYC, sanctions screening, and real-time settlement — so your team stays compliant by default.
+              KYC checks, sanctions screening, and on-chain settlement — tools to help your team handle crypto payments responsibly.
             </p>
           </div>
 
