@@ -33,19 +33,7 @@ export default function InvoicesPage() {
   return (
     <ThemeProvider>
       <DashboardLayout>
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">Invoices</h1>
-                <p className="text-slate-500 mt-0.5">
-                  Send and manage crypto-native invoices. Human or AI-generated.
-                </p>
-              </div>
-            </div>
-          </div>
-          <InvoiceModule />
-        </div>
+        <InvoiceModule />
       </DashboardLayout>
     </ThemeProvider>
   )

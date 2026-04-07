@@ -849,6 +849,14 @@ export function InvoiceModule() {
 
   return (
     <div className="space-y-6">
+      {/* Page header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Invoices</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Send and manage crypto-native invoices. Human or AI-generated.</p>
+        </div>
+      </div>
+
       {/* Payment URL banner */}
       {createdPaymentUrl && (
         <div className="flex items-center justify-between gap-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
@@ -882,7 +890,7 @@ export function InvoiceModule() {
             label: "Total",
             value: stats.total,
             icon: (
-              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
               </svg>
             ),
@@ -891,7 +899,7 @@ export function InvoiceModule() {
             label: "Pending",
             value: stats.pending,
             icon: (
-              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
             ),
@@ -900,7 +908,7 @@ export function InvoiceModule() {
             label: "Paid",
             value: stats.paid,
             icon: (
-              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
               </svg>
             ),
@@ -909,23 +917,23 @@ export function InvoiceModule() {
             label: "Total Value",
             value: `$${parseFloat(stats.totalValue).toLocaleString()}`,
             icon: (
-              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
                 <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
               </svg>
             ),
           },
         ].map((s) => (
-          <Card key={s.label} className="bg-white border-slate-200 shadow-sm">
-            <CardContent className="p-4 flex items-center gap-3">
+          <Card key={s.label} className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-5 flex items-center gap-4">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                 style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}
               >
                 {s.icon}
               </div>
               <div>
-                <p className="text-slate-500 text-xs">{s.label}</p>
-                <p className="text-slate-900 font-bold text-lg">{s.value}</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">{s.label}</p>
+                <p className="text-slate-900 font-bold text-2xl mt-0.5 leading-none">{s.value}</p>
               </div>
             </CardContent>
           </Card>
@@ -934,29 +942,38 @@ export function InvoiceModule() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center justify-between mb-4">
-          <TabsList className="bg-slate-100">
-            <TabsTrigger value="invoices" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-600">
+        <div className="flex items-center justify-between mb-5">
+          <TabsList className="bg-transparent border border-slate-200 rounded-xl p-1 h-auto gap-0.5">
+            <TabsTrigger
+              value="invoices"
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            >
               <FileText className="h-3.5 w-3.5 mr-1.5" />
               Invoices
             </TabsTrigger>
-            <TabsTrigger value="agents" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-600">
+            <TabsTrigger
+              value="agents"
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            >
               <Bot className="h-3.5 w-3.5 mr-1.5" />
               Agents
               {agents.length > 0 && (
-                <span className="ml-1.5 bg-slate-200 text-slate-600 text-xs rounded-full px-1.5 py-0.5">{agents.length}</span>
+                <span className="ml-1.5 bg-slate-100 text-slate-500 text-xs rounded-full px-1.5 py-0.5 leading-none">{agents.length}</span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="rules" className="data-[state=active]:bg-white data-[state=active]:text-slate-900 text-slate-600">
+            <TabsTrigger
+              value="rules"
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all"
+            >
               <Send className="h-3.5 w-3.5 mr-1.5" />
               Rules
             </TabsTrigger>
           </TabsList>
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2 shadow-sm px-5"
             onClick={() => setShowCreate(true)}
           >
-            <FilePlus className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
             New Invoice
           </Button>
         </div>
@@ -964,13 +981,13 @@ export function InvoiceModule() {
         {/* ── Invoices Tab ── */}
         <TabsContent value="invoices" className="mt-0">
           {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
               {["all", "pending", "paid", "overdue", "draft"].map((s) => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors capitalize ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize ${
                     filterStatus === s
                       ? "bg-white text-slate-900 shadow-sm"
                       : "text-slate-500 hover:text-slate-700"
@@ -982,14 +999,14 @@ export function InvoiceModule() {
             </div>
             <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
               {[
-                { value: "all", label: "All creators" },
+                { value: "all", label: "All" },
                 { value: "human", label: "Human" },
                 { value: "agent", label: "Agent" },
               ].map((c) => (
                 <button
                   key={c.value}
                   onClick={() => setFilterCreator(c.value)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                     filterCreator === c.value
                       ? "bg-white text-slate-900 shadow-sm"
                       : "text-slate-500 hover:text-slate-700"
@@ -1001,16 +1018,19 @@ export function InvoiceModule() {
             </div>
           </div>
 
-          <Card className="bg-white border-slate-200 shadow-sm">
+          <Card className="bg-white border-slate-200 shadow-sm overflow-hidden">
             {filteredInvoices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                  <FileText className="h-7 w-7 text-slate-400" />
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
+                  style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}
+                >
+                  <FileText className="h-7 w-7 text-emerald-400" />
                 </div>
-                <p className="text-slate-700 font-semibold">No invoices yet</p>
-                <p className="text-slate-400 text-sm mt-1">Create your first invoice to get started</p>
+                <p className="text-slate-800 font-semibold text-base">No invoices yet</p>
+                <p className="text-slate-400 text-sm mt-1 max-w-xs">Create your first invoice to start getting paid on-chain.</p>
                 <Button
-                  className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+                  className="mt-5 bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
                   onClick={() => setShowCreate(true)}
                 >
                   <Plus className="h-4 w-4" />
@@ -1018,82 +1038,85 @@ export function InvoiceModule() {
                 </Button>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-slate-100 hover:bg-transparent">
-                    <TableHead className="text-slate-500 font-medium">Invoice #</TableHead>
-                    <TableHead className="text-slate-500 font-medium">Recipient</TableHead>
-                    <TableHead className="text-slate-500 font-medium">Amount</TableHead>
-                    <TableHead className="text-slate-500 font-medium">Status</TableHead>
-                    <TableHead className="text-slate-500 font-medium">Due</TableHead>
-                    <TableHead className="text-slate-500 font-medium">Creator</TableHead>
-                    <TableHead className="text-right text-slate-500 font-medium">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvoices.map((inv) => {
-                    const cfg = statusConfig[inv.status] ?? statusConfig.draft
-                    return (
-                      <TableRow key={inv.id} className="border-slate-50 hover:bg-slate-50/50 cursor-pointer" onClick={() => setSelectedInvoice(inv)}>
-                        <TableCell className="font-mono text-sm text-slate-700">{inv.invoiceNumber}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="text-slate-800 text-sm font-medium">{inv.issuedTo || "—"}</p>
-                            {inv.issuedToAddress && (
-                              <p className="text-slate-400 text-xs truncate max-w-[140px]">{inv.issuedToAddress}</p>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-semibold text-slate-800">
-                          {inv.amount.toFixed(2)}
-                          <span className="text-xs text-slate-400 ml-1">{inv.currency}</span>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`text-xs border ${cfg.color} flex items-center gap-1`}><cfg.icon className="h-3 w-3" />{cfg.label}</Badge>
-                        </TableCell>
-                        <TableCell className="text-slate-500 text-sm">
-                          {inv.dueAt ? new Date(inv.dueAt).toLocaleDateString() : "—"}
-                        </TableCell>
-                        <TableCell>
-                          {inv.agentId ? (
-                            <span className="flex items-center gap-1 text-xs text-slate-500">
-                              <Bot className="h-3.5 w-3.5 text-purple-500" />
-                              {inv.agentName || "Agent"}
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-xs text-slate-500">
-                              <User className="h-3.5 w-3.5 text-emerald-500" />
-                              You
+              <div className="divide-y divide-slate-100">
+                {filteredInvoices.map((inv) => {
+                  const cfg = statusConfig[inv.status] ?? statusConfig.draft
+                  return (
+                    <div
+                      key={inv.id}
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-slate-50/70 cursor-pointer transition-colors group"
+                      onClick={() => setSelectedInvoice(inv)}
+                    >
+                      {/* Icon */}
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 transition-colors">
+                        <FileText className="h-4.5 w-4.5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                      </div>
+
+                      {/* Invoice info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-mono text-sm font-semibold text-slate-800 leading-none">{inv.invoiceNumber}</span>
+                          <span className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full capitalize leading-none">{inv.network}</span>
+                          {inv.agentId && (
+                            <span className="text-[11px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded-full leading-none flex items-center gap-1">
+                              <Bot className="h-2.5 w-2.5" />{inv.agentName || "Agent"}
                             </span>
                           )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-1 truncate">
+                          {inv.issuedTo
+                            ? inv.issuedTo
+                            : inv.issuedToAddress
+                            ? <span className="font-mono">{inv.issuedToAddress.slice(0, 10)}…</span>
+                            : "No recipient"}
+                        </p>
+                      </div>
+
+                      {/* Status + amount */}
+                      <div className="flex items-center gap-4 shrink-0">
+                        <Badge className={`text-xs border ${cfg.color} flex items-center gap-1 hidden sm:flex`}>
+                          <cfg.icon className="h-3 w-3" />{cfg.label}
+                        </Badge>
+                        <div className="text-right min-w-[88px]">
+                          <p className="font-semibold text-slate-800 text-sm leading-none">
+                            {inv.amount.toFixed(2)}{" "}
+                            <span className="font-normal text-slate-400 text-xs">{inv.currency}</span>
+                          </p>
+                          {inv.dueAt && (
+                            <p className="text-xs text-slate-400 mt-1">
+                              Due {new Date(inv.dueAt).toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                            </p>
+                          )}
+                        </div>
+                        {/* Hover actions */}
+                        <div
+                          className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                            onClick={(e) => { e.stopPropagation(); setSelectedInvoice(inv) }}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          {inv.status === "pending" && (
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="h-7 px-2 text-slate-500 hover:text-slate-800"
-                              onClick={(e) => { e.stopPropagation(); setSelectedInvoice(inv) }}
+                              className="h-8 w-8 p-0 text-emerald-500 hover:text-emerald-700 hover:bg-emerald-50"
+                              onClick={(e) => { e.stopPropagation(); markAsPaid(inv) }}
                             >
-                              <Eye className="h-3.5 w-3.5" />
+                              <CheckCircle className="h-3.5 w-3.5" />
                             </Button>
-                            {inv.status === "pending" && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                onClick={(e) => { e.stopPropagation(); markAsPaid(inv) }}
-                              >
-                                <CheckCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </Card>
         </TabsContent>
