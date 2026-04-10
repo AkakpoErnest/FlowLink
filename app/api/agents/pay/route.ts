@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { agentSendERC20, agentSendNative, deriveAgentWallet } from '@/lib/agent-wallet'
 import { logAudit } from '@/lib/audit'
+import { z } from 'zod'
 
 // Token addresses on HashKey Testnet
 const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
@@ -11,25 +12,35 @@ const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
   USDT: '0x2B3e4A3E5e6E7f8A9b0c1D2e3F4a5B6c7D8e9F0' as `0x${string}`,
 }
 
+const agentPaySchema = z.object({
+  agentId: z.string().min(1, "agentId is required"),
+  toAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "toAddress must be a valid EVM address").optional(),
+  toAgentId: z.string().optional(),
+  amount: z.number().positive("amount must be positive"),
+  token: z.enum(["HSK", "USDC", "USDT"]).default("HSK"),
+  memo: z.string().max(500).optional().default(""),
+  paymentType: z.enum(["agent-to-human", "agent-to-agent"]).default("agent-to-human"),
+}).refine(d => d.toAddress || d.toAgentId, "toAddress or toAgentId is required")
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const userId = session.user.id
 
-  const body = await req.json()
+  const rawBody = await req.json()
+  const parsed = agentPaySchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
+  }
   const {
     agentId,
     toAddress,
     toAgentId,
     amount,
-    token = 'HSK',
-    memo = '',
-    paymentType = 'agent-to-human',
-  } = body
-
-  if (!agentId || !amount || amount <= 0) {
-    return NextResponse.json({ error: 'agentId and amount required' }, { status: 400 })
-  }
+    token,
+    memo,
+    paymentType,
+  } = parsed.data
 
   // Get agent and verify ownership
   const agent = await prisma.agent.findFirst({
@@ -68,7 +79,8 @@ export async function POST(req: Request) {
   }
 
   if (!txResult.success) {
-    return NextResponse.json({ error: txResult.error, code: 'TX_FAILED' }, { status: 500 })
+    console.error('[agents/pay] Transaction failed:', txResult.error)
+    return NextResponse.json({ error: 'Transaction failed', code: 'TX_FAILED' }, { status: 500 })
   }
 
   const payerAddress = deriveAgentWallet(agentIndex).address

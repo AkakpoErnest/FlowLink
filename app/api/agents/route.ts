@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { deriveAgentWallet } from "@/lib/agent-wallet"
+import { z } from "zod"
 
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
@@ -21,12 +22,24 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ success: true, data: agents, total: agents.length })
 }
 
+const agentCreateSchema = z.object({
+  name: z.string().min(1, "name is required").max(200),
+  description: z.string().max(1000).optional().nullable(),
+  walletAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid EVM address").optional().nullable(),
+  capabilities: z.array(z.string().max(100)).max(50).optional(),
+})
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   const userId = session.user.id
 
-  const body = await request.json()
+  const rawBody = await request.json()
+  const parsed = agentCreateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
+  }
+  const body = parsed.data
 
   // Create agent first to get DB-generated id
   const agent = await prisma.agent.create({
@@ -56,13 +69,25 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, data: { ...agent, walletAddress } }, { status: 201 })
 }
 
+const agentUpdateSchema = z.object({
+  id: z.string().min(1, "id is required"),
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(1000).optional().nullable(),
+  status: z.enum(["active", "inactive", "paused"]).optional(),
+  capabilities: z.array(z.string().max(100)).max(50).optional(),
+})
+
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   const userId = session.user.id
 
-  const body = await request.json()
-  const { id, ...updates } = body
+  const rawBody = await request.json()
+  const parsed = agentUpdateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
+  }
+  const { id, ...updates } = parsed.data
 
   const existing = await prisma.agent.findFirst({ where: { id, userId } })
   if (!existing) {
