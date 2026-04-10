@@ -247,25 +247,33 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               />
             </div>
 
-            {!isConnected && sessionWallet && (
+            {/* @ts-ignore */}
+            {(session?.user as any)?.walletType === "managed" && sessionWallet && (
+              <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                FlowLink managed — signs automatically, no reconnect needed
+              </p>
+            )}
+
+            {(session?.user as any)?.walletType !== "managed" && !isConnected && sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">Wallet saved — reconnect for on-chain actions</Label>
+                <Label className="text-xs text-slate-500">External wallet — reconnect MetaMask for on-chain actions</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Reconnect Wallet" accountStatus="address" showBalance={false} />
                 </div>
               </div>
             )}
 
-            {!isConnected && !sessionWallet && (
+            {!sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">Connect a wallet to link it</Label>
+                <Label className="text-xs text-slate-500">No wallet linked yet</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Connect Wallet" accountStatus="address" showBalance={false} />
                 </div>
               </div>
             )}
 
-            {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (
+            {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (session?.user as any)?.walletType !== "managed" && (
               <div className="space-y-2">
                 <p className="text-xs text-slate-500">
                   Connected:{" "}

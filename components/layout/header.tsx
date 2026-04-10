@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Menu, X, Link2 } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 export default function Header() {
@@ -22,9 +22,7 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-              <Link2 className="w-5 h-5 text-white" strokeWidth={2.5} />
-            </div>
+            <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-9 h-9 rounded-xl object-cover" />
             <span className="font-bold text-xl tracking-tight">
               <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
             </span>

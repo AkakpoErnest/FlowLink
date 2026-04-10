@@ -42,6 +42,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           // @ts-ignore
           walletAddress: user.walletAddress ?? null,
+          // @ts-ignore
+          walletType: user.walletType ?? null,
         }
       },
     }),
@@ -136,19 +138,22 @@ export const authOptions: NextAuthOptions = {
         if (walletFromUser) {
           // Credentials providers (email/password, siwe, google-one-tap) include walletAddress
           token.walletAddress = walletFromUser
+          token.walletType = (user as any).walletType ?? null
         } else {
           // Google OAuth does not include custom fields — always fetch from DB so
           // the wallet address is never lost on re-login.
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            select: { walletAddress: true },
+            select: { walletAddress: true, walletType: true },
           })
           token.walletAddress = dbUser?.walletAddress ?? null
+          token.walletType = dbUser?.walletType ?? null
         }
       }
       // Handle session.update() calls from the client
       if (trigger === 'update') {
         if (session?.walletAddress !== undefined) token.walletAddress = session.walletAddress
+        if (session?.walletType !== undefined) token.walletType = session.walletType
         if (session?.name !== undefined) token.name = session.name
         if (session?.picture !== undefined) token.picture = session.picture
       }
@@ -161,6 +166,8 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         // @ts-ignore — custom field
         session.user.walletAddress = token.walletAddress as string | null
+        // @ts-ignore — custom field
+        session.user.walletType = token.walletType as string | null
         if (token.name) session.user.name = token.name as string
         if (token.picture) session.user.image = token.picture as string
       }

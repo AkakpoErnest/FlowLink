@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Github, Twitter, Linkedin, Mail, Link2 } from 'lucide-react'
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -12,9 +12,7 @@ export default function Footer() {
           {/* Brand col — spans 2 */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-                <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
-              </div>
+              <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-8 h-8 rounded-xl object-cover" />
               <span className="font-bold text-lg">
                 <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
               </span>

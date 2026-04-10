@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import {
-  Shield, Wallet, ArrowRight, Chrome, Loader2, Mail, Link2,
+  Shield, Wallet, ArrowRight, Chrome, Loader2, Mail,
   UserCheck, Ban, FileCheck, CheckCircle, Lock,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -99,9 +99,7 @@ export default function LoginPage() {
       {/* Top nav — same as landing */}
       <header className="border-b border-slate-100 px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-            <Link2 className="w-5 h-5 text-white" strokeWidth={2.5} />
-          </div>
+          <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-9 h-9 rounded-xl object-cover" />
           <span className="font-bold text-xl tracking-tight">
             <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
           </span>

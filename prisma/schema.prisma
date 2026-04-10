@@ -19,8 +19,11 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  walletAddress String?   @unique
-  createdAt     DateTime  @default(now())
+  walletAddress       String?   @unique
+  walletType          String?   // "managed" | "external"
+  encryptedPrivateKey String?   // AES-256-GCM encrypted private key
+  encryptedMnemonic   String?   // AES-256-GCM encrypted mnemonic (null for private-key imports)
+  createdAt           DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
   accounts       Account[]

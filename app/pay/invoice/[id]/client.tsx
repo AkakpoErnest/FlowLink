@@ -182,9 +182,7 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
       <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-              <Link2 className="w-4 h-4 text-white" strokeWidth={2.5} />
-            </div>
+            <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-8 h-8 rounded-xl object-cover" />
             <span className="font-bold text-xl tracking-tight">
               <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
             </span>

@@ -1,16 +1,18 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Search, User, Lock, Bell, Building2, Users, Shield,
   CreditCard, Plug, Coins, Hash, Store, Wallet, Globe, FileText,
   ChevronRight, ArrowLeft, Loader2, Check, Eye, EyeOff,
+  Camera, Copy, Unlink, Plus, Calendar, Mail, KeyRound, AlertTriangle,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { useSession } from "next-auth/react"
+import { WalletSetupModal } from "@/components/wallet-setup-modal"
 
 // ─── Panel definitions ─────────────────────────────────────────────────────
 
@@ -59,8 +61,32 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null)
 
-  useEffect(() => { setName(session?.user?.name ?? "") }, [session?.user?.name])
+  // Avatar
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [avatarSaving, setAvatarSaving] = useState(false)
+  const [avatarMsg, setAvatarMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null)
 
+  // Wallet
+  const [walletAddress, setWalletAddress] = useState<string | null>((session?.user as any)?.walletAddress ?? null)
+  const [walletType, setWalletType] = useState<string | null>((session?.user as any)?.walletType ?? null)
+  const [walletModalOpen, setWalletModalOpen] = useState(false)
+  const [walletUnlinking, setWalletUnlinking] = useState(false)
+  const [walletCopied, setWalletCopied] = useState(false)
+  const [walletMsg, setWalletMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null)
+
+  // Seed phrase reveal
+  const [seedLoading, setSeedLoading] = useState(false)
+  const [seedPhrase, setSeedPhrase] = useState<string | null>(null)
+  const [seedVisible, setSeedVisible] = useState(false)
+  const [seedCopied, setSeedCopied] = useState(false)
+
+  useEffect(() => { setName(session?.user?.name ?? "") }, [session?.user?.name])
+  useEffect(() => {
+    setWalletAddress((session?.user as any)?.walletAddress ?? null)
+    setWalletType((session?.user as any)?.walletType ?? null)
+  }, [(session?.user as any)?.walletAddress, (session?.user as any)?.walletType])
+
+  // ── Profile info save ──────────────────────────────────────────────────────
   const save = async () => {
     setSaving(true); setMsg(null)
     try {
@@ -83,14 +109,153 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
     }
   }
 
+  // ── Avatar upload ──────────────────────────────────────────────────────────
+  const handleAvatarFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setAvatarMsg({ type: "err", text: "Please select an image file." }); return
+    }
+    setAvatarSaving(true); setAvatarMsg(null)
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string
+      try {
+        const res = await fetch("/api/user/avatar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: dataUrl }),
+        })
+        const data = await res.json()
+        if (data.success) {
+          await update({ image: data.data.image })
+          setAvatarMsg({ type: "ok", text: "Avatar updated." })
+        } else {
+          setAvatarMsg({ type: "err", text: data.error ?? "Failed to upload." })
+        }
+      } catch {
+        setAvatarMsg({ type: "err", text: "Upload failed." })
+      } finally {
+        setAvatarSaving(false)
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // ── Wallet actions ─────────────────────────────────────────────────────────
+  const unlinkWallet = async () => {
+    setWalletUnlinking(true); setWalletMsg(null)
+    try {
+      const res = await fetch("/api/user/wallet", { method: "DELETE" })
+      const data = await res.json()
+      if (data.success) {
+        await update({ walletAddress: null, walletType: null })
+        setWalletAddress(null); setWalletType(null); setSeedPhrase(null)
+        setWalletMsg({ type: "ok", text: "Wallet unlinked." })
+      } else {
+        setWalletMsg({ type: "err", text: data.error ?? "Failed to unlink." })
+      }
+    } catch {
+      setWalletMsg({ type: "err", text: "Something went wrong." })
+    } finally {
+      setWalletUnlinking(false)
+    }
+  }
+
+  const loadSeedPhrase = async () => {
+    setSeedLoading(true)
+    try {
+      const res = await fetch("/api/user/wallet/seed")
+      const data = await res.json()
+      if (data.success) {
+        setSeedPhrase(data.mnemonic)
+      } else {
+        setWalletMsg({ type: "err", text: data.error ?? "Could not retrieve seed phrase." })
+      }
+    } catch {
+      setWalletMsg({ type: "err", text: "Something went wrong." })
+    } finally {
+      setSeedLoading(false)
+    }
+  }
+
+  const copySeed = () => {
+    if (!seedPhrase) return
+    navigator.clipboard.writeText(seedPhrase)
+    setSeedCopied(true)
+    setTimeout(() => setSeedCopied(false), 2000)
+  }
+
+  const copyWallet = () => {
+    if (!walletAddress) return
+    navigator.clipboard.writeText(walletAddress)
+    setWalletCopied(true)
+    setTimeout(() => setWalletCopied(false), 2000)
+  }
+
   const isDirty = name !== (session?.user?.name ?? "")
-  const isOAuth = !!(session?.user?.email && !(session?.user as any)?.hasPassword)
+  const avatarUrl = (session?.user as any)?.image ?? session?.user?.image
+  const initials = (session?.user?.name ?? session?.user?.email ?? "?")
+    .split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase()
+  const memberSince = (session?.user as any)?.createdAt
+    ? new Date((session?.user as any).createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+    : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PanelHeader title="Personal Details" icon={User} onBack={onBack} />
 
-      <div className="space-y-4">
+      {/* ── Avatar ── */}
+      <section className="space-y-3">
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Profile Picture</h3>
+        <div className="flex items-center gap-4">
+          <div className="relative group">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center overflow-hidden border-2 border-white shadow">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-indigo-600 font-bold text-xl">{initials}</span>
+              )}
+            </div>
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              disabled={avatarSaving}
+            >
+              {avatarSaving ? <Loader2 className="h-4 w-4 text-white animate-spin" /> : <Camera className="h-4 w-4 text-white" />}
+            </button>
+          </div>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => fileRef.current?.click()}
+              disabled={avatarSaving}
+              className="text-xs"
+            >
+              {avatarSaving ? <><Loader2 className="h-3 w-3 mr-1.5 animate-spin" />Uploading…</> : <><Camera className="h-3 w-3 mr-1.5" />Change photo</>}
+            </Button>
+            <p className="text-xs text-slate-400 mt-1">JPG, PNG, or WebP · max 750 KB</p>
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleAvatarFile(f) }}
+          />
+        </div>
+        {avatarMsg && (
+          <p className={`text-xs flex items-center gap-1 ${avatarMsg.type === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+            {avatarMsg.type === "ok" && <Check className="h-3 w-3" />}
+            {avatarMsg.text}
+          </p>
+        )}
+      </section>
+
+      <div className="border-t border-slate-100" />
+
+      {/* ── Profile info ── */}
+      <section className="space-y-4">
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Profile Info</h3>
         <div>
           <Label className="text-sm text-slate-700 font-medium">Display Name</Label>
           <Input
@@ -102,7 +267,8 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
         </div>
 
         <div>
-          <Label className="text-sm text-slate-700 font-medium">
+          <Label className="text-sm text-slate-700 font-medium flex items-center gap-1.5">
+            <Mail className="h-3.5 w-3.5 text-slate-400" />
             Email <span className="text-slate-400 font-normal">(read-only)</span>
           </Label>
           <Input
@@ -112,6 +278,13 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
           />
           <p className="text-xs text-slate-400 mt-1">Email cannot be changed here. Contact support if needed.</p>
         </div>
+
+        {memberSince && (
+          <div className="flex items-center gap-2 text-xs text-slate-400">
+            <Calendar className="h-3.5 w-3.5" />
+            Member since {memberSince}
+          </div>
+        )}
 
         {msg && (
           <p className={`text-sm flex items-center gap-1.5 ${msg.type === "ok" ? "text-emerald-600" : "text-red-500"}`}>
@@ -127,7 +300,143 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
         >
           {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save Changes"}
         </Button>
-      </div>
+      </section>
+
+      <div className="border-t border-slate-100" />
+
+      {/* ── Linked Wallet ── */}
+      <section className="space-y-3">
+        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Linked Wallet</h3>
+        {walletAddress ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                <Wallet className="h-4 w-4 text-indigo-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-slate-500 font-medium">Connected wallet</p>
+                  {walletType === "managed" ? (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">FlowLink managed</span>
+                  ) : walletType === "external" ? (
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">External</span>
+                  ) : null}
+                </div>
+                <p className="font-mono text-xs text-slate-800 truncate">{walletAddress}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={copyWallet} className="flex-1 text-xs">
+                {walletCopied ? <><Check className="h-3 w-3 mr-1.5 text-emerald-500" />Copied</> : <><Copy className="h-3 w-3 mr-1.5" />Copy</>}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setWalletModalOpen(true)} className="flex-1 text-xs">
+                <Wallet className="h-3 w-3 mr-1.5" />Change
+              </Button>
+              <Button
+                variant="outline" size="sm" onClick={unlinkWallet} disabled={walletUnlinking}
+                className="text-xs text-red-500 hover:text-red-600 border-red-200 hover:border-red-300 hover:bg-red-50"
+              >
+                {walletUnlinking ? <Loader2 className="h-3 w-3 animate-spin" /> : <Unlink className="h-3 w-3" />}
+              </Button>
+            </div>
+
+            {/* Seed phrase section — managed wallets only */}
+            {walletType === "managed" && (
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <KeyRound className="h-3.5 w-3.5 text-slate-400" />
+                    <p className="text-xs font-medium text-slate-600">Secret Recovery Phrase</p>
+                  </div>
+                  {!seedPhrase ? (
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={loadSeedPhrase}
+                      disabled={seedLoading}
+                      className="text-xs h-7 px-2.5"
+                    >
+                      {seedLoading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                      {seedLoading ? "Loading…" : "Reveal"}
+                    </Button>
+                  ) : (
+                    <div className="flex gap-1">
+                      <button onClick={copySeed} className="p-1 rounded text-slate-400 hover:text-slate-600">
+                        {seedCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                      </button>
+                      <button onClick={() => setSeedVisible(!seedVisible)} className="p-1 rounded text-slate-400 hover:text-slate-600">
+                        {seedVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                      <button onClick={() => { setSeedPhrase(null); setSeedVisible(false) }} className="p-1 rounded text-slate-400 hover:text-slate-600 text-xs">✕</button>
+                    </div>
+                  )}
+                </div>
+
+                {seedPhrase && (
+                  <div className="space-y-2">
+                    <div className="rounded-lg bg-amber-50 border border-amber-200 p-2 flex gap-1.5">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-amber-700">Never share this phrase. Anyone with it controls your wallet.</p>
+                    </div>
+                    {seedVisible ? (
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {seedPhrase.split(" ").map((word, i) => (
+                          <div key={i} className="flex items-center gap-1 bg-slate-100 rounded-md px-2 py-1">
+                            <span className="text-[10px] text-slate-400 w-4 shrink-0">{i + 1}.</span>
+                            <span className="text-xs font-mono text-slate-800">{word}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setSeedVisible(true)}
+                        className="w-full h-14 rounded-lg border border-dashed border-amber-300 flex items-center justify-center gap-2 text-xs text-amber-600 hover:bg-amber-50 transition-colors"
+                      >
+                        <Eye className="h-3.5 w-3.5" />Click to show phrase
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {!seedPhrase && (
+                  <p className="text-[10px] text-slate-400">View your 12-word seed phrase. Keep it safe — it gives full access to your wallet.</p>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/50 p-5 flex flex-col items-center gap-3 text-center">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+              <Wallet className="h-5 w-5 text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-700">No wallet linked</p>
+              <p className="text-xs text-slate-400 mt-0.5">Connect a wallet to send and receive crypto payments.</p>
+            </div>
+            <Button size="sm" onClick={() => setWalletModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />Link wallet
+            </Button>
+          </div>
+        )}
+        {walletMsg && (
+          <p className={`text-xs flex items-center gap-1 ${walletMsg.type === "ok" ? "text-emerald-600" : "text-red-500"}`}>
+            {walletMsg.type === "ok" && <Check className="h-3 w-3" />}
+            {walletMsg.text}
+          </p>
+        )}
+      </section>
+
+      <WalletSetupModal
+        open={walletModalOpen}
+        onClose={async () => {
+          setWalletModalOpen(false)
+          // Fetch the freshest wallet address from the server
+          try {
+            const res = await fetch("/api/user")
+            const data = await res.json()
+            if (data.success) setWalletAddress(data.data?.walletAddress ?? null)
+          } catch { /* ignore */ }
+        }}
+      />
     </div>
   )
 }
