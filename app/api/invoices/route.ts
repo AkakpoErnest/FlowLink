@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { logAudit } from "@/lib/audit"
+import { z } from "zod"
 
 export type Invoice = {
   id: string
@@ -75,32 +76,47 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ success: true, data: invoices, stats })
 }
 
+const evmAddress = z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Must be a valid EVM address")
+
+const invoiceCreateSchema = z.object({
+  amount: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).refine(v => !isNaN(v) && v > 0, "amount must be a positive number").optional(),
+  subtotal: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).refine(v => !isNaN(v) && v > 0, "subtotal must be a positive number").optional(),
+  recipientAddress: evmAddress.optional().nullable(),
+  recipientEmail: z.string().email("Invalid email address").optional().nullable(),
+  agentId: z.string().optional().nullable(),
+  agentName: z.string().max(200).optional().nullable(),
+  issuedTo: z.string().max(200).optional().nullable(),
+  issuedToAddress: z.string().max(200).optional().nullable(),
+  recipientName: z.string().max(200).optional().nullable(),
+  currency: z.string().max(20).optional(),
+  network: z.string().max(50).optional(),
+  status: z.enum(["draft", "pending", "paid", "overdue", "cancelled"]).optional(),
+  description: z.string().max(2000).optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+  lineItems: z.array(z.object({
+    description: z.string().max(500),
+    quantity: z.number(),
+    unitPrice: z.string(),
+    total: z.string(),
+  })).optional(),
+  invoiceNumber: z.string().max(50).optional(),
+  issueDate: z.string().optional().nullable(),
+  dueAt: z.string().optional().nullable(),
+}).refine(d => d.amount !== undefined || d.subtotal !== undefined, "amount or subtotal is required")
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   // @ts-ignore
   const userId = session.user.id as string
 
-  const body = await request.json()
-
-  const amount = parseFloat(body.amount ?? body.subtotal ?? "0")
-  if (isNaN(amount) || amount <= 0) {
-    return NextResponse.json({ success: false, error: "amount must be a positive number" }, { status: 400 })
+  const rawBody = await request.json()
+  const parsed = invoiceCreateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
   }
-
-  if (body.recipientAddress) {
-    const walletRegex = /^0x[a-fA-F0-9]{40}$/
-    if (!walletRegex.test(body.recipientAddress)) {
-      return NextResponse.json({ success: false, error: "recipientAddress must be a valid wallet address" }, { status: 400 })
-    }
-  }
-
-  if (body.recipientEmail && body.recipientEmail.includes('@')) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(body.recipientEmail)) {
-      return NextResponse.json({ success: false, error: "recipientEmail must be a valid email address" }, { status: 400 })
-    }
-  }
+  const body = parsed.data
+  const amount = body.amount ?? body.subtotal ?? 0
 
   const count = await prisma.invoice.count({ where: { userId } })
   const year = new Date().getFullYear()
@@ -132,7 +148,7 @@ export async function POST(request: NextRequest) {
   const network = body.network || 'celo'
   const currency = body.currency || 'USDC'
   const lineItems = body.lineItems || []
-  const subtotal = parseFloat(body.subtotal ?? body.amount ?? "0")
+  const subtotal = body.subtotal ?? body.amount ?? 0
   const status = body.status || 'pending'
 
   const invoice = await prisma.invoice.create({
@@ -196,14 +212,28 @@ export async function POST(request: NextRequest) {
   }, { status: 201 })
 }
 
+const invoiceUpdateSchema = z.object({
+  id: z.string().min(1, "id is required"),
+  status: z.enum(["draft", "pending", "paid", "overdue", "cancelled"]).optional(),
+  amount: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).optional(),
+  dueAt: z.string().optional(),
+  description: z.string().max(2000).optional().nullable(),
+  notes: z.string().max(2000).optional().nullable(),
+  txHash: z.string().max(100).optional().nullable(),
+})
+
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   // @ts-ignore
   const userId = session.user.id as string
 
-  const body = await request.json()
-  const { id, ...updates } = body
+  const rawBody = await request.json()
+  const parsed = invoiceUpdateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
+  }
+  const { id, ...updates } = parsed.data
 
   const existing = await prisma.invoice.findFirst({ where: { id, userId } })
   if (!existing) {
@@ -215,7 +245,6 @@ export async function PUT(request: NextRequest) {
     data.paidAt = new Date()
   }
   if (updates.dueAt) data.dueAt = new Date(updates.dueAt)
-  if (updates.amount) data.amount = parseFloat(updates.amount)
 
   const invoice = await prisma.invoice.update({ where: { id }, data })
   return NextResponse.json({ success: true, data: invoice })

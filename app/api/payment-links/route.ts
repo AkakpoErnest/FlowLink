@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
+import { z } from "zod"
 
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
@@ -43,22 +44,28 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ success: true, data: links, total: links.length })
 }
 
+const paymentLinkCreateSchema = z.object({
+  code: z.string().max(100).optional(),
+  name: z.string().max(200).optional().nullable(),
+  network: z.string().max(50).optional(),
+  sourceToken: z.string().max(20).optional(),
+  destStable: z.string().max(20).optional(),
+  amountMin: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).refine(v => !isNaN(v) && v >= 0, "amountMin must be a non-negative number").optional().nullable(),
+  amountMax: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).refine(v => !isNaN(v) && v > 0, "amountMax must be a positive number").optional().nullable(),
+})
+
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   // @ts-ignore
   const userId = session.user.id as string
 
-  const body = await request.json()
-
-  if (body.amountMin !== undefined && body.amountMin !== null) {
-    const min = parseFloat(body.amountMin)
-    if (isNaN(min) || min < 0) return NextResponse.json({ success: false, error: "amountMin must be a non-negative number" }, { status: 400 })
+  const rawBody = await request.json()
+  const parsed = paymentLinkCreateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
   }
-  if (body.amountMax !== undefined && body.amountMax !== null) {
-    const max = parseFloat(body.amountMax)
-    if (isNaN(max) || max <= 0) return NextResponse.json({ success: false, error: "amountMax must be a positive number" }, { status: 400 })
-  }
+  const body = parsed.data
 
   // Look up the authenticated user's wallet address to use as recipient
   const user = await prisma.user.findUnique({
@@ -74,8 +81,8 @@ export async function POST(request: NextRequest) {
       network: body.network || "hashkey-testnet",
       sourceToken: body.sourceToken || "USDC",
       destStable: body.destStable || "USDC",
-      amountMin: body.amountMin ? parseFloat(body.amountMin) : null,
-      amountMax: body.amountMax ? parseFloat(body.amountMax) : null,
+      amountMin: body.amountMin ?? null,
+      amountMax: body.amountMax ?? null,
       recipientAddress: user?.walletAddress ?? null,
       status: "active",
     },
@@ -84,14 +91,26 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, data: link }, { status: 201 })
 }
 
+const paymentLinkUpdateSchema = z.object({
+  id: z.string().min(1, "id is required"),
+  name: z.string().max(200).optional().nullable(),
+  status: z.enum(["active", "inactive", "archived"]).optional(),
+  amountMin: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).optional().nullable(),
+  amountMax: z.union([z.string(), z.number()]).transform(v => parseFloat(String(v))).optional().nullable(),
+})
+
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
   // @ts-ignore
   const userId = session.user.id as string
 
-  const body = await request.json()
-  const { id, ...updates } = body
+  const rawBody = await request.json()
+  const parsed = paymentLinkUpdateSchema.safeParse(rawBody)
+  if (!parsed.success) {
+    return NextResponse.json({ success: false, error: parsed.error.errors[0].message }, { status: 400 })
+  }
+  const { id, ...updates } = parsed.data
 
   const existing = await prisma.paymentLink.findFirst({ where: { id, userId } })
   if (!existing) {

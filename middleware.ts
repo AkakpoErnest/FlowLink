@@ -49,6 +49,22 @@ export function middleware(req: NextRequest) {
     }
   }
 
+  // Rate limit wallet seed retrieval: 5 per minute (sensitive mnemonic endpoint)
+  if (path.startsWith('/api/user/wallet/seed')) {
+    const allowed = rateLimit(`${ip}:wallet-seed`, 5, 60_000)
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 })
+    }
+  }
+
+  // Rate limit AI chat: 20 per minute
+  if (path.startsWith('/api/ai/chat')) {
+    const allowed = rateLimit(`${ip}:ai-chat`, 20, 60_000)
+    if (!allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429 })
+    }
+  }
+
   return NextResponse.next()
 }
 
@@ -60,5 +76,8 @@ export const config = {
     '/api/invoices/:path*',
     '/api/payment-links/:path*',
     '/api/user/avatar/:path*',
+    '/api/user/wallet/seed/:path*',
+    '/api/user/wallet/seed',
+    '/api/ai/chat',
   ],
 }

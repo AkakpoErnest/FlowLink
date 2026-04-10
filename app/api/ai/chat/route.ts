@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth-config'
+import { z } from 'zod'
 
 const OLLAMA_BASE = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:7b'
@@ -77,14 +80,30 @@ async function askOllama(message: string, history: { role: string; content: stri
   return reply
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { message, history } = await request.json()
+const chatSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(4000, 'Message too long'),
+  history: z.array(
+    z.object({
+      role: z.enum(['user', 'assistant']),
+      content: z.string().max(4000),
+    })
+  ).max(50).optional(),
+})
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+export async function POST(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  try {
+    const body = await request.json()
+    const parsed = chatSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.errors[0].message }, { status: 400 })
     }
 
+    const { message, history } = parsed.data
     let reply: string
 
     if (process.env.ANTHROPIC_API_KEY) {
@@ -97,9 +116,6 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('AI Chat error:', error)
-    return NextResponse.json(
-      { error: 'AI unavailable. Set ANTHROPIC_API_KEY for production or ensure Ollama is running locally.' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'AI service unavailable' }, { status: 500 })
   }
 }
