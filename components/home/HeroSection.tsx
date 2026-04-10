@@ -22,6 +22,18 @@ const fadeUp = (delay = 0) => ({
 export default function HeroSection() {
   return (
     <section className="relative overflow-hidden pt-16 bg-white">
+      {/* Subtle fintech background image */}
+      <div className="absolute inset-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1600&q=80&auto=format&fit=crop"
+          alt=""
+          className="w-full h-full object-cover opacity-[0.04]"
+          aria-hidden="true"
+        />
+        {/* Fade out toward center so text area stays clean */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-white/60" />
+      </div>
       <div className="container mx-auto px-6 py-20 lg:py-28">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
 

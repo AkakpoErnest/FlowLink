@@ -27,8 +27,21 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="FlowLink - Crypto Payments You Can Trust" />
-        <title>FlowLink - Crypto Payments Platform</title>
+        <meta name="description" content="FlowLink — Crypto payments with built-in compliance tools. KYC checks, sanctions screening, and on-chain settlement on HashKey Chain." />
+        <title>FlowLink — Crypto Payments with Built-in Compliance</title>
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="FlowLink — Crypto Payments with Built-in Compliance" />
+        <meta property="og:description" content="KYC checks, sanctions screening, and on-chain settlement on HashKey Chain — tools to help your team stay compliant from day one." />
+        <meta property="og:image" content="/og-image.svg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="FlowLink" />
+        {/* Twitter / X */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="FlowLink — Crypto Payments with Built-in Compliance" />
+        <meta name="twitter:description" content="KYC checks, sanctions screening, and on-chain settlement on HashKey Chain." />
+        <meta name="twitter:image" content="/og-image.svg" />
       </head>
       <body className={`font-sans ${dmSans.variable} ${GeistMono.variable}`}>
         <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
