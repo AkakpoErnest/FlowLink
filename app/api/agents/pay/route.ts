@@ -13,10 +13,8 @@ const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
-  // @ts-ignore
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const body = await req.json()
   const {

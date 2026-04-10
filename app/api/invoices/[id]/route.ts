@@ -26,8 +26,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // Authed PATCH — update status, txHash, etc.
 export async function PATCH(request: NextRequest, { params }: Params) {
   const session = await getServerSession(authOptions)
-  // @ts-ignore
-  const userId = session?.user?.id as string | undefined
+  const userId = session?.user?.id
 
   const body = await request.json()
 

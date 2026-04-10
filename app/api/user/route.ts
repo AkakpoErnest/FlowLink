@@ -10,8 +10,7 @@ function unauth() {
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -25,8 +24,7 @@ export async function GET(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   // Guard: session user id must be present (can be absent when JWT is misconfigured)
   if (!userId) {

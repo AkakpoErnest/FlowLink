@@ -23,7 +23,7 @@ function unauth() {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  const userId = (session.user as any).id as string
+  const userId = session.user.id
   if (!userId) return unauth()
 
   let body: { walletAddress?: string; mnemonic?: string; privateKey?: string }
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  const userId = (session.user as any).id as string
+  const userId = session.user.id
   if (!userId) return unauth()
 
   try {

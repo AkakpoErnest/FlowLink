@@ -8,8 +8,7 @@ export async function POST(request: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
   if (!userId) {
     return NextResponse.json({ success: false, error: 'Session user ID missing' }, { status: 401 })
   }

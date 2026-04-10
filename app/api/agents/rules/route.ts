@@ -10,8 +10,7 @@ function unauth() { return NextResponse.json({ error: "Unauthorized" }, { status
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const agentId = req.nextUrl.searchParams.get("agentId")
   if (!agentId) return NextResponse.json({ error: "agentId required" }, { status: 400 })
@@ -31,8 +30,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const body = await req.json()
   const { agentId, type, config } = body
@@ -60,8 +58,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const body = await req.json()
   const { id, status, config } = body
@@ -90,8 +87,7 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const id = req.nextUrl.searchParams.get("id")
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 })

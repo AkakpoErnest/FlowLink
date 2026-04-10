@@ -9,8 +9,7 @@ export async function POST(request: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   let body: { currentPassword?: string; newPassword?: string }
   try {

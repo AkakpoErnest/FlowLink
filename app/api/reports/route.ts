@@ -26,8 +26,7 @@ function toCsv(rows: Record<string, unknown>[], fallbackHeaders?: string[]): str
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const { searchParams } = new URL(request.url)
   const type = searchParams.get('type') ?? 'payments'

@@ -12,8 +12,7 @@ function unauth() {
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const { searchParams } = new URL(request.url)
   const paymentLinkId = searchParams.get('paymentLinkId')
@@ -156,8 +155,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  // @ts-ignore
-  const userId = session.user.id as string
+  const userId = session.user.id
 
   const body = await request.json()
   const { id, ...updates } = body

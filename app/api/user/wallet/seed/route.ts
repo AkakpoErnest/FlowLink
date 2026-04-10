@@ -19,7 +19,7 @@ function unauth() {
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user) return unauth()
-  const userId = (session.user as any).id as string
+  const userId = session.user.id
   if (!userId) return unauth()
 
   const user = await prisma.user.findUnique({

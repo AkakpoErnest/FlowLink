@@ -1,35 +1,47 @@
 # FlowLink
 
-FlowLink is a crypto compliance payments platform built natively on HashKey Chain. It combines on-chain payment routing with built-in KYC/AML screening, AI agent invoicing, ERC-20 token support, and payroll automation — aimed at businesses that need compliant crypto payments without building compliance infrastructure from scratch.
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
+[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma)](https://www.prisma.io)
+[![HashKey Chain](https://img.shields.io/badge/HashKey-Testnet-green)](https://hashkeychain-testnet-explorer.alt.technology)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+AI-powered crypto payment infrastructure built on **HashKey Chain Testnet**. FlowLink lets you create payment links, issue on-chain invoices, run autonomous AI agents with dedicated managed wallets, and process crypto payroll — all from a single dashboard.
+
+---
 
 ## Features
 
-- **Compliant payment links** — Create shareable payment links (`/l/[code]`) with optional KYC verification and sanctions screening enforced before each payment settles. Supports fixed or open amounts.
-- **ERC-20 + native token payments** — Payment links accept HSK (native), USDC, or USDT. Native transfers use `sendTransaction`; ERC-20 transfers use the standard `transfer(address, uint256)` ABI via `useWriteContract`.
-- **AI agent invoicing** — Register autonomous agents with dedicated wallet addresses, issue on-chain invoices, and let clients pay directly to agent wallets via auto-generated payment links. Funds bypass the platform owner and land directly in the agent's wallet.
-- **Compliance vaults** — Create vaults with programmable policies (allowlists, limits, risk thresholds) that govern how funds move.
-- **Payroll batches** — Define batches of recipients with wallet addresses and amounts, then process crypto payroll with per-recipient KYC status tracking.
-- **Compliance dashboard** — Real-time stats pulled from the database: KYC pass rate, AML flags, transaction monitoring, risk scores.
-- **AI assistant** — Uses Anthropic Claude API in production (`claude-haiku-4-5-20251001`); falls back to Ollama locally. Answers compliance and platform questions in context.
-- **SIWE + Google OAuth** — Sign-In with Ethereum via EIP-4361 message signing, or standard Google OAuth through NextAuth.
-- **Multi-chain wallet support** — RainbowKit connects to HashKey Testnet (primary), HashKey Mainnet, Ethereum, Polygon, Arbitrum, Optimism, and Sepolia. Payment execution is enforced on HashKey Testnet only.
+- **Invoicing** — Create and send invoices with auto-generated payment links. Invoice numbers follow `FL-YEAR-NNN`. Supports per-agent or per-user recipient routing.
+- **Payment links** — Shareable `/l/[code]` links that accept HSK (native), USDC, or USDT. Compliance screening runs before each payment settles.
+- **AI agents** — Register autonomous agents with deterministic managed wallets (HD-derived). Agents can issue invoices, execute on-chain payments, and run scheduled or conditional rules via a cron engine.
+- **Managed wallets** — AES-256-GCM encrypted server-side wallets. Supports seed phrase and private key import. The plaintext private key never touches the database.
+- **Payroll** — Define batches of recipients with wallet addresses and amounts. Per-recipient KYC status tracking.
+- **Compliance vaults** — Programmable policy vaults (allowlists, risk thresholds, spend limits).
+- **AI assistant** — Powered by `claude-haiku-4-5-20251001` when `ANTHROPIC_API_KEY` is set; falls back to Ollama locally.
+- **Multi-chain wallet support** — RainbowKit on HashKey Testnet (primary), HashKey Mainnet, Ethereum, Polygon, Arbitrum, Optimism, and Sepolia. Payment execution is enforced on HashKey Testnet.
+- **Auth** — Email/password, Google OAuth, Google One Tap, and Sign-In with Ethereum (SIWE / EIP-4361).
+
+---
 
 ## Tech Stack
 
 | Layer | Choice |
 |---|---|
 | Framework | Next.js 14 App Router |
-| Database | Prisma ORM + Supabase PostgreSQL |
-| Auth | NextAuth v4 (SIWE + Google OAuth) |
+| Language | TypeScript 5 |
+| Database | Prisma ORM + PostgreSQL (Supabase) |
+| Auth | NextAuth v4 (SIWE, Google OAuth, Credentials) |
 | Wallet / Chain | wagmi v2 + viem + RainbowKit |
 | Primary network | HashKey Chain Testnet (EVM, Chain ID 133) |
-| AI | Anthropic Claude API / Ollama (local fallback) |
-| UI | Tailwind CSS + shadcn/ui |
+| Animations | Framer Motion |
+| AI | Anthropic Claude API (`claude-haiku-4-5-20251001`) / Ollama fallback |
+| UI | Tailwind CSS + shadcn/ui + Radix UI |
 | Analytics | Vercel Analytics |
 
-## HashKey Chain
+---
 
-FlowLink targets HashKey Chain as its primary settlement layer.
+## HashKey Chain
 
 | | Testnet | Mainnet |
 |---|---|---|
@@ -46,23 +58,49 @@ FlowLink targets HashKey Chain as its primary settlement layer.
 | USDC | ERC-20 | 6 |
 | USDT | ERC-20 | 6 |
 
-> **Note:** USDC and USDT contract addresses for HashKey testnet should be verified against the [testnet explorer](https://hashkeychain-testnet-explorer.alt.technology) before live use. The addresses in `lib/hashkey.ts` are placeholders pending testnet deployment confirmation.
+---
 
 ## Getting Started
 
 ### Environment variables
 
-Create a `.env` file (or `.env.local`) with:
+Create a `.env` file (or `.env.local`) at the project root:
 
 ```env
-DATABASE_URL=postgresql://...          # Supabase pooled connection string (port 6543)
-DIRECT_URL=postgresql://...            # Supabase direct connection string (port 5432, for migrations)
+# Database (Supabase recommended)
+DATABASE_URL=postgresql://...          # Pooled connection string (port 6543)
+DIRECT_URL=postgresql://...            # Direct connection string (port 5432, used by migrations)
+
+# NextAuth
 NEXTAUTH_URL=http://localhost:3000
 NEXTAUTH_SECRET=<random string>
+
+# Google OAuth
 GOOGLE_CLIENT_ID=<your google client id>
 GOOGLE_CLIENT_SECRET=<your google client secret>
+
+# WalletConnect
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<walletconnect project id>
-ANTHROPIC_API_KEY=<optional — enables Claude AI assistant; falls back to Ollama if unset>
+
+# AI assistant (optional — falls back to Ollama if unset)
+ANTHROPIC_API_KEY=<your anthropic api key>
+
+# Managed wallet encryption (32-byte hex, required for managed wallets)
+WALLET_ENCRYPTION_KEY=<64-char hex string>
+
+# Agent wallet signing (BIP-39 mnemonic, required for agent on-chain payments)
+DEPLOYER_MNEMONIC=<12 or 24 word mnemonic>
+
+# HashKey RPC override (optional — defaults to public testnet RPC)
+NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://hashkeychain-testnet.alt.technology
+
+# FlowLink contract addresses (optional)
+NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_TESTNET=0x...
+NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x...
+
+# Ollama (optional — local AI fallback)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:7b
 ```
 
 ### Install and run
@@ -77,74 +115,39 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Get testnet HSK
 
-To test payments you need testnet HSK for gas. Use the [HashKey Testnet faucet](https://faucet.hashkeychain-testnet.alt.technology) or request tokens from the HashKey developer community.
+Use the [HashKey Testnet faucet](https://faucet.hashkeychain-testnet.alt.technology) or request tokens from the HashKey developer community.
+
+---
+
+## Deployment (Vercel)
+
+1. Push to GitHub and import the repo in [Vercel](https://vercel.com).
+2. Add all environment variables above under **Project Settings → Environment Variables**.
+3. Set `NEXTAUTH_URL` to your production domain (e.g. `https://yourapp.vercel.app`).
+4. Add the production URL to the allowed redirect URIs in your Google OAuth app.
+5. Vercel detects Next.js automatically and runs `npm install && npm run build` (which also runs `prisma generate`).
+
+---
 
 ## Agent System
 
-The agent system lets you register named entities (bots, autonomous services, contractors) with dedicated wallet addresses. The full payment flow is:
+Agents are autonomous entities with dedicated wallet addresses. The full payment flow:
 
-1. Register an agent with a name and wallet address in the **Agents** tab of the invoice module (`/invoices`).
-2. Issue an invoice from that agent — FlowLink auto-generates a payment link with `recipientAddress` set to the agent's wallet. The invoice gets a `paymentLinkCode` like `inv-xxxxxxxx`.
-3. Share the generated link (`/l/inv-xxxxxxxx`) with the client.
-4. The client connects their wallet on HashKey Testnet, compliance screening runs, and they send the token specified on the invoice.
-5. Funds land directly in the agent's wallet — not the platform owner's.
+1. Register an agent with a name in the **Agents** tab (`/invoices`). A deterministic wallet is auto-derived from `DEPLOYER_MNEMONIC`.
+2. Issue an invoice from that agent — FlowLink auto-creates a payment link with `recipientAddress = agent.walletAddress`.
+3. Share the link (`/l/inv-xxxxxxxx`) with the client.
+4. The client pays on HashKey Testnet; funds land directly in the agent's wallet.
 
-Invoice numbers follow the format `FL-YEAR-NNN` (e.g. `FL-2025-001`), auto-generated per user.
+Agent rules support three types:
+- **Scheduled** — cron-based (e.g. `0 9 * * 1` = every Monday 9 AM). Parsed with [croner](https://github.com/Hexagon/croner).
+- **Conditional** — triggered by platform events (e.g. `invoice_overdue`).
+- **Multi-step** — sequential workflow with optional delays between steps.
 
-## Payment Routing
+---
 
-The `recipientAddress` field on `PaymentLink` controls where funds go:
+## Known Limitations
 
-- **Agent invoice links** → `recipientAddress` = agent's wallet (set at invoice creation time).
-- **Standard payment links** → `recipientAddress` falls back to the link owner's `walletAddress` on their user profile.
-
-> Google OAuth users do not have a `walletAddress` set automatically. A payment link created by a Google-only user will show "Payment unavailable" until they connect and save a wallet address to their profile.
-
-## What's been built
-
-A log of significant implementation milestones, useful if you're picking up the codebase:
-
-| Area | What was done |
-|---|---|
-| **Mock data removal** | Removed hardcoded audit trails, fake analytics percentages, and simulated country breakdowns from payroll and vault modules. All stats now come from the database. |
-| **Agent system** | Added `Agent` model (Prisma), `/api/agents` CRUD routes, agent selector in invoice form, and "Agents" tab in the invoice module. |
-| **Invoice → payment link** | When an invoice is created with an `agentId`, the API auto-creates a `PaymentLink` with `recipientAddress = agent.walletAddress` and writes the code back to `paymentLinkCode` on the invoice. |
-| **Payment routing** | Added `recipientAddress` to `PaymentLink`. The `/l/[code]` page uses it as the destination, falling back to the link owner's wallet. |
-| **ERC-20 payments** | `payment-flow.tsx` previously sent native HSK for all tokens. Now branches: HSK → `sendTransaction` + `parseEther`; USDC/USDT → `useWriteContract` + `parseUnits(amount, decimals)` calling ERC-20 `transfer()`. Token symbol shown throughout the UI dynamically. |
-| **AI assistant** | Rewrote `/api/ai/chat` to use `claude-haiku-4-5-20251001` when `ANTHROPIC_API_KEY` is set, falling back to Ollama. Removed fabricated compliance stats from the system prompt. |
-| **Sonner toasts** | Added `<SonnerToaster>` to `app/layout.tsx` — was missing, causing all `sonner` toast calls to be silent. |
-| **Dead code cleanup** | Deleted `lib/auth.ts` (Zustand auth store), `components/wallet-connect.tsx`, `components/dashboard-header.tsx`, `app/page.tsx.backup`. |
-| **Dashboard** | Removed duplicate module renders; dashboard now renders `<DashboardOverview />` once. |
-
-## Known Limitations & TODOs
-
-**Needs real data / external integration:**
-
-- **Compliance checks are simulated** — The `runCompliance` function in `components/payment-flow.tsx` waits 1.5 s and returns a fixed score of 95. Wire in a real provider (Chainalysis, Elliptic, Sumsub) to replace it.
-- **USDC/USDT addresses unverified** — The addresses in `lib/hashkey.ts` are not confirmed HashKey testnet deployments. Before using ERC-20 payments on testnet, look up the actual deployed addresses on the [HashKey testnet explorer](https://hashkeychain-testnet-explorer.alt.technology) and update them.
-
-**Auth / wallet flow:**
-
-- **Google OAuth users have no wallet** — Signing in with Google creates a `User` row with no `walletAddress`. Any payment link they create will show "Payment unavailable" to payers until a wallet is connected and saved to their profile. A wallet-linking flow (connect wallet → PATCH `/api/user`) needs to be built.
-- **SIWE session and Google session are separate** — A user who first used Google OAuth and later connects a wallet gets a new SIWE session as a different user. There's no account-merge flow yet.
-
-**Payment link UX:**
-
-- **No token selector on link creation** — `CreateLinkForm` doesn't expose a token picker; the `sourceToken` defaults to USDC (schema default). Add a `<Select>` for HSK / USDC / USDT if you want links that accept native HSK.
-- **No "Pay again" amount reset after ERC-20** — Minor: the "Pay again" button resets amount state but `useWriteContract` data lingers until the reset fires; the `resetWrite()` call handles this now but hasn't been tested end-to-end on testnet.
-
-**Infrastructure:**
-
-- **Testnet HSK needed for gas** — Even USDC/USDT payments require HSK for gas fees. Anyone testing payments needs testnet HSK first.
-- **`ANTHROPIC_API_KEY` not in Vercel yet** — Add it to Vercel env vars to enable the AI assistant in production. Without it the assistant silently falls back to Ollama (which won't be running in production).
-
-## Deployment
-
-The app deploys to Vercel without configuration.
-
-1. Push to GitHub and import the repo in [Vercel](https://vercel.com).
-2. Add all environment variables listed above under **Project Settings → Environment Variables**.
-3. Set `NEXTAUTH_URL` to your production domain (e.g. `https://yourapp.vercel.app`).
-4. Add the production URL to the allowed redirect URIs in your Google OAuth app.
-5. Add `ANTHROPIC_API_KEY` to enable the Claude AI assistant in production.
-6. Vercel detects Next.js automatically and runs `npm install && npm run build`.
+- **Compliance checks are simulated** — `runCompliance()` in `payment-flow.tsx` returns a fixed score of 95. Wire in a real provider (Chainalysis, Elliptic, Sumsub) to replace it.
+- **USDC/USDT addresses unverified** — Addresses in `lib/hashkey.ts` are placeholders. Verify against the [HashKey testnet explorer](https://hashkeychain-testnet-explorer.alt.technology) before use.
+- **Google OAuth users have no wallet** — Payment links created by Google-only users show "Payment unavailable" until a wallet is connected and saved to their profile.
+- **No account merge flow** — SIWE and Google OAuth sessions are independent users; no merge flow exists yet.

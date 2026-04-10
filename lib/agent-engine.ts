@@ -1,5 +1,7 @@
 // Agent Rules Engine — evaluate and schedule agent rules
 
+import { Cron } from "croner"
+
 export type RuleType = "scheduled" | "conditional" | "multistep"
 export type RuleStatus = "active" | "paused"
 
@@ -40,18 +42,18 @@ export interface AgentRule {
 
 /**
  * Compute the next run time for a scheduled rule based on its cron expression.
- * Simplified: parses "minute hour dom month dow" and returns next Date.
- * For a production app wire up a proper cron parser like `cronstrue` or `cron-parser`.
+ * Supports 5-part (standard) and 6-part (with seconds) cron expressions via croner.
+ * Falls back to 1 hour from now if the expression is invalid.
  */
 export function computeNextRun(cronExpr: string, from: Date = new Date()): Date | null {
-  // Naïve implementation — returns 1 hour from now as a fallback
-  // Replace with a real cron parser in production
   try {
-    const next = new Date(from)
-    next.setHours(next.getHours() + 1, 0, 0, 0)
-    return next
+    const job = new Cron(cronExpr, { startAt: from })
+    return job.nextRun(from) ?? null
   } catch {
-    return null
+    // Invalid cron expression — fall back to 1 hour from now
+    const fallback = new Date(from)
+    fallback.setHours(fallback.getHours() + 1, 0, 0, 0)
+    return fallback
   }
 }
 
