@@ -38,6 +38,7 @@ export default async function InvoicePayPage({ params }: Props) {
         paidAt: invoice.paidAt?.toISOString() ?? null,
         txHash: invoice.txHash,
         paymentLinkCode: invoice.paymentLinkCode,
+        hspCheckoutUrl: (invoice as any).hspCheckoutUrl ?? null,
         createdAt: invoice.createdAt.toISOString(),
       }}
       senderName={senderName}

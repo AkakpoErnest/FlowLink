@@ -91,6 +91,8 @@ model PaymentLink {
   status           String   @default("active")
   totalVolume      Float    @default(0)
   transactions     Int      @default(0)
+  hspCheckoutUrl   String?
+  hspMandateId     String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -98,6 +100,7 @@ model PaymentLink {
   payments Payment[]
 
   @@index([userId, createdAt])
+  @@index([hspMandateId])
 }
 
 model Payment {
@@ -151,11 +154,15 @@ model Invoice {
   txHash           String?
   complianceStatus String    @default("pending")
   paymentLinkCode  String?
+  hspCheckoutUrl   String?
+  hspMandateId     String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   agent Agent? @relation(fields: [agentId], references: [id])
+
+  @@index([hspMandateId])
 }
 
 model ComplianceVault {
@@ -207,17 +214,18 @@ model PayrollRecipient {
 }
 
 model Agent {
-  id            String   @id @default(cuid())
-  userId        String
-  name          String
-  description   String?
-  walletAddress String?
-  capabilities  Json     @default("[]")
-  status        String   @default("active")
-  totalEarned   Float    @default(0)
-  invoiceCount  Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  userId               String
+  name                 String
+  description          String?
+  walletAddress        String?
+  capabilities         Json     @default("[]")
+  status               String   @default("active")
+  totalEarned          Float    @default(0)
+  invoiceCount         Int      @default(0)
+  hspMultipayMandateId String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]

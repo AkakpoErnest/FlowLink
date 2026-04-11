@@ -36,7 +36,42 @@ export default async function PaymentLinkPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20">
-      <div className="container mx-auto px-4 py-12 max-w-lg">
+      <div className="container mx-auto px-4 py-12 max-w-lg space-y-4">
+        {/* HSP hosted checkout — shown when available */}
+        {link.hspCheckoutUrl && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Pay via HashKey HSP</p>
+              <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
+                Powered by HashKey HSP
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">
+              Use HashKey Settlement Protocol for a seamless fiat-to-crypto checkout experience.
+            </p>
+            <a
+              href={link.hspCheckoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm"
+            >
+              Pay via HSK
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path fillRule="evenodd" d="M4.25 5.5a.75.75 0 00-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 00.75-.75v-4a.75.75 0 011.5 0v4A2.25 2.25 0 0112.75 17h-8.5A2.25 2.25 0 012 14.75v-8.5A2.25 2.25 0 014.25 4h5a.75.75 0 010 1.5h-5z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M6.194 12.753a.75.75 0 001.06.053L16.5 4.44v2.81a.75.75 0 001.5 0v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 000 1.5h2.553l-9.056 8.194a.75.75 0 00-.053 1.06z" clipRule="evenodd" />
+              </svg>
+            </a>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100" />
+              </div>
+              <div className="relative flex justify-center text-xs text-slate-400">
+                <span className="bg-white px-2">or pay with wallet below</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         <PaymentFlow
           paymentLink={{
             id: link.id,

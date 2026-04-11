@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { agentSendERC20, agentSendNative, deriveAgentWallet } from '@/lib/agent-wallet'
 import { logAudit } from '@/lib/audit'
+import { hspClient } from '@/lib/hsp-client'
 import { z } from 'zod'
 
 // Token addresses on HashKey Testnet
@@ -47,6 +48,31 @@ export async function POST(req: Request) {
     where: { id: agentId, userId },
   })
   if (!agent) return NextResponse.json({ error: 'Agent not found' }, { status: 404 })
+
+  // Ensure agent has an HSP Multi-Pay mandate (create once, reuse for all payments)
+  let hspMultipayMandateId = agent.hspMultipayMandateId ?? null
+  if (!hspMultipayMandateId && hspClient.isConfigured) {
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://flowlink.ink'
+      const mandate = await hspClient.createMultiPayMandate({
+        merchant_order_id: `agent-${agent.id}`,
+        description: `FlowLink Agent: ${agent.name}`,
+        webhook_url: `${appUrl}/api/webhooks/hsp`,
+        redirect_url: `${appUrl}/dashboard`,
+      })
+      if (mandate?.data?.cart_mandate_id) {
+        hspMultipayMandateId = mandate.data.cart_mandate_id
+        await prisma.agent.update({
+          where: { id: agentId },
+          data: { hspMultipayMandateId },
+        })
+        console.log(`[HSP] Created multi-pay mandate ${hspMultipayMandateId} for agent ${agentId}`)
+      }
+    } catch (err) {
+      console.error('[HSP] Failed to create multi-pay mandate for agent:', err)
+      // Non-fatal — continue with on-chain payment
+    }
+  }
 
   // Resolve destination
   let destAddress: `0x${string}`
@@ -97,7 +123,9 @@ export async function POST(req: Request) {
       status: 'completed',
       payerAddress,
       recipientAddress: destAddress,
-      memo,
+      memo: hspMultipayMandateId
+        ? `${memo || ''}${memo ? ' | ' : ''}hsp_mandate:${hspMultipayMandateId}`.trim()
+        : memo,
       paymentType,
       kycPassed: true,
       sanctionsChecked: true,
@@ -110,7 +138,14 @@ export async function POST(req: Request) {
     action: 'agent.payment.executed',
     entityId: payment.id,
     entityType: 'Payment',
-    metadata: { agentId, paymentType, amount, token, txHash: txResult.txHash },
+    metadata: {
+      agentId,
+      paymentType,
+      amount,
+      token,
+      txHash: txResult.txHash,
+      hspMultipayMandateId: hspMultipayMandateId ?? undefined,
+    },
   })
 
   return NextResponse.json({
@@ -118,6 +153,7 @@ export async function POST(req: Request) {
     txHash: txResult.txHash,
     txUrl: `https://testnet-explorer.hsk.xyz/tx/${txResult.txHash}`,
     payment,
+    hspMultipayMandateId: hspMultipayMandateId ?? null,
     message:
       paymentType === 'agent-to-agent'
         ? `Agent paid ${destAgentName} ${amount} ${token} on HashKey Chain`

@@ -52,6 +52,7 @@ interface InvoiceData {
   paidAt: string | null
   txHash: string | null
   paymentLinkCode: string | null
+  hspCheckoutUrl: string | null
   createdAt: string
 }
 
@@ -254,6 +255,38 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
             </div>
           )}
         </div>
+
+        {/* HSP hosted checkout — shown when available and invoice unpaid */}
+        {!isPaid && invoice.hspCheckoutUrl && effectiveStatus !== 'draft' && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Pay via HashKey HSP</p>
+              <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 rounded-full px-2 py-0.5 font-medium">
+                Powered by HashKey HSP
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">
+              Use HashKey Settlement Protocol for a seamless checkout experience.
+            </p>
+            <a
+              href={invoice.hspCheckoutUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors text-sm"
+            >
+              Pay via HSK
+              <ExternalLink className="h-4 w-4" />
+            </a>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100" />
+              </div>
+              <div className="relative flex justify-center text-xs text-slate-400">
+                <span className="bg-white px-2">or pay with wallet below</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Payment section */}
         {isPaid ? (
