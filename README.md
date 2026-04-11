@@ -1,47 +1,275 @@
 # FlowLink
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
-[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748?logo=prisma)](https://www.prisma.io)
-[![HashKey Chain](https://img.shields.io/badge/HashKey-Testnet-green)](https://hashkeychain-testnet-explorer.alt.technology)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+**AI-powered crypto payment infrastructure on HashKey Chain**
 
-AI-powered crypto payment infrastructure built on **HashKey Chain Testnet**. FlowLink lets you create payment links, issue on-chain invoices, run autonomous AI agents with dedicated managed wallets, and process crypto payroll — all from a single dashboard.
+[![HashKey Chain](https://img.shields.io/badge/HashKey-Chain%20Testnet-00b4d8?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+)](https://hashkeychain-testnet-explorer.alt.technology)
+[![PayFi Track](https://img.shields.io/badge/Track-PayFi-8b5cf6)](https://dorahacks.io/hackathon/2045)
+[![AI Track](https://img.shields.io/badge/Track-AI%20Agents-f59e0b)](https://dorahacks.io/hackathon/2045)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript)](https://www.typescriptlang.org)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?logo=prisma)](https://www.prisma.io)
+
+**Live demo:** [https://flowlink.ink](https://flowlink.ink)
+
+> Submitted to the **HashKey On-Chain Horizon Hackathon 2026** — PayFi + AI tracks
 
 ---
 
-## Features
+## What We Built
 
-- **Invoicing** — Create and send invoices with auto-generated payment links. Invoice numbers follow `FL-YEAR-NNN`. Supports per-agent or per-user recipient routing.
-- **Payment links** — Shareable `/l/[code]` links that accept HSK (native), USDC, or USDT. Compliance screening runs before each payment settles.
-- **AI agents** — Register autonomous agents with deterministic managed wallets (HD-derived). Agents can issue invoices, execute on-chain payments, and run scheduled or conditional rules via a cron engine.
-- **Managed wallets** — AES-256-GCM encrypted server-side wallets. Supports seed phrase and private key import. The plaintext private key never touches the database.
-- **Payroll** — Define batches of recipients with wallet addresses and amounts. Per-recipient KYC status tracking.
-- **Compliance vaults** — Programmable policy vaults (allowlists, risk thresholds, spend limits).
-- **AI assistant** — Powered by `claude-haiku-4-5-20251001` when `ANTHROPIC_API_KEY` is set; falls back to Ollama locally.
-- **Multi-chain wallet support** — RainbowKit on HashKey Testnet (primary), HashKey Mainnet, Ethereum, Polygon, Arbitrum, Optimism, and Sepolia. Payment execution is enforced on HashKey Testnet.
-- **Auth** — Email/password, Google OAuth, Google One Tap, and Sign-In with Ethereum (SIWE / EIP-4361).
+FlowLink is a complete B2B payment platform for the Web3 era. Businesses can invoice clients, share payment links, and let AI agents handle recurring transfers — all settled on HashKey Chain with HSP protocol compliance built in. No crypto experience required on the payer side; no MetaMask required on the business side.
+
+---
+
+## Why HashKey Chain + HSP
+
+FlowLink is built **natively** on HashKey Chain Testnet (Chain ID 133). Every payment flow routes through the HashKey Settlement Protocol (HSP):
+
+- **Single-Pay mandates** — each invoice and payment link auto-registers an HSP Cart Mandate with a hosted checkout URL, giving payers a compliant, branded payment experience.
+- **Multi-Pay mandates** — AI agents use HSP Multi-Pay to execute recurring or rule-based transfers under a single standing mandate — one authorization, unlimited on-chain payments.
+- **On-chain AML + settlement** — HSP handles compliance screening, receipt generation, and settlement routing before funds hit the recipient wallet.
+- **Real-time webhooks** — `/api/webhooks/hsp` receives HMAC-signed payment confirmations from HSP and updates invoice/payment status instantly.
+- **Graceful degradation** — the platform runs fully without HSP credentials. Add `HSP_APP_KEY` + `HSP_APP_SECRET` and HSP activates automatically across all flows.
+
+---
+
+## Key Features
+
+| | Feature | Description |
+|---|---|---|
+| 🧾 | **Invoicing** | Create, send, and track crypto invoices. Auto-generated `FL-YEAR-NNN` numbers. Supports USDC, USDT, and HSK. |
+| 🔗 | **Payment Links** | Shareable `/l/[code]` links with custom amounts, token selection, and expiry. HSP checkout URL included. |
+| 🤖 | **AI Agents** | Autonomous agents with dedicated wallets. Schedule payments via cron, trigger on events, or chain multi-step workflows. Powered by Claude. |
+| 💳 | **Managed Wallets** | Server-side wallets with AES-256-GCM encrypted private keys. No MetaMask needed to receive or send payments. |
+| 🔐 | **HSP Integration** | Single-Pay Cart Mandates for invoices/links; Multi-Pay mandates for agent recurring payments. |
+| 📊 | **Dashboard** | Real-time payment tracking, agent activity feed, and compliance/KYT overview. |
+| 🔒 | **Security** | Zod input validation, rate limiting, CSP headers, HMAC webhook verification, bcrypt-hashed passwords. |
 
 ---
 
 ## Tech Stack
 
-| Layer | Choice |
+| Layer | Technology |
 |---|---|
-| Framework | Next.js 14 App Router |
-| Language | TypeScript 5 |
-| Database | Prisma ORM + PostgreSQL (Supabase) |
-| Auth | NextAuth v4 (SIWE, Google OAuth, Credentials) |
-| Wallet / Chain | wagmi v2 + viem + RainbowKit |
-| Primary network | HashKey Chain Testnet (EVM, Chain ID 133) |
-| Animations | Framer Motion |
-| AI | Anthropic Claude API (`claude-haiku-4-5-20251001`) / Ollama fallback |
-| UI | Tailwind CSS + shadcn/ui + Radix UI |
-| Analytics | Vercel Analytics |
+| Frontend | Next.js 14 App Router, TypeScript, Tailwind CSS, Framer Motion |
+| Backend | Next.js API Routes, Prisma ORM |
+| Database | PostgreSQL (Supabase) |
+| Auth | NextAuth.js — Google OAuth, credentials, Sign-In with Ethereum (SIWE) |
+| Blockchain | HashKey Chain Testnet (Chain ID 133), Viem, wagmi v2, RainbowKit |
+| Payments | HSP (HashKey Settlement Protocol) — Single-Pay + Multi-Pay |
+| AI | Anthropic Claude API (`claude-haiku-4-5-20251001`) |
+| Wallets | Managed (AES-256-GCM encrypted) + External (MetaMask / WalletConnect) |
+| Deployment | Vercel |
 
 ---
 
-## HashKey Chain
+## HSP Integration Details
+
+HSP is the core settlement layer for every payment in FlowLink.
+
+**Client:** `lib/hsp-client.ts` — a typed TypeScript client that signs every request with HMAC-SHA256 using `HSP_APP_KEY` + `HSP_APP_SECRET`.
+
+### Flow: Invoice / Payment Link
+
+```
+Business creates invoice
+        │
+        ▼
+FlowLink calls HSP CreateCartMandate (Single-Pay)
+        │
+        ▼
+HSP returns mandate ID + hosted checkout URL
+        │
+        ▼
+Payer visits checkout URL → pays on HashKey Chain
+        │
+        ▼
+HSP fires signed webhook → /api/webhooks/hsp
+        │
+        ▼
+FlowLink marks invoice PAID, notifies business
+```
+
+### Flow: AI Agent Recurring Payment
+
+```
+Agent rule triggers (cron / event)
+        │
+        ▼
+FlowLink calls HSP CreateCartMandate (Multi-Pay)
+        │
+        ▼
+Agent wallet signs + submits transaction on HashKey Chain
+        │
+        ▼
+HSP confirms settlement via webhook
+        │
+        ▼
+FlowLink logs payment, updates agent activity feed
+```
+
+### Webhook Endpoint
+
+`POST /api/webhooks/hsp` — validates HMAC-SHA256 signature in `X-HSP-Signature` header before processing any event. Handles `payment.completed`, `payment.failed`, and `mandate.activated` events.
+
+### Mandate Types
+
+| Type | Use case | HSP endpoint |
+|---|---|---|
+| Single-Pay | One-time invoice or payment link | `POST /v1/cart-mandates/single` |
+| Multi-Pay | Agent recurring/scheduled transfers | `POST /v1/cart-mandates/multi` |
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        FlowLink                         │
+│                                                         │
+│   ┌──────────┐   ┌───────────┐   ┌──────────────────┐  │
+│   │ Invoices │   │  Payment  │   │    AI Agents     │  │
+│   │ & Links  │   │ Dashboard │   │ (Claude-powered) │  │
+│   └────┬─────┘   └─────┬─────┘   └────────┬─────────┘  │
+│        │               │                  │             │
+│        └───────────────┼──────────────────┘             │
+│                        │                                │
+│               ┌────────▼────────┐                       │
+│               │   HSP Client    │  ← HMAC-signed API    │
+│               │ (hsp-client.ts) │                       │
+│               └────────┬────────┘                       │
+└────────────────────────┼────────────────────────────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  HashKey Settlement  │
+              │   Protocol (HSP)     │
+              │  Cart Mandates API   │
+              └──────────┬───────────┘
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  HashKey Chain       │
+              │  Testnet (ID: 133)   │
+              │  HSK / USDC / USDT   │
+              └──────────┬───────────┘
+                         │
+              Webhook signed confirmation
+                         │
+                         ▼
+              ┌──────────────────────┐
+              │  /api/webhooks/hsp   │
+              │  → DB status update  │
+              └──────────────────────┘
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database (Supabase recommended)
+- HSP merchant credentials (optional — see below)
+
+### Install
+
+```bash
+git clone https://github.com/AkakpoErnest/FlowLink.git
+cd FlowLink
+npm install
+cp .env.example .env.local
+# Fill in required env vars
+npx prisma db push
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Environment Variables
+
+```env
+# ── Database ──────────────────────────────────────────────
+DATABASE_URL=postgresql://...          # Pooled connection (port 6543)
+DIRECT_URL=postgresql://...            # Direct connection (port 5432, for migrations)
+
+# ── Auth ──────────────────────────────────────────────────
+NEXTAUTH_SECRET=<random string>
+NEXTAUTH_URL=http://localhost:3000
+GOOGLE_CLIENT_ID=<your google client id>
+GOOGLE_CLIENT_SECRET=<your google client secret>
+
+# ── App ───────────────────────────────────────────────────
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:3000
+
+# ── HashKey Chain ─────────────────────────────────────────
+NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://hashkeychain-testnet.alt.technology
+NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_TESTNET=0x...   # optional
+NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x...   # optional
+
+# ── Wallet / Key Management ───────────────────────────────
+DEPLOYER_MNEMONIC=<12 or 24 word BIP-39 mnemonic>    # Required for agent on-chain payments
+WALLET_ENCRYPTION_KEY=<64-char hex>                   # AES-256-GCM key for managed wallets
+
+# ── HashKey Settlement Protocol (HSP) ─────────────────────
+# Obtain credentials at: https://merchant.hsp.hashkey.com
+HSP_APP_KEY=your_hsp_app_key_here
+HSP_APP_SECRET=your_hsp_app_secret_here
+HSP_BASE_URL=https://api-testnet.hsp.hashkey.com
+HSP_WEBHOOK_SECRET=your_webhook_secret_here
+
+# ── AI ────────────────────────────────────────────────────
+ANTHROPIC_API_KEY=<your anthropic api key>
+```
+
+> **Note:** `HSP_*` variables are optional. The app runs fully without them — HSP features activate automatically once credentials are provided.
+
+### Testnet Tokens
+
+Get testnet HSK from the [HashKey Testnet Faucet](https://faucet.hashkeychain-testnet.alt.technology).
+
+---
+
+## Project Structure
+
+```
+FlowLink/
+├── app/
+│   ├── (auth)/          # Login, register pages
+│   ├── api/
+│   │   ├── invoices/    # Invoice CRUD + HSP mandate creation
+│   │   ├── payments/    # Payment link CRUD
+│   │   ├── agents/      # AI agent management
+│   │   └── webhooks/
+│   │       └── hsp/     # HSP webhook receiver (HMAC verified)
+│   ├── dashboard/       # Main app dashboard
+│   ├── invoices/        # Invoice management + agent UI
+│   └── l/[code]/        # Public payment link page
+├── lib/
+│   ├── hsp-client.ts    # HSP API client with HMAC-SHA256 signing
+│   ├── hashkey.ts       # Chain config, token addresses
+│   ├── managed-wallet.ts # AES-256-GCM wallet encryption
+│   └── ai-agent.ts      # Claude-powered agent logic
+├── prisma/
+│   └── schema.prisma    # Database schema
+└── components/          # UI components
+```
+
+---
+
+## Hackathon Tracks
+
+This project is submitted to the **PayFi** and **AI** tracks of the [HashKey On-Chain Horizon Hackathon 2026](https://dorahacks.io/hackathon/2045).
+
+**PayFi** — FlowLink integrates HSP at every layer of the payment stack: invoice creation, payment link generation, and agent-driven recurring transfers all route through HSP Single-Pay or Multi-Pay Cart Mandates. Real-time webhook confirmation closes the settlement loop on-chain.
+
+**AI** — The agent system uses Anthropic Claude to interpret natural-language payment rules and translate them into on-chain actions. Agents support cron-scheduled payments, event-triggered transfers (e.g. `invoice_overdue`), and multi-step conditional workflows — all executed autonomously with managed wallets.
+
+---
+
+## HashKey Chain Reference
 
 | | Testnet | Mainnet |
 |---|---|---|
@@ -50,7 +278,7 @@ AI-powered crypto payment infrastructure built on **HashKey Chain Testnet**. Flo
 | RPC | `https://hashkeychain-testnet.alt.technology` | `https://mainnet.hsk.xyz` |
 | Explorer | `https://hashkeychain-testnet-explorer.alt.technology` | `https://explorer.hsk.xyz` |
 
-### Supported payment tokens
+**Supported payment tokens on Testnet**
 
 | Token | Type | Decimals |
 |---|---|---|
@@ -60,94 +288,8 @@ AI-powered crypto payment infrastructure built on **HashKey Chain Testnet**. Flo
 
 ---
 
-## Getting Started
+## Links
 
-### Environment variables
-
-Create a `.env` file (or `.env.local`) at the project root:
-
-```env
-# Database (Supabase recommended)
-DATABASE_URL=postgresql://...          # Pooled connection string (port 6543)
-DIRECT_URL=postgresql://...            # Direct connection string (port 5432, used by migrations)
-
-# NextAuth
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=<random string>
-
-# Google OAuth
-GOOGLE_CLIENT_ID=<your google client id>
-GOOGLE_CLIENT_SECRET=<your google client secret>
-
-# WalletConnect
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<walletconnect project id>
-
-# AI assistant (optional — falls back to Ollama if unset)
-ANTHROPIC_API_KEY=<your anthropic api key>
-
-# Managed wallet encryption (32-byte hex, required for managed wallets)
-WALLET_ENCRYPTION_KEY=<64-char hex string>
-
-# Agent wallet signing (BIP-39 mnemonic, required for agent on-chain payments)
-DEPLOYER_MNEMONIC=<12 or 24 word mnemonic>
-
-# HashKey RPC override (optional — defaults to public testnet RPC)
-NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://hashkeychain-testnet.alt.technology
-
-# FlowLink contract addresses (optional)
-NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_TESTNET=0x...
-NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x...
-
-# Ollama (optional — local AI fallback)
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen2.5:7b
-```
-
-### Install and run
-
-```bash
-npm install
-npx prisma db push
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-### Get testnet HSK
-
-Use the [HashKey Testnet faucet](https://faucet.hashkeychain-testnet.alt.technology) or request tokens from the HashKey developer community.
-
----
-
-## Deployment (Vercel)
-
-1. Push to GitHub and import the repo in [Vercel](https://vercel.com).
-2. Add all environment variables above under **Project Settings → Environment Variables**.
-3. Set `NEXTAUTH_URL` to your production domain (e.g. `https://yourapp.vercel.app`).
-4. Add the production URL to the allowed redirect URIs in your Google OAuth app.
-5. Vercel detects Next.js automatically and runs `npm install && npm run build` (which also runs `prisma generate`).
-
----
-
-## Agent System
-
-Agents are autonomous entities with dedicated wallet addresses. The full payment flow:
-
-1. Register an agent with a name in the **Agents** tab (`/invoices`). A deterministic wallet is auto-derived from `DEPLOYER_MNEMONIC`.
-2. Issue an invoice from that agent — FlowLink auto-creates a payment link with `recipientAddress = agent.walletAddress`.
-3. Share the link (`/l/inv-xxxxxxxx`) with the client.
-4. The client pays on HashKey Testnet; funds land directly in the agent's wallet.
-
-Agent rules support three types:
-- **Scheduled** — cron-based (e.g. `0 9 * * 1` = every Monday 9 AM). Parsed with [croner](https://github.com/Hexagon/croner).
-- **Conditional** — triggered by platform events (e.g. `invoice_overdue`).
-- **Multi-step** — sequential workflow with optional delays between steps.
-
----
-
-## Known Limitations
-
-- **Compliance checks are simulated** — `runCompliance()` in `payment-flow.tsx` returns a fixed score of 95. Wire in a real provider (Chainalysis, Elliptic, Sumsub) to replace it.
-- **USDC/USDT addresses unverified** — Addresses in `lib/hashkey.ts` are placeholders. Verify against the [HashKey testnet explorer](https://hashkeychain-testnet-explorer.alt.technology) before use.
-- **Google OAuth users have no wallet** — Payment links created by Google-only users show "Payment unavailable" until a wallet is connected and saved to their profile.
-- **No account merge flow** — SIWE and Google OAuth sessions are independent users; no merge flow exists yet.
+- **Live app:** [https://flowlink.ink](https://flowlink.ink)
+- **GitHub:** [https://github.com/AkakpoErnest/FlowLink](https://github.com/AkakpoErnest/FlowLink)
+- **Hackathon:** [HashKey On-Chain Horizon Hackathon 2026](https://dorahacks.io/hackathon/2045)
