@@ -347,14 +347,26 @@ export function DashboardOverview() {
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading…
               </div>
             ) : recent.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                  </svg>
+              <div className="relative text-center py-10 text-slate-400 rounded-xl overflow-hidden">
+                {/* Subtle background illustration */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <img
+                    src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=60&auto=format&fit=crop"
+                    alt=""
+                    className="w-full h-full object-cover opacity-[0.04] grayscale"
+                    aria-hidden="true"
+                  />
                 </div>
-                <p className="text-sm">No payments yet. Share a payment link to get started.</p>
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500">No payments yet</p>
+                  <p className="text-xs text-slate-400 mt-1">Share a payment link to get started.</p>
+                </div>
               </div>
             ) : (
               recent.map((p) => (
@@ -420,14 +432,26 @@ export function DashboardOverview() {
                 </div>
               </>
             ) : (
-              <div className="text-center py-8 text-slate-400">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    <polyline points="9 12 11 14 15 10"/>
-                  </svg>
+              <div className="relative text-center py-10 text-slate-400 rounded-xl overflow-hidden">
+                {/* Subtle background illustration */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <img
+                    src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=60&auto=format&fit=crop"
+                    alt=""
+                    className="w-full h-full object-cover opacity-[0.04] grayscale"
+                    aria-hidden="true"
+                  />
                 </div>
-                <p className="text-sm">No payment data yet. Compliance metrics will appear here once you receive payments.</p>
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500">No compliance data yet</p>
+                  <p className="text-xs text-slate-400 mt-1">Metrics appear once you receive payments.</p>
+                </div>
               </div>
             )}
           </CardContent>
