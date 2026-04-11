@@ -8,33 +8,28 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ============================================================
-// NextAuth required models
-// ============================================================
-
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  walletAddress       String?   @unique
-  walletType          String?   // "managed" | "external"
-  encryptedPrivateKey String?   // AES-256-GCM encrypted private key
-  encryptedMnemonic   String?   // AES-256-GCM encrypted mnemonic (null for private-key imports)
-  createdAt           DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts       Account[]
-  sessions       Session[]
-  paymentLinks   PaymentLink[]
-  payments       Payment[]
-  invoices       Invoice[]
-  vaults         ComplianceVault[]
-  payrollBatches PayrollBatch[]
-  agents         Agent[]
-  auditLogs      AuditLog[]
+  id                  String            @id @default(cuid())
+  name                String?
+  email               String?           @unique
+  emailVerified       DateTime?
+  image               String?
+  walletAddress       String?           @unique
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  password            String?
+  encryptedMnemonic   String?
+  encryptedPrivateKey String?
+  walletType          String?
+  accounts            Account[]
+  agents              Agent[]
+  auditLogs           AuditLog[]
+  vaults              ComplianceVault[]
+  invoices            Invoice[]
+  payments            Payment[]
+  paymentLinks        PaymentLink[]
+  payrollBatches      PayrollBatch[]
+  sessions            Session[]
 }
 
 model Account {
@@ -43,15 +38,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -61,8 +55,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -73,28 +66,24 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ============================================================
-// App models
-// ============================================================
-
 model PaymentLink {
-  id               String   @id @default(cuid())
+  id               String    @id @default(cuid())
   userId           String
-  code             String   @unique
+  code             String    @unique
   name             String?
-  network          String   @default("celo")
-  sourceToken      String   @default("USDC")
-  destStable       String   @default("USDC")
+  sourceToken      String    @default("USDC")
+  destStable       String    @default("USDC")
   amountMin        Float?
   amountMax        Float?
+  status           String    @default("active")
+  totalVolume      Float     @default(0)
+  transactions     Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   recipientAddress String?
-  status           String   @default("active")
-  totalVolume      Float    @default(0)
-  transactions     Int      @default(0)
   hspCheckoutUrl   String?
   hspMandateId     String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  network          String   @default("hashkey_testnet")
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   payments Payment[]
@@ -104,30 +93,29 @@ model PaymentLink {
 }
 
 model Payment {
-  id               String   @id @default(cuid())
+  id               String       @id @default(cuid())
   userId           String?
   paymentLinkId    String?
-  agentId          String?
   payer            String?
   amount           Float
-  currency         String   @default("USDC")
-  token            String?
+  currency         String       @default("USDC")
   txHash           String?
-  status           String   @default("pending")
-  network          String   @default("celo")
-  complianceScore  Int      @default(0)
-  kycPassed        Boolean  @default(false)
-  sanctionsChecked Boolean  @default(false)
+  status           String       @default("pending")
+  network          String       @default("celo")
+  complianceScore  Int          @default(0)
+  kycPassed        Boolean      @default(false)
+  sanctionsChecked Boolean      @default(false)
   gasUsed          String?
-  payerAddress     String?
-  recipientAddress String?
+  createdAt        DateTime     @default(now())
+  agentId          String?
   memo             String?
-  paymentType      String?  @default("standard")
-  createdAt        DateTime @default(now())
-
-  user        User?        @relation(fields: [userId], references: [id])
-  paymentLink PaymentLink? @relation(fields: [paymentLinkId], references: [id])
-  agent       Agent?       @relation(fields: [agentId], references: [id])
+  payerAddress     String?
+  paymentType      String?      @default("standard")
+  recipientAddress String?
+  token            String?
+  agent            Agent?       @relation(fields: [agentId], references: [id])
+  paymentLink      PaymentLink? @relation(fields: [paymentLinkId], references: [id])
+  user             User?        @relation(fields: [userId], references: [id])
 
   @@index([paymentLinkId, userId])
 }
@@ -141,14 +129,11 @@ model Invoice {
   issuedTo         String?
   issuedToAddress  String?
   amount           Float
-  subtotal         Float?
   currency         String    @default("USDC")
   network          String    @default("celo")
   status           String    @default("draft")
   description      String?
-  notes            String?
   lineItems        Json?
-  issueDate        DateTime?
   dueAt            DateTime?
   paidAt           DateTime?
   txHash           String?
@@ -156,6 +141,9 @@ model Invoice {
   paymentLinkCode  String?
   hspCheckoutUrl   String?
   hspMandateId     String?
+  issueDate        DateTime?
+  notes            String?
+  subtotal         Float?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -176,56 +164,53 @@ model ComplianceVault {
   policies            Json?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PayrollBatch {
-  id          String    @id @default(cuid())
+  id          String             @id @default(cuid())
   userId      String
   name        String
   totalAmount Float
-  currency    String    @default("USDC")
-  status      String    @default("pending")
-  network     String    @default("celo")
+  currency    String             @default("USDC")
+  status      String             @default("pending")
+  network     String             @default("celo")
   scheduledAt DateTime?
   completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipients PayrollRecipient[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipients  PayrollRecipient[]
 }
 
 model PayrollRecipient {
-  id            String  @id @default(cuid())
+  id            String       @id @default(cuid())
   batchId       String
   name          String
   email         String?
   walletAddress String
   amount        Float
-  currency      String  @default("USDC")
-  status        String  @default("pending")
-  kycStatus     String  @default("pending")
+  currency      String       @default("USDC")
+  status        String       @default("pending")
+  kycStatus     String       @default("pending")
   country       String?
   txHash        String?
-
-  batch PayrollBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batch         PayrollBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
 }
 
 model Agent {
-  id                   String   @id @default(cuid())
+  id                   String      @id @default(cuid())
   userId               String
   name                 String
   description          String?
   walletAddress        String?
-  capabilities         Json     @default("[]")
-  status               String   @default("active")
-  totalEarned          Float    @default(0)
-  invoiceCount         Int      @default(0)
+  capabilities         Json        @default("[]")
+  status               String      @default("active")
+  totalEarned          Float       @default(0)
+  invoiceCount         Int         @default(0)
   hspMultipayMandateId String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   user     User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   invoices Invoice[]
@@ -236,20 +221,19 @@ model Agent {
 model AgentRule {
   id        String    @id @default(cuid())
   agentId   String
-  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  type      String    // 'scheduled' | 'conditional' | 'multistep'
+  type      String
   config    Json
   status    String    @default("active")
   lastRun   DateTime?
   nextRun   DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  agent     Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {
   id         String   @id @default(cuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
   action     String
   entityId   String?
   entityType String?
@@ -257,6 +241,7 @@ model AuditLog {
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
 
   @@index([userId, createdAt])
   @@index([action])
