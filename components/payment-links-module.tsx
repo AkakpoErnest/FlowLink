@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -9,8 +8,9 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, AlertTriangle, Loader2, ExternalLink, Link2, Unlink, Share2 } from "lucide-react"
+import { QrCode, Plus, Copy, Shield, CheckCircle, Clock, Loader2, ExternalLink, Link2, Unlink, Share2, TrendingUp, Zap } from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 interface PaymentLink {
   id: string
@@ -24,6 +24,30 @@ interface PaymentLink {
   totalVolume: number
   transactions: number
   createdAt: string
+}
+
+function SkeletonLinkCard() {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 animate-pulse">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-36 bg-white/10 rounded" />
+            <div className="h-4 w-16 bg-white/[0.06] rounded" />
+          </div>
+          <div className="h-3 w-64 bg-white/[0.06] rounded" />
+          <div className="flex gap-4 mt-2">
+            <div className="h-3 w-16 bg-white/[0.06] rounded" />
+            <div className="h-3 w-20 bg-white/[0.06] rounded" />
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="h-8 w-20 bg-white/[0.06] rounded-lg" />
+          <div className="h-8 w-8 bg-white/[0.06] rounded-lg" />
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function PaymentLinksModule() {
@@ -47,7 +71,7 @@ export function PaymentLinksModule() {
 
   const copyLink = (code: string) => {
     navigator.clipboard.writeText(`${window.location.origin}/l/${code}`)
-    toast.success('Link copied!')
+    toast.success('Link copied to clipboard')
   }
 
   const deactivate = async (id: string) => {
@@ -56,11 +80,13 @@ export function PaymentLinksModule() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status: 'inactive' }),
     })
+    toast.success('Link deactivated')
     fetchLinks()
   }
 
   const deleteLink = async (id: string) => {
     await fetch(`/api/payment-links?id=${id}`, { method: 'DELETE' })
+    toast.success('Link deleted')
     fetchLinks()
   }
 
@@ -69,69 +95,82 @@ export function PaymentLinksModule() {
 
   return (
     <div className="space-y-6">
-      {/* Header banner */}
-      <div className="relative rounded-2xl overflow-hidden bg-slate-900 min-h-[96px] flex items-center px-6">
-        <img src="/image5.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20 scale-x-[-1]" />
-        <div className="relative z-10 flex items-center justify-between w-full">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Payment Links</h2>
-            <p className="text-slate-400 mt-0.5 text-sm">Create and share compliant payment links</p>
-          </div>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button className="bg-teal-600 hover:bg-teal-500 text-white shrink-0">
-                <Plus className="h-4 w-4 mr-2" /> Create Link
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>New Payment Link</DialogTitle>
-                <DialogDescription>Create a compliant payment link on Celo Mainnet</DialogDescription>
-              </DialogHeader>
-              <CreateLinkForm onSuccess={() => { setShowCreateDialog(false); fetchLinks() }} />
-            </DialogContent>
-          </Dialog>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Payment Links</h1>
+          <p className="text-slate-500 mt-1 text-sm">Create and share compliant payment links</p>
         </div>
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogTrigger asChild>
+            <Button className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-900/30 rounded-xl">
+              <Plus className="h-4 w-4 mr-2" /> Create Link
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg bg-[#0f172a] border border-white/10 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-white">New Payment Link</DialogTitle>
+              <DialogDescription className="text-slate-500">Create a compliant payment link</DialogDescription>
+            </DialogHeader>
+            <CreateLinkForm onSuccess={() => { setShowCreateDialog(false); fetchLinks() }} />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: 'Active Links', value: activeLinks.length.toString(), icon: Zap },
+          { label: 'Total Volume', value: `$${links.reduce((s, l) => s + l.totalVolume, 0).toLocaleString()}`, icon: TrendingUp },
+          { label: 'Total Payments', value: links.reduce((s, l) => s + l.transactions, 0).toString(), icon: CheckCircle },
+        ].map(({ label, value, icon: Icon }) => (
+          <div key={label} className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Icon className="h-3.5 w-3.5 text-emerald-400" />
+              <span className="text-xs text-slate-500">{label}</span>
+            </div>
+            <p className="text-2xl font-bold text-white">{value}</p>
+          </div>
+        ))}
       </div>
 
       <Tabs defaultValue="active">
-        <TabsList>
-          <TabsTrigger value="active">Active ({activeLinks.length})</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive ({inactiveLinks.length})</TabsTrigger>
+        <TabsList className="bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl">
+          <TabsTrigger
+            value="active"
+            className="rounded-lg text-slate-500 data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-sm"
+          >
+            Active
+            <span className="ml-2 text-xs bg-emerald-500/20 text-emerald-400 rounded-md px-1.5 py-0.5">{activeLinks.length}</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="inactive"
+            className="rounded-lg text-slate-500 data-[state=active]:bg-white/[0.08] data-[state=active]:text-white data-[state=active]:shadow-sm"
+          >
+            Inactive
+            <span className="ml-2 text-xs bg-white/10 text-slate-500 rounded-md px-1.5 py-0.5">{inactiveLinks.length}</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="mt-4 space-y-3">
           {loading ? (
             <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-xl border border-slate-200 bg-white p-5 animate-pulse">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-36 bg-slate-200 rounded" />
-                        <div className="h-4 w-16 bg-slate-100 rounded" />
-                      </div>
-                      <div className="h-3 w-64 bg-slate-100 rounded" />
-                      <div className="flex gap-4 mt-2">
-                        <div className="h-3 w-16 bg-slate-100 rounded" />
-                        <div className="h-3 w-20 bg-slate-100 rounded" />
-                        <div className="h-3 w-16 bg-slate-100 rounded" />
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="h-8 w-16 bg-slate-100 rounded" />
-                      <div className="h-8 w-8 bg-slate-100 rounded" />
-                      <div className="h-8 w-20 bg-slate-100 rounded" />
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {[1, 2, 3].map((i) => <SkeletonLinkCard key={i} />)}
             </div>
           ) : activeLinks.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <QrCode className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">No active links</p>
-              <p className="text-sm mt-1">Create your first payment link to get started</p>
+            <div className="text-center py-16 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                <QrCode className="h-7 w-7 text-emerald-400" />
+              </div>
+              <p className="font-semibold text-slate-300">No active payment links</p>
+              <p className="text-sm text-slate-600 mt-1 mb-4">Create a link to start accepting crypto payments</p>
+              <Button
+                onClick={() => setShowCreateDialog(true)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Create your first link
+              </Button>
             </div>
           ) : (
             activeLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} onDelete={deleteLink} />)
@@ -140,9 +179,9 @@ export function PaymentLinksModule() {
 
         <TabsContent value="inactive" className="mt-4 space-y-3">
           {inactiveLinks.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <Clock className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No inactive links</p>
+            <div className="text-center py-12 rounded-2xl border border-white/[0.06] bg-white/[0.02]">
+              <Clock className="h-10 w-10 mx-auto mb-3 text-slate-600" />
+              <p className="text-sm text-slate-500">No inactive links</p>
             </div>
           ) : (
             inactiveLinks.map(link => <LinkCard key={link.id} link={link} onCopy={copyLink} onDeactivate={deactivate} onDelete={deleteLink} />)
@@ -155,60 +194,102 @@ export function PaymentLinksModule() {
 
 function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink; onCopy: (c: string) => void; onDeactivate: (id: string) => void; onDelete: (id: string) => void }) {
   const url = `${typeof window !== 'undefined' ? window.location.origin : ''}/l/${link.code}`
+  const isActive = link.status === 'active'
 
   return (
-    <Card className="hover:shadow-sm transition-shadow">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="font-semibold text-slate-900 truncate">{link.name ?? link.code}</p>
-              <Badge className={`flex items-center gap-1 ${link.status === 'active' ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                {link.status === 'active'
-                  ? <Link2 className="h-3 w-3 text-emerald-600" />
-                  : <Unlink className="h-3 w-3 text-slate-400" />}
-                {link.status}
-              </Badge>
+    <div className={cn(
+      "rounded-2xl border transition-all hover:border-white/10 p-5 group",
+      isActive ? "border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05]" : "border-white/[0.04] bg-white/[0.02]"
+    )}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className={cn(
+              "w-8 h-8 rounded-xl flex items-center justify-center shrink-0",
+              isActive ? "bg-emerald-500/10" : "bg-white/[0.04]"
+            )}>
+              {isActive
+                ? <Link2 className="h-4 w-4 text-emerald-400" />
+                : <Unlink className="h-4 w-4 text-slate-600" />}
             </div>
-            <p className="text-xs font-mono text-slate-400 mb-3 truncate">{url}</p>
-            <div className="flex flex-wrap gap-4 text-sm text-slate-500">
-              <span className="flex items-center gap-1">
-                <Shield className="h-3.5 w-3.5 text-teal-500" />
-                {link.sourceToken}
-              </span>
-              {(link.amountMin || link.amountMax) && (
-                <span>{link.amountMin ?? '0'} – {link.amountMax ?? '∞'}</span>
-              )}
-              <span>{link.transactions} payments</span>
-              <span>${link.totalVolume.toLocaleString()} volume</span>
-            </div>
+            <p className="font-semibold text-slate-200 truncate">{link.name ?? link.code}</p>
+            <span className={cn(
+              "shrink-0 text-xs px-2 py-0.5 rounded-full font-medium border",
+              isActive
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                : "bg-white/[0.06] text-slate-500 border-white/10"
+            )}>
+              {link.status}
+            </span>
           </div>
-          <div className="flex gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={() => onCopy(link.code)}>
-              <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-            </Button>
-            {typeof navigator !== 'undefined' && navigator.share && (
-              <Button variant="outline" size="sm" onClick={() => navigator.share({ url: `${window.location.origin}/l/${link.code}`, title: link.name ?? link.code })}>
-                <Share2 className="h-3.5 w-3.5" />
-              </Button>
+          <p className="text-xs font-mono text-slate-600 mb-3 truncate">{url}</p>
+          <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+            <span className="flex items-center gap-1">
+              <Shield className="h-3 w-3 text-emerald-600" />
+              {link.sourceToken}
+            </span>
+            {(link.amountMin || link.amountMax) && (
+              <span>{link.amountMin ?? '0'} – {link.amountMax ?? '∞'}</span>
             )}
-            <a href={`/l/${link.code}`} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Button>
-            </a>
-            {link.status === 'active' && (
-              <Button variant="outline" size="sm" className="text-amber-600 hover:text-amber-700 hover:border-amber-200" onClick={() => onDeactivate(link.id)}>
-                Deactivate
-              </Button>
-            )}
-            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-200" onClick={() => onDelete(link.id)}>
-              Delete
-            </Button>
+            <span className="flex items-center gap-1">
+              <CheckCircle className="h-3 w-3 text-slate-600" />
+              {link.transactions} payments
+            </span>
+            <span className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3 text-slate-600" />
+              ${link.totalVolume.toLocaleString()} volume
+            </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onCopy(link.code)}
+            className="bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl"
+          >
+            <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+          </Button>
+          {typeof navigator !== 'undefined' && navigator.share && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigator.share({ url: `${window.location.origin}/l/${link.code}`, title: link.name ?? link.code })}
+              className="bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <a href={`/l/${link.code}`} target="_blank" rel="noopener noreferrer">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
+          </a>
+          {isActive && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20 rounded-xl"
+              onClick={() => onDeactivate(link.id)}
+            >
+              Pause
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20 rounded-xl"
+            onClick={() => onDelete(link.id)}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -252,14 +333,21 @@ function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
   return (
     <div className="space-y-4 pt-2">
       <div className="space-y-1.5">
-        <Label>Link Name</Label>
-        <Input placeholder="e.g. Conference Ticket" value={name} onChange={e => setName(e.target.value)} />
+        <Label className="text-slate-400 text-xs">Link Name</Label>
+        <Input
+          placeholder="e.g. Conference Ticket"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          className="bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50"
+        />
       </div>
       <div className="space-y-1.5">
-        <Label>Token</Label>
+        <Label className="text-slate-400 text-xs">Token</Label>
         <Select value={token} onValueChange={setToken}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
-          <SelectContent>
+          <SelectTrigger className="bg-white/[0.04] border-white/10 text-slate-300">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-[#1e293b] border-white/10 text-slate-300">
             <SelectItem value="USDC">USDC (Celo)</SelectItem>
             <SelectItem value="USDT">USDT (Celo)</SelectItem>
             <SelectItem value="cUSD">cUSD (Celo Dollar)</SelectItem>
@@ -269,17 +357,39 @@ function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label>Min Amount (optional)</Label>
-          <Input type="number" placeholder="0.00" value={amountMin} onChange={e => setAmountMin(e.target.value)} />
+          <Label className="text-slate-400 text-xs">Min Amount <span className="text-slate-600">(optional)</span></Label>
+          <Input
+            type="number"
+            placeholder="0.00"
+            value={amountMin}
+            onChange={e => setAmountMin(e.target.value)}
+            className="bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600"
+          />
         </div>
         <div className="space-y-1.5">
-          <Label>Max Amount (optional)</Label>
-          <Input type="number" placeholder="∞" value={amountMax} onChange={e => setAmountMax(e.target.value)} />
+          <Label className="text-slate-400 text-xs">Max Amount <span className="text-slate-600">(optional)</span></Label>
+          <Input
+            type="number"
+            placeholder="∞"
+            value={amountMax}
+            onChange={e => setAmountMax(e.target.value)}
+            className="bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600"
+          />
         </div>
       </div>
       <div className="flex gap-3 pt-2">
-        <Button variant="outline" onClick={onSuccess} className="flex-1">Cancel</Button>
-        <Button onClick={handleCreate} disabled={loading} className="flex-1 bg-teal-600 hover:bg-teal-500 text-white">
+        <Button
+          variant="outline"
+          onClick={onSuccess}
+          className="flex-1 bg-white/[0.04] border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl"
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleCreate}
+          disabled={loading}
+          className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30"
+        >
           {loading ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating…</> : 'Create Link'}
         </Button>
       </div>

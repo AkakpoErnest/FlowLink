@@ -35,8 +35,22 @@ export default async function PaymentLinkPage({ params }: Props) {
     : (link.user.name ?? link.user.email ?? 'Unknown')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50/20">
-      <div className="container mx-auto px-4 py-12 max-w-lg">
+    <div className="min-h-screen bg-[#f8fafc]">
+      {/* Header bar */}
+      <header className="bg-white border-b border-slate-200">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl overflow-hidden">
+              <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">
+              <span className="text-slate-900">Flow</span>
+              <span className="text-emerald-600">Link</span>
+            </span>
+          </div>
+        </div>
+      </header>
+      <div className="max-w-lg mx-auto px-4 py-10">
         <PaymentFlow
           paymentLink={{
             id: link.id,

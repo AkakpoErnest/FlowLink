@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, Zap, CheckCircle, Loader2, Download, ChevronDown, Link2, FileText, Wallet } from "lucide-react"
+import { Shield, CheckCircle, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -35,17 +34,6 @@ interface ComplianceMetrics {
   score: number
 }
 
-function StatIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
-      style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}
-    >
-      {children}
-    </div>
-  )
-}
-
 async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
   try {
     const res = await fetch(`/api/reports?type=${type}`)
@@ -62,6 +50,77 @@ async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
   } catch (e) {
     console.error('Export failed:', e)
   }
+}
+
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6 animate-pulse">
+      <div className="flex items-start justify-between mb-4">
+        <div className="space-y-2">
+          <div className="h-3 w-24 bg-white/10 rounded" />
+          <div className="h-8 w-20 bg-white/10 rounded" />
+        </div>
+        <div className="w-12 h-12 rounded-xl bg-white/10" />
+      </div>
+      <div className="h-3 w-32 bg-white/[0.06] rounded" />
+    </div>
+  )
+}
+
+function SkeletonRow() {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-white/10" />
+        <div className="space-y-1.5">
+          <div className="h-3 w-28 bg-white/10 rounded" />
+          <div className="h-2.5 w-20 bg-white/[0.06] rounded" />
+        </div>
+      </div>
+      <div className="space-y-1.5 text-right">
+        <div className="h-3 w-16 bg-white/10 rounded" />
+        <div className="h-2.5 w-12 bg-white/[0.06] rounded ml-auto" />
+      </div>
+    </div>
+  )
+}
+
+const statusStyles: Record<string, string> = {
+  completed: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+  pending: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+  failed: "bg-red-500/10 text-red-400 border border-red-500/20",
+}
+
+function StatusBadge({ status }: { status: string }) {
+  return (
+    <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium capitalize", statusStyles[status] ?? "bg-white/10 text-slate-400 border border-white/10")}>
+      {status}
+    </span>
+  )
+}
+
+function StatCard({ title, value, icon, trend, sub }: { title: string; value: string; icon: React.ReactNode; trend?: string; sub?: string }) {
+  return (
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.05] transition-all p-6 group">
+      <div className="flex items-start justify-between mb-4">
+        <div>
+          <p className="text-sm text-slate-500 font-medium">{title}</p>
+          <p className="text-3xl font-bold text-white mt-1 tracking-tight">{value}</p>
+        </div>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0 group-hover:scale-105 transition-transform"
+          style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}>
+          {icon}
+        </div>
+      </div>
+      {trend && (
+        <div className="flex items-center gap-1">
+          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
+          <span className="text-xs text-emerald-400 font-medium">{trend}</span>
+          {sub && <span className="text-xs text-slate-600 ml-1">{sub}</span>}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export function DashboardOverview() {
@@ -93,7 +152,6 @@ export function DashboardOverview() {
 
         if (cancelled) return
 
-        // Parse payments — API returns { success, data, total } wrapper
         let recentPayments: RecentPayment[] = []
         let totalPayments = 0
         if (paymentsRes.status === 'fulfilled' && paymentsRes.value.ok) {
@@ -103,7 +161,6 @@ export function DashboardOverview() {
         }
         setRecent(recentPayments)
 
-        // Try dedicated stats route first; fall back to computing from links
         if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
           const data = await statsRes.value.json()
           setStats({
@@ -113,7 +170,6 @@ export function DashboardOverview() {
             pendingInvoices: data.pendingInvoices ?? 0,
           })
         } else {
-          // Compute stats from payment-links (fallback)
           let activePaymentLinks = 0
           let totalVolume = 0
           if (linksRes.status === 'fulfilled' && linksRes.value.ok) {
@@ -140,91 +196,65 @@ export function DashboardOverview() {
   }, [])
 
   const s = stats ?? { totalVolume: 0, activePaymentLinks: 0, totalPayments: 0, pendingInvoices: 0 }
+
   const statCards = [
     {
       title: 'Total Volume',
       value: `$${s.totalVolume.toLocaleString()}`,
+      trend: 'This month',
       icon: (
-        <StatIcon>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3,20 8,14 12,17 17,9 22,12 25,7" />
-            <polyline points="21,7 25,7 25,11" />
-          </svg>
-        </StatIcon>
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3,20 8,14 12,17 17,9 22,12 25,7" />
+          <polyline points="21,7 25,7 25,11" />
+        </svg>
       ),
     },
     {
-      title: 'Active Payment Links',
+      title: 'Active Links',
       value: s.activePaymentLinks.toString(),
+      trend: 'Payment links',
       icon: (
-        <StatIcon>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="8" height="8" rx="1.5"/>
-            <rect x="5.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-            <rect x="17" y="3" width="8" height="8" rx="1.5"/>
-            <rect x="19.5" y="5.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-            <rect x="3" y="17" width="8" height="8" rx="1.5"/>
-            <rect x="5.5" y="19.5" width="3" height="3" fill="#34d399" stroke="none" rx="0.5"/>
-            <path d="M19 20 L22 17 M17 22 C16 22 14.5 20.5 14.5 19 C14.5 17.5 16 16 17.5 16 L19 16 M22 19 C23 19 24.5 20.5 24.5 22 C24.5 23.5 23 25 21.5 25 L20 25"/>
-          </svg>
-        </StatIcon>
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
       ),
     },
     {
       title: 'Total Payments',
       value: s.totalPayments.toString(),
+      trend: 'All time',
       icon: (
-        <StatIcon>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="5" y1="11" x2="23" y2="11"/>
-            <polyline points="17,6 23,11 17,16"/>
-            <line x1="23" y1="17" x2="5" y2="17"/>
-            <polyline points="11,22 5,17 11,12"/>
-          </svg>
-        </StatIcon>
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="5" y1="11" x2="23" y2="11"/>
+          <polyline points="17,6 23,11 17,16"/>
+          <line x1="23" y1="17" x2="5" y2="17"/>
+          <polyline points="11,22 5,17 11,12"/>
+        </svg>
       ),
     },
     {
       title: 'Pending Invoices',
       value: s.pendingInvoices.toString(),
+      trend: 'Awaiting payment',
       icon: (
-        <StatIcon>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 4 L18 4 L22 8 L22 15 M6 4 L6 24 L15 24"/>
-            <polyline points="18,4 18,8 22,8"/>
-            <line x1="10" y1="11" x2="18" y2="11"/>
-            <line x1="10" y1="14" x2="15" y2="14"/>
-            <circle cx="20" cy="21" r="5"/>
-            <polyline points="20,18.5 20,21 22,22.5"/>
-          </svg>
-        </StatIcon>
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 4 L18 4 L22 8 L22 15 M6 4 L6 24 L15 24"/>
+          <polyline points="18,4 18,8 22,8"/>
+          <line x1="10" y1="11" x2="18" y2="11"/>
+          <line x1="10" y1="14" x2="15" y2="14"/>
+          <circle cx="20" cy="21" r="5"/>
+          <polyline points="20,18.5 20,21 22,22.5"/>
+        </svg>
       ),
     },
   ]
 
   const hasCompletedSetup = hasPaymentLink && hasInvoice && !!walletAddress
   const onboardingSteps = [
-    {
-      step: 1,
-      title: "Create your first payment link",
-      desc: "Share it with anyone to receive crypto payments instantly.",
-      icon: Link2,
-      done: hasPaymentLink,
-    },
-    {
-      step: 2,
-      title: "Link your wallet",
-      desc: "Connect your wallet so you can receive funds on HashKey Chain.",
-      icon: Wallet,
-      done: !!walletAddress,
-    },
-    {
-      step: 3,
-      title: "Create an invoice",
-      desc: "Professional invoices with built-in KYC/AML compliance.",
-      icon: FileText,
-      done: hasInvoice,
-    },
+    { step: 1, title: "Create a payment link", desc: "Share it to receive crypto payments instantly.", icon: Link2, done: hasPaymentLink },
+    { step: 2, title: "Link your wallet", desc: "Connect to receive funds on HashKey Chain.", icon: Wallet, done: !!walletAddress },
+    { step: 3, title: "Send an invoice", desc: "Professional invoices with built-in KYC/AML.", icon: FileText, done: hasInvoice },
   ]
   const completedSteps = onboardingSteps.filter(s => s.done).length
 
@@ -233,72 +263,72 @@ export function DashboardOverview() {
       {/* Greeting */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            👋 Hey {firstName}!
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Good morning, {firstName}
           </h1>
-          <p className="text-slate-500 mt-1 text-sm">Here&apos;s what&apos;s happening with your payments today.</p>
+          <p className="text-slate-500 mt-1 text-sm">Here&apos;s your payment overview for today.</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-500 text-white">
+            <Button size="sm" className="bg-white/[0.06] hover:bg-white/10 text-slate-300 border border-white/10 hover:border-white/20">
               <Download className="h-3.5 w-3.5 mr-1.5" />
-              Export Report
+              Export
               <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => downloadReport('payments')}>
+          <DropdownMenuContent align="end" className="bg-[#1e293b] border-white/10 text-slate-300">
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payments')}>
               Payments CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => downloadReport('invoices')}>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('invoices')}>
               Invoices CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => downloadReport('payroll')}>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payroll')}>
               Payroll CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Onboarding steps — shown until all 3 are complete or dismissed */}
+      {/* Onboarding steps */}
       {!hasCompletedSetup && !dismissedOnboarding && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-6">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-base font-semibold text-slate-900">Let&apos;s get you started!</h2>
+              <h2 className="text-base font-semibold text-white">Get started with FlowLink</h2>
               <p className="text-sm text-slate-500 mt-0.5">
-                {completedSteps} of 3 steps complete
+                <span className="text-emerald-400 font-medium">{completedSteps}</span> of 3 steps complete
               </p>
             </div>
             <button
               onClick={() => setDismissedOnboarding(true)}
-              className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-sm text-slate-600 hover:text-slate-400 transition-colors"
             >
-              I&apos;ll do this later
+              Skip for now
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {onboardingSteps.map(({ step, title, desc, icon: Icon, done }) => (
               <div
                 key={step}
                 className={cn(
-                  "rounded-xl border p-5 transition-shadow hover:shadow-sm",
-                  done ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"
+                  "rounded-xl border p-4 transition-all",
+                  done
+                    ? "border-emerald-500/20 bg-emerald-500/[0.06]"
+                    : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]"
                 )}
               >
-                <div
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-3",
-                    done ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600"
-                  )}
-                >
-                  {done ? "✓" : step}
+                <div className={cn(
+                  "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mb-3",
+                  done ? "bg-emerald-500/20 text-emerald-400" : "bg-white/10 text-slate-500"
+                )}>
+                  {done ? <CheckCircle className="h-4 w-4" /> : step}
                 </div>
-                <h3 className="font-semibold text-slate-900 text-sm mb-1">{title}</h3>
-                <p className="text-xs text-slate-500">{desc}</p>
+                <h3 className={cn("font-semibold text-sm mb-1", done ? "text-emerald-300" : "text-slate-300")}>{title}</h3>
+                <p className="text-xs text-slate-600">{desc}</p>
                 {!done && (
-                  <span className="text-xs text-emerald-600 font-medium mt-3 block">
-                    Do it now →
+                  <span className="text-xs text-emerald-500 font-medium mt-3 flex items-center gap-1">
+                    Do it now <ArrowRight className="h-3 w-3" />
                   </span>
                 )}
               </div>
@@ -307,109 +337,107 @@ export function DashboardOverview() {
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-6 flex items-center gap-3">
-                  <Loader2 className="h-5 w-5 animate-spin text-slate-300" />
-                  <span className="text-sm text-slate-400">Loading…</span>
-                </CardContent>
-              </Card>
-            ))
+          ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
           : statCards.map((card) => (
-              <Card key={card.title} className={card.title === 'Total Volume' ? 'relative overflow-hidden' : ''}>
-                {card.title === 'Total Volume' && (
-                  <img src="/image7.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15 pointer-events-none" />
-                )}
-                <CardHeader className="flex flex-row items-center justify-between pb-2 relative">
-                  <CardTitle className={`text-sm font-medium ${card.title === 'Total Volume' ? 'text-slate-700' : 'text-slate-500'}`}>{card.title}</CardTitle>
-                  {card.icon}
-                </CardHeader>
-                <CardContent className="relative">
-                  <div className="text-2xl font-bold text-slate-900">{card.value}</div>
-                </CardContent>
-              </Card>
+              <StatCard
+                key={card.title}
+                title={card.title}
+                value={card.value}
+                icon={card.icon}
+                trend={card.trend}
+              />
             ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent payments */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-slate-900">Recent Payments</CardTitle>
-            <CardDescription>Last 5 payments received</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base font-semibold text-white">Recent Payments</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Last 5 transactions</p>
+            </div>
+            <TrendingUp className="h-4 w-4 text-slate-600" />
+          </div>
+          <div className="space-y-2">
             {loading ? (
-              <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading…
-              </div>
+              <>
+                <SkeletonRow />
+                <SkeletonRow />
+                <SkeletonRow />
+              </>
             ) : recent.length === 0 ? (
-              <div className="relative text-center py-10 text-slate-400 rounded-xl overflow-hidden">
-                {/* Subtle background illustration */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <img
-                    src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=60&auto=format&fit=crop"
-                    alt=""
-                    className="w-full h-full object-cover opacity-[0.04] grayscale"
-                    aria-hidden="true"
-                  />
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                  style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
                 </div>
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-slate-500">No payments yet</p>
-                  <p className="text-xs text-slate-400 mt-1">Share a payment link to get started.</p>
-                </div>
+                <p className="text-sm font-medium text-slate-400">No payments yet</p>
+                <p className="text-xs text-slate-600 mt-1">Share a payment link to get started</p>
               </div>
             ) : (
               recent.map((p) => (
-                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
+                <div key={p.id} className="flex items-center justify-between p-3.5 rounded-xl hover:bg-white/[0.03] transition-colors group">
                   <div className="flex items-center gap-3">
-                    <div className={`h-2 w-2 rounded-full ${p.status === 'completed' ? 'bg-emerald-600' : p.status === 'pending' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                    <div className={cn(
+                      "w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0",
+                      p.status === 'completed' ? "bg-emerald-500/10 text-emerald-400" :
+                      p.status === 'pending' ? "bg-amber-500/10 text-amber-400" :
+                      "bg-white/[0.06] text-slate-500"
+                    )}>
+                      {p.payer ? p.payer.slice(2, 4).toUpperCase() : "??"}
+                    </div>
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{p.payer ? `${p.payer.slice(0, 6)}…${p.payer.slice(-4)}` : 'Unknown'}</p>
-                      <p className="text-xs text-slate-500 capitalize">{p.status}</p>
+                      <p className="text-sm font-medium text-slate-300">
+                        {p.payer ? `${p.payer.slice(0, 6)}…${p.payer.slice(-4)}` : 'Unknown'}
+                      </p>
+                      <p className="text-xs text-slate-600">
+                        {new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-slate-900">{p.amount} {p.currency}</p>
-                    <p className="text-xs text-slate-500">{new Date(p.createdAt).toLocaleDateString()}</p>
+                  <div className="text-right flex flex-col items-end gap-1">
+                    <p className="text-sm font-semibold text-white">{p.amount} {p.currency}</p>
+                    <StatusBadge status={p.status} />
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Compliance score */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-slate-900">Compliance Status</CardTitle>
-            <CardDescription>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-base font-semibold text-white">Compliance Status</h2>
+              <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
                 HashKey Testnet · Live
-              </span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
+              </p>
+            </div>
+            <Shield className="h-4 w-4 text-slate-600" />
+          </div>
+          <div className="space-y-5">
             {loading ? (
-              <div className="flex items-center gap-2 text-slate-400 text-sm py-4">
-                <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+              <div className="space-y-3">
+                <div className="h-20 rounded-xl bg-white/[0.03] animate-pulse" />
+                <div className="h-3 bg-white/[0.03] rounded animate-pulse" />
+                <div className="h-3 bg-white/[0.03] rounded animate-pulse w-4/5" />
+                <div className="h-3 bg-white/[0.03] rounded animate-pulse w-3/5" />
               </div>
             ) : compliance ? (
               <>
-                <div className="flex items-center gap-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                  <div className="text-4xl font-black text-emerald-600">{compliance.score}</div>
+                <div className="flex items-center gap-4 p-4 bg-emerald-500/[0.06] rounded-xl border border-emerald-500/20">
+                  <div className="text-4xl font-black text-emerald-400">{compliance.score}</div>
                   <div>
-                    <p className="font-semibold text-slate-900">Compliance Score</p>
+                    <p className="font-semibold text-white">Compliance Score</p>
                     <p className="text-sm text-slate-500">Based on {stats?.totalPayments ?? 0} payments</p>
                   </div>
                 </div>
@@ -420,42 +448,32 @@ export function DashboardOverview() {
                 ].map((item) => (
                   <div key={item.label} className="space-y-1.5">
                     <div className="flex justify-between text-sm">
-                      <span className="text-slate-600">{item.label}</span>
-                      <span className="font-semibold text-slate-900">{item.value}%</span>
+                      <span className="text-slate-500">{item.label}</span>
+                      <span className="font-semibold text-white">{item.value}%</span>
                     </div>
-                    <Progress value={item.value} className="h-1.5" />
+                    <Progress value={item.value} className="h-1.5 bg-white/10" />
                   </div>
                 ))}
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-100 text-sm text-green-800">
-                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 text-sm text-emerald-400">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
                   No alerts · All systems normal
                 </div>
               </>
             ) : (
-              <div className="relative text-center py-10 text-slate-400 rounded-xl overflow-hidden">
-                {/* Subtle background illustration */}
-                <div className="absolute inset-0 pointer-events-none">
-                  <img
-                    src="https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&q=60&auto=format&fit=crop"
-                    alt=""
-                    className="w-full h-full object-cover opacity-[0.04] grayscale"
-                    aria-hidden="true"
-                  />
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                  style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                  </svg>
                 </div>
-                <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                      <polyline points="9 12 11 14 15 10"/>
-                    </svg>
-                  </div>
-                  <p className="text-sm font-medium text-slate-500">No compliance data yet</p>
-                  <p className="text-xs text-slate-400 mt-1">Metrics appear once you receive payments.</p>
-                </div>
+                <p className="text-sm font-medium text-slate-400">No compliance data yet</p>
+                <p className="text-xs text-slate-600 mt-1">Metrics appear once you receive payments.</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Agent Payments */}

@@ -10,9 +10,8 @@ import {
 } from "wagmi"
 import { parseEther, parseUnits } from "viem"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { CheckCircle, AlertTriangle, Clock, ExternalLink, Loader2, Link2 } from "lucide-react"
+import { CheckCircle, AlertTriangle, Clock, ExternalLink, Loader2, ShieldCheck, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { getChain, getToken, isNativeToken } from "@/lib/chains"
 import { toast } from "sonner"
 
@@ -61,11 +60,11 @@ interface Props {
   recipientAddress: string | null
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  draft: { label: "Draft", color: "bg-slate-100 text-slate-600 border-slate-200", icon: Clock },
-  pending: { label: "Pending Payment", color: "bg-yellow-50 text-yellow-700 border-yellow-200", icon: Clock },
-  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle },
-  overdue: { label: "Overdue", color: "bg-red-50 text-red-700 border-red-200", icon: AlertTriangle },
+const statusConfig: Record<string, { label: string; bg: string; text: string; icon: React.ElementType }> = {
+  draft:   { label: "Draft",            bg: "bg-slate-100",   text: "text-slate-500",  icon: Clock },
+  pending: { label: "Pending Payment",  bg: "bg-amber-50",    text: "text-amber-700",  icon: Clock },
+  paid:    { label: "Paid",             bg: "bg-emerald-50",  text: "text-emerald-700",icon: CheckCircle },
+  overdue: { label: "Overdue",          bg: "bg-red-50",      text: "text-red-700",    icon: AlertTriangle },
 }
 
 function isOverdue(dueAt: string | null, status: string) {
@@ -85,19 +84,8 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
   const onCorrectChain = chain?.id === targetChain?.id
   const explorerUrl = targetChain?.explorerUrl ?? ""
 
-  const {
-    sendTransaction,
-    data: nativeTxHash,
-    isPending: isSendingNative,
-    reset: resetTx,
-  } = useSendTransaction()
-
-  const {
-    writeContract,
-    data: erc20TxHash,
-    isPending: isSendingErc20,
-    reset: resetWrite,
-  } = useWriteContract()
+  const { sendTransaction, data: nativeTxHash, isPending: isSendingNative } = useSendTransaction()
+  const { writeContract, data: erc20TxHash, isPending: isSendingErc20 } = useWriteContract()
 
   const txHash = localTxHash ?? nativeTxHash ?? erc20TxHash
   const isSending = isSendingNative || isSendingErc20
@@ -107,7 +95,6 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
     query: { enabled: !!(nativeTxHash ?? erc20TxHash) },
   })
 
-  // Mark paid in DB once confirmed
   const handleConfirmed = async (hash: string) => {
     setLocalTxHash(hash)
     setLocalStatus("paid")
@@ -124,7 +111,6 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
     }
   }
 
-  // Watch for confirmation
   if ((nativeTxHash || erc20TxHash) && isConfirmed && !txSubmitted) {
     handleConfirmed((nativeTxHash ?? erc20TxHash) as string)
   }
@@ -173,64 +159,69 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
   const effectiveStatus = isOverdue(invoice.dueAt, localStatus) ? "overdue" : localStatus
   const cfg = statusConfig[effectiveStatus] ?? statusConfig.pending
   const StatusIcon = cfg.icon
-
   const isPaid = localStatus === "paid" || txSubmitted
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/20">
-      {/* Header */}
-      <div className="border-b border-slate-200 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-8 h-8 rounded-xl object-cover" />
-            <span className="font-bold text-xl tracking-tight">
+    <div className="min-h-screen bg-[#f8fafc]">
+      {/* Top nav — Stripe-style */}
+      <header className="bg-white border-b border-slate-200">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl overflow-hidden">
+              <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-full h-full object-cover" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">
               <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
             </span>
           </div>
-          <Badge className={`text-xs border ${cfg.color} flex items-center gap-1`}>
+          <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.text}`}>
             <StatusIcon className="h-3 w-3" />
             {cfg.label}
-          </Badge>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-lg mx-auto px-4 py-10 space-y-6">
+      <div className="max-w-lg mx-auto px-4 py-10 space-y-5">
+
         {/* Invoice card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          {/* Top: from/to */}
-          <div className="p-6 border-b border-slate-100 space-y-4">
-            <div>
-              <p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Invoice from</p>
-              <p className="text-slate-800 font-semibold">{senderName}</p>
-            </div>
-            <div className="flex justify-between items-end">
+          {/* Header */}
+          <div className="px-6 pt-6 pb-5 border-b border-slate-100">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Invoice</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Invoice from</p>
+                <p className="font-semibold text-slate-900 text-base">{senderName}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Invoice #</p>
                 <p className="font-mono text-sm text-slate-600">{invoice.invoiceNumber}</p>
               </div>
-              {invoice.dueAt && (
-                <div className="text-right">
-                  <p className="text-xs text-slate-400 uppercase tracking-wide mb-0.5">Due</p>
-                  <p className={`text-sm font-medium ${effectiveStatus === "overdue" ? "text-red-600" : "text-slate-700"}`}>
-                    {new Date(invoice.dueAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                  </p>
-                </div>
-              )}
             </div>
+
+            {invoice.dueAt && (
+              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm">
+                <span className="text-slate-500">Due date</span>
+                <span className={`font-medium ${effectiveStatus === "overdue" ? "text-red-600" : "text-slate-700"}`}>
+                  {new Date(invoice.dueAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Line items */}
           {Array.isArray(invoice.lineItems) && invoice.lineItems.length > 0 && (
-            <div className="px-6 py-4 space-y-0 border-b border-slate-100">
+            <div className="px-6 py-4 border-b border-slate-100 space-y-0">
               {invoice.lineItems.map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+                <div key={i} className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0">
                   <div>
-                    <p className="text-sm text-slate-700">{item.description}</p>
+                    <p className="text-sm text-slate-700 font-medium">{item.description}</p>
                     {item.quantity > 1 && (
-                      <p className="text-xs text-slate-400">{item.quantity} × {parseFloat(item.unitPrice || "0").toFixed(2)}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {item.quantity} × {parseFloat(item.unitPrice || "0").toFixed(2)}
+                      </p>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-slate-800 ml-4 whitespace-nowrap">
+                  <p className="text-sm font-semibold text-slate-800 ml-6 whitespace-nowrap tabular-nums">
                     {parseFloat(item.total).toFixed(2)} {invoice.currency}
                   </p>
                 </div>
@@ -239,17 +230,20 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
           )}
 
           {/* Total */}
-          <div className="px-6 py-4 flex justify-between items-center">
-            <span className="text-slate-500 text-sm">Total due</span>
-            <span className="text-2xl font-bold text-slate-900">
-              {invoice.amount.toFixed(2)} <span className="text-base font-medium text-slate-500">{invoice.currency}</span>
-            </span>
+          <div className="px-6 py-5 flex items-center justify-between">
+            <span className="text-slate-600 font-medium">Total due</span>
+            <div className="text-right">
+              <span className="text-3xl font-bold text-slate-900 tabular-nums">
+                {invoice.amount.toFixed(2)}
+              </span>
+              <span className="text-lg text-slate-400 ml-1.5">{invoice.currency}</span>
+            </div>
           </div>
 
           {/* Notes */}
           {invoice.notes && (
-            <div className="px-6 pb-4 text-sm text-slate-500 border-t border-slate-100 pt-3">
-              <span className="font-medium text-slate-600">Notes: </span>
+            <div className="px-6 pb-5 text-sm text-slate-500 border-t border-slate-100 pt-4">
+              <span className="font-medium text-slate-600">Note: </span>
               {invoice.notes}
             </div>
           )}
@@ -257,62 +251,58 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
 
         {/* Payment section */}
         {isPaid ? (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-              <CheckCircle className="h-6 w-6 text-emerald-600" />
+          <div className="bg-white rounded-2xl border border-emerald-200 shadow-sm p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
-            <div>
-              <p className="font-semibold text-emerald-800 text-lg">Payment Complete</p>
-              <p className="text-emerald-600 text-sm mt-0.5">Thank you! This invoice has been paid.</p>
-            </div>
+            <p className="font-bold text-slate-900 text-xl">Payment Complete</p>
+            <p className="text-slate-500 text-sm mt-1">Thank you — this invoice has been paid.</p>
             {txHash && (
               <a
                 href={`${explorerUrl}/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-700 underline"
+                className="inline-flex items-center gap-1.5 text-xs text-emerald-600 hover:text-emerald-700 underline mt-4"
               >
-                View transaction <ExternalLink className="h-3 w-3" />
+                View on-chain transaction <ExternalLink className="h-3 w-3" />
               </a>
             )}
           </div>
         ) : effectiveStatus === "draft" ? (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center">
-            <p className="text-slate-600 font-medium">This invoice hasn&apos;t been sent yet</p>
-            <p className="text-slate-400 text-sm mt-1">The sender needs to send this invoice before payment is available.</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+            <p className="text-slate-700 font-medium">Invoice not yet sent</p>
+            <p className="text-slate-400 text-sm mt-1">The sender needs to finalize and send this invoice first.</p>
           </div>
         ) : !recipientAddress ? (
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center">
-            <p className="text-slate-600 font-medium">Payment unavailable</p>
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 text-center">
+            <p className="text-slate-700 font-medium">Payment unavailable</p>
             <p className="text-slate-400 text-sm mt-1">The invoice owner hasn&apos;t connected a wallet yet.</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <p className="text-slate-700 font-medium text-sm">Pay with your wallet</p>
+            <p className="text-sm font-semibold text-slate-700">Pay with your wallet</p>
 
             {!isConnected ? (
-              <div className="flex justify-center">
+              <div className="flex justify-center py-2">
                 <ConnectButton />
               </div>
             ) : !onCorrectChain ? (
               <Button
-                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl"
                 onClick={() => targetChain && switchChain({ chainId: targetChain.id })}
                 disabled={isSwitching}
               >
-                {isSwitching ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : null}
+                {isSwitching && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Switch to {targetChain?.name ?? invoice.network}
               </Button>
             ) : isConfirming ? (
-              <Button className="w-full bg-emerald-600 text-white" disabled>
+              <Button className="w-full h-12 bg-emerald-600 text-white font-semibold rounded-xl" disabled>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Confirming transaction...
+                Confirming on chain...
               </Button>
             ) : (
               <Button
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-base h-12 font-semibold"
+                className="w-full h-12 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-base font-bold rounded-xl shadow-lg shadow-emerald-200"
                 disabled={isSending}
                 onClick={handlePay}
               >
@@ -329,7 +319,7 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
 
             {isConnected && (
               <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                <span>Connected: {address?.slice(0, 6)}…{address?.slice(-4)}</span>
+                <span className="font-mono">{address?.slice(0, 6)}…{address?.slice(-4)}</span>
                 <ConnectButton.Custom>
                   {({ openAccountModal }) => (
                     <button onClick={openAccountModal} className="underline hover:text-slate-600">
@@ -340,11 +330,18 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
               </div>
             )}
 
-            <div className="text-xs text-slate-400 text-center border-t border-slate-100 pt-3">
-              Powered by <span className="font-medium text-slate-500">FlowLink</span> on {targetChain?.name ?? invoice.network}
+            <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 border-t border-slate-100 pt-4">
+              <Lock className="h-3 w-3" />
+              Secured by FlowLink · {targetChain?.name ?? invoice.network}
             </div>
           </div>
         )}
+
+        {/* Trust badge */}
+        <div className="flex items-center justify-center gap-2 text-xs text-slate-400 py-2">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+          KYC/AML compliant · HashKey Chain
+        </div>
       </div>
     </div>
   )
