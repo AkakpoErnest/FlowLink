@@ -115,25 +115,26 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 7%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 7%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 142.1 76.2% 36.3%;
-  --primary-foreground: 355.7 100% 97.3%;
-  --secondary: 240 3.7% 13%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 13%;
-  --muted-foreground: 240 5% 58%;
-  --accent: 240 3.7% 13%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  /* Dark teal/slate palette — matches FlowLink dashboard design system */
+  --background: 222 47% 8%;        /* #0f172a */
+  --foreground: 210 40% 98%;       /* near-white */
+  --card: 222 47% 10%;             /* #131f35 */
+  --card-foreground: 210 40% 98%;
+  --popover: 222 40% 12%;          /* #1e293b */
+  --popover-foreground: 210 40% 98%;
+  --primary: 152 69% 52%;          /* #34d399 emerald */
+  --primary-foreground: 222 47% 8%;
+  --secondary: 222 30% 16%;
+  --secondary-foreground: 210 40% 90%;
+  --muted: 222 30% 14%;
+  --muted-foreground: 215 20% 50%; /* slate-500 */
+  --accent: 162 50% 20%;           /* dark teal */
+  --accent-foreground: 152 69% 70%;
+  --destructive: 0 62% 40%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 18%;
-  --input: 240 3.7% 13%;
-  --ring: 142.1 76.2% 36.3%;
+  --border: 222 30% 14%;           /* very subtle border */
+  --input: 222 30% 14%;
+  --ring: 152 69% 52%;             /* emerald focus ring */
 }
 
 @layer base {
