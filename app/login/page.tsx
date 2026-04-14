@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { ShaderBackground } from "@/components/landing/ShaderBackground"
 import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useAccount, useSignMessage } from "wagmi"
@@ -95,7 +96,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#071a1a]/95 via-[#0a2420]/90 to-[#0d2d2d]/95 flex flex-col">
+      <ShaderBackground />
       {/* Top nav — same as landing */}
       <header className="border-b border-slate-100 px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">

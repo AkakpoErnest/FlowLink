@@ -6,11 +6,7 @@ export function HeroSection() {
   return (
     <section
       id="home"
-      className="relative min-h-screen flex flex-col justify-center overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(135deg, #0f2420 0%, #1a3530 35%, #2a5248 65%, #1e3d35 100%)",
-      }}
+      className="relative z-10 min-h-screen flex flex-col justify-center overflow-hidden bg-gradient-to-br from-[#071a1a]/95 via-[#0a2420]/90 to-[#0d2d2d]/95"
     >
       <style>{`
         @keyframes fadeUp {
