@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { computeNextRun } from "@/lib/agent-engine"
 import { z } from "zod"
+import { Prisma } from "@prisma/client"
 
 function unauth() { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
 
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
   }
 
   const rule = await prisma.agentRule.create({
-    data: { agentId, type, config, status: "active", nextRun },
+    data: { agentId, type, config: config as Prisma.InputJsonValue, status: "active", nextRun },
   })
 
   return NextResponse.json({ success: true, data: rule })
@@ -103,7 +104,7 @@ export async function PATCH(req: NextRequest) {
     where: { id },
     data: {
       ...(status !== undefined ? { status } : {}),
-      ...(config !== undefined ? { config } : {}),
+      ...(config !== undefined ? { config: config as Prisma.InputJsonValue } : {}),
     },
   })
 
