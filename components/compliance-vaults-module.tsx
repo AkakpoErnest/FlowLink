@@ -206,13 +206,13 @@ function VaultCard({ vault, onSelect }: { vault: ComplianceVault; onSelect: (vau
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "paused":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
       case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
     }
   }
 

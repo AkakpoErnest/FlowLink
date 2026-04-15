@@ -47,13 +47,13 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6">
+    <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-6">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-          <Bot className="w-5 h-5 text-emerald-600" />
+        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+          <Bot className="w-5 h-5 text-emerald-400" />
         </div>
         <div>
-          <h3 className="font-semibold text-slate-900">Agent Payments</h3>
+          <h3 className="font-semibold text-white">Agent Payments</h3>
           <p className="text-sm text-slate-500">Autonomous on-chain settlements on HashKey</p>
         </div>
       </div>
@@ -61,15 +61,15 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
       <div className="space-y-4">
         {/* From Agent */}
         <div>
-          <label className="text-sm font-medium text-slate-700 mb-1 block">From Agent</label>
+          <label className="text-sm font-medium text-slate-400 mb-1 block">From Agent</label>
           <select
             value={fromAgent}
             onChange={(e) => setFromAgent(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"
+            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white"
           >
-            <option value="">Select agent...</option>
+            <option value="" className="bg-[#1e293b]">Select agent...</option>
             {agents.map((a) => (
-              <option key={a.id} value={a.id}>
+              <option key={a.id} value={a.id} className="bg-[#1e293b]">
                 {a.name}
               </option>
             ))}
@@ -80,20 +80,20 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
         <div className="flex gap-2">
           <button
             onClick={() => setToType('human')}
-            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${
+            className={`flex-1 py-2 text-sm rounded-xl border font-medium transition-colors ${
               toType === 'human'
                 ? 'bg-emerald-600 text-white border-emerald-600'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
+                : 'bg-white/[0.04] text-slate-400 border-white/[0.08] hover:border-emerald-500/40 hover:text-slate-200'
             }`}
           >
             → Human
           </button>
           <button
             onClick={() => setToType('agent')}
-            className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${
+            className={`flex-1 py-2 text-sm rounded-xl border font-medium transition-colors ${
               toType === 'agent'
                 ? 'bg-emerald-600 text-white border-emerald-600'
-                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'
+                : 'bg-white/[0.04] text-slate-400 border-white/[0.08] hover:border-emerald-500/40 hover:text-slate-200'
             }`}
           >
             → Agent <Zap className="inline w-3 h-3" />
@@ -106,19 +106,19 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
             value={toAddress}
             onChange={(e) => setToAddress(e.target.value)}
             placeholder="Recipient wallet 0x..."
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white placeholder:text-slate-600"
           />
         ) : (
           <select
             value={toAgent}
             onChange={(e) => setToAgent(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"
+            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white"
           >
-            <option value="">Select destination agent...</option>
+            <option value="" className="bg-[#1e293b]">Select destination agent...</option>
             {agents
               .filter((a) => a.id !== fromAgent)
               .map((a) => (
-                <option key={a.id} value={a.id}>
+                <option key={a.id} value={a.id} className="bg-[#1e293b]">
                   {a.name}
                 </option>
               ))}
@@ -134,16 +134,16 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
             type="number"
             min="0"
             step="any"
-            className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm"
+            className="flex-1 border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white placeholder:text-slate-600"
           />
           <select
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            className="w-28 border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-900"
+            className="w-28 border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white"
           >
-            <option>HSK</option>
-            <option>USDC</option>
-            <option>USDT</option>
+            <option className="bg-[#1e293b]">HSK</option>
+            <option className="bg-[#1e293b]">USDC</option>
+            <option className="bg-[#1e293b]">USDT</option>
           </select>
         </div>
 
@@ -151,13 +151,13 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
           placeholder="Memo (optional)"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"
+          className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-sm bg-white/[0.04] text-white placeholder:text-slate-600"
         />
 
         <button
           onClick={handlePay}
           disabled={loading || !fromAgent || !amount}
-          className="w-full bg-emerald-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30"
         >
           {loading ? (
             'Sending on HashKey...'
@@ -169,15 +169,15 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
         </button>
 
         {result && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-            <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-start gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-green-800">Payment sent on HashKey Chain</p>
+              <p className="text-sm font-medium text-emerald-400">Payment sent on HashKey Chain</p>
               <a
                 href={result.txUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-green-600 flex items-center gap-1 mt-1 hover:underline"
+                className="text-xs text-emerald-400/70 flex items-center gap-1 mt-1 hover:text-emerald-400"
               >
                 View on Explorer <ExternalLink className="w-3 h-3" />
               </a>
@@ -185,7 +185,7 @@ export function AgentPaymentWidget({ agents }: AgentPaymentWidgetProps) {
           </div>
         )}
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
             {error}
           </p>
         )}

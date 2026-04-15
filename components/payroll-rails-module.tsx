@@ -293,15 +293,15 @@ function PayrollBatchCard({ batch, onSelect }: { batch: PayrollBatch; onSelect: 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "processing":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
       case "failed":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-500/10 text-red-400 border-red-500/20"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
     }
   }
 
@@ -530,28 +530,28 @@ function RecipientsManagement({ recipients }: { recipients: Recipient[] }) {
   const getKycLevelColor = (level: string) => {
     switch (level) {
       case "institutional":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "enhanced":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "basic":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "verified":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
       case "blocked":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "bg-red-500/10 text-red-400 border-red-500/20"
       case "paid":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200"
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "bg-white/[0.06] text-slate-400 border-white/[0.08]"
     }
   }
 
@@ -755,28 +755,28 @@ function PayrollBatchDetails({ batch, recipients }: { batch: PayrollBatch; recip
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     <span className="text-sm">KYC Verification</span>
                   </div>
-                  <Badge className="bg-green-100 text-green-800">Passed</Badge>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Passed</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     <span className="text-sm">Sanctions Screening</span>
                   </div>
-                  <Badge className="bg-green-100 text-green-800">Passed</Badge>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Passed</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-500" />
                     <span className="text-sm">Country Limits</span>
                   </div>
-                  <Badge className="bg-green-100 text-green-800">Within Limits</Badge>
+                  <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Within Limits</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-yellow-500" />
                     <span className="text-sm">Risk Assessment</span>
                   </div>
-                  <Badge className="bg-yellow-100 text-yellow-800">1 Medium Risk</Badge>
+                  <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20">1 Medium Risk</Badge>
                 </div>
               </div>
             </CardContent>
