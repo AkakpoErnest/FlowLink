@@ -11,11 +11,11 @@ import { Copy, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 
-const CHAINS = SUPPORTED_CHAINS.filter(c => !c.testnet)
+const CHAINS = SUPPORTED_CHAINS
 
 export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
   const [network, setNetwork] = useState(DEFAULT_CHAIN_KEY)
-  const [sourceToken, setSourceToken] = useState(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'cUSD')
+  const [sourceToken, setSourceToken] = useState(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'HSK')
   const [amount, setAmount] = useState("")
   const [memo, setMemo] = useState("")
   const [generatedLink, setGeneratedLink] = useState("")
@@ -61,7 +61,7 @@ export function CreateLinkForm({ onSuccess }: { onSuccess?: () => void } = {}) {
       setAmount("")
       setMemo("")
       setNetwork(DEFAULT_CHAIN_KEY)
-      setSourceToken(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'cUSD')
+      setSourceToken(CHAINS.find(c => c.key === DEFAULT_CHAIN_KEY)?.tokens[0]?.symbol ?? 'HSK')
       onSuccess?.()
     } catch (error) {
       toast({

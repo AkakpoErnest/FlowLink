@@ -295,7 +295,7 @@ function LinkCard({ link, onCopy, onDeactivate, onDelete }: { link: PaymentLink;
 
 function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
   const [name, setName] = useState('')
-  const [token, setToken] = useState('USDC')
+  const [token, setToken] = useState('HSK')
   const [amountMin, setAmountMin] = useState('')
   const [amountMax, setAmountMax] = useState('')
   const [loading, setLoading] = useState(false)
@@ -348,10 +348,9 @@ function CreateLinkForm({ onSuccess }: { onSuccess: () => void }) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-[#1e293b] border-white/10 text-slate-300">
-            <SelectItem value="USDC">USDC (Celo)</SelectItem>
-            <SelectItem value="USDT">USDT (Celo)</SelectItem>
-            <SelectItem value="cUSD">cUSD (Celo Dollar)</SelectItem>
-            <SelectItem value="CELO">CELO (native)</SelectItem>
+            <SelectItem value="HSK">HSK (native)</SelectItem>
+            <SelectItem value="USDC">USDC (HashKey)</SelectItem>
+            <SelectItem value="USDT">USDT (HashKey)</SelectItem>
           </SelectContent>
         </Select>
       </div>

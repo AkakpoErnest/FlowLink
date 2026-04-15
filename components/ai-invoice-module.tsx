@@ -22,7 +22,7 @@ import {
 import type { Invoice } from "@/app/api/invoices/route"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
 
-const CHAINS = SUPPORTED_CHAINS.filter(c => !c.testnet)
+const CHAINS = SUPPORTED_CHAINS
 
 interface Agent {
   id: string
@@ -37,18 +37,19 @@ interface Agent {
 }
 
 const statusConfig = {
-  draft: { label: "Draft", color: "bg-slate-100 text-slate-600 border-slate-200", icon: FileText },
-  pending: { label: "Pending", color: "bg-yellow-50 text-yellow-700 border-yellow-200", icon: Clock },
-  paid: { label: "Paid", color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: CheckCircle },
-  overdue: { label: "Overdue", color: "bg-red-50 text-red-700 border-red-200", icon: AlertTriangle },
-  cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-500 border-slate-200", icon: X },
+  draft:     { label: "Draft",     color: "bg-white/[0.06] text-slate-400 border-white/[0.08]",       icon: FileText },
+  pending:   { label: "Pending",   color: "bg-amber-500/10 text-amber-400 border-amber-500/20",        icon: Clock },
+  paid:      { label: "Paid",      color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",  icon: CheckCircle },
+  overdue:   { label: "Overdue",   color: "bg-red-500/10 text-red-400 border-red-500/20",              icon: AlertTriangle },
+  cancelled: { label: "Cancelled", color: "bg-white/[0.06] text-slate-500 border-white/[0.08]",        icon: X },
 }
 
 const networkLabel: Record<string, string> = {
-  hashkey: "HashKey Chain",
-  polygon: "Polygon",
-  ethereum: "Ethereum",
-  celo: "Celo",
+  "hashkey-testnet": "HashKey Testnet",
+  "hashkey":         "HashKey Chain",
+  polygon:           "Polygon",
+  ethereum:          "Ethereum",
+  celo:              "Celo",
 }
 
 interface LineItem {
@@ -64,11 +65,10 @@ const defaultForm = () => ({
   issuedTo: "",
   issuedToAddress: "",
   description: "",
-  currency: "cUSD",
+  currency: "HSK",
   network: DEFAULT_CHAIN_KEY,
   dueAt: "",
   kycRequired: true,
-  // optional agent fields
   selectedAgentId: "",
   agentName: "",
   agentDescription: "",
@@ -147,63 +147,71 @@ function CreateInvoiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0f172a] border border-white/10">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-emerald-600" />
+          <DialogTitle className="flex items-center gap-2 text-white">
+            <FileText className="h-5 w-5 text-emerald-400" />
             New Invoice
           </DialogTitle>
-          <DialogDescription>Create an invoice and share the payment link with your client.</DialogDescription>
+          <DialogDescription className="text-slate-500">Create an invoice and share the payment link with your client.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5 mt-2">
           {/* Client */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs text-slate-600">Invoice To (Name) *</Label>
-              <Input value={form.issuedTo} onChange={e => setForm(f => ({ ...f, issuedTo: e.target.value }))} placeholder="Client name or company" className="mt-1" />
+              <Label className="text-xs text-slate-400">Invoice To (Name) *</Label>
+              <Input value={form.issuedTo} onChange={e => setForm(f => ({ ...f, issuedTo: e.target.value }))} placeholder="Client name or company"
+                className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl" />
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Client Wallet Address</Label>
-              <Input value={form.issuedToAddress} onChange={e => setForm(f => ({ ...f, issuedToAddress: e.target.value }))} placeholder="0x… (optional)" className="mt-1" />
+              <Label className="text-xs text-slate-400">Client Wallet Address</Label>
+              <Input value={form.issuedToAddress} onChange={e => setForm(f => ({ ...f, issuedToAddress: e.target.value }))} placeholder="0x… (optional)"
+                className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl" />
             </div>
           </div>
 
           <div>
-            <Label className="text-xs text-slate-600">Description</Label>
-            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Services rendered, project details…" className="mt-1" rows={2} />
+            <Label className="text-xs text-slate-400">Description</Label>
+            <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Services rendered, project details…"
+              className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl resize-none" rows={2} />
           </div>
 
           {/* Payment settings */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <Label className="text-xs text-slate-600">Network</Label>
+              <Label className="text-xs text-slate-400">Network</Label>
               <Select value={form.network} onValueChange={v => {
                 const chain = CHAINS.find(c => c.key === v)
-                setForm(f => ({ ...f, network: v, currency: chain?.tokens[0]?.symbol ?? "cUSD" }))
+                setForm(f => ({ ...f, network: v, currency: chain?.tokens[0]?.symbol ?? "HSK" }))
               }}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{CHAINS.map(c => <SelectItem key={c.key} value={c.key}>{c.name}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1 bg-white/[0.04] border-white/10 text-slate-300 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#1e293b] border-white/10 text-slate-300">
+                  {CHAINS.map(c => <SelectItem key={c.key} value={c.key}>{c.name}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Token</Label>
+              <Label className="text-xs text-slate-400">Token</Label>
               <Select value={form.currency} onValueChange={v => setForm(f => ({ ...f, currency: v }))}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>{(CHAINS.find(c => c.key === form.network)?.tokens ?? []).map(t => <SelectItem key={t.symbol} value={t.symbol}>{t.symbol}</SelectItem>)}</SelectContent>
+                <SelectTrigger className="mt-1 bg-white/[0.04] border-white/10 text-slate-300 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#1e293b] border-white/10 text-slate-300">
+                  {(CHAINS.find(c => c.key === form.network)?.tokens ?? []).map(t => <SelectItem key={t.symbol} value={t.symbol}>{t.symbol}</SelectItem>)}
+                </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-xs text-slate-600">Due Date</Label>
-              <Input type="date" value={form.dueAt} onChange={e => setForm(f => ({ ...f, dueAt: e.target.value }))} className="mt-1" />
+              <Label className="text-xs text-slate-400">Due Date</Label>
+              <Input type="date" value={form.dueAt} onChange={e => setForm(f => ({ ...f, dueAt: e.target.value }))}
+                className="mt-1 bg-white/[0.04] border-white/10 text-white focus:border-emerald-500/50 rounded-xl" />
             </div>
           </div>
 
           {/* KYC */}
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-            <Shield className="h-4 w-4 text-emerald-600 shrink-0" />
+          <div className="flex items-center gap-3 p-3 bg-white/[0.04] border border-white/[0.06] rounded-xl">
+            <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
             <div className="flex-1">
-              <p className="text-slate-900 text-sm font-medium">Require KYC</p>
+              <p className="text-white text-sm font-medium">Require KYC</p>
               <p className="text-slate-500 text-xs">Payer must complete KYC before payment</p>
             </div>
             <Switch checked={form.kycRequired} onCheckedChange={v => setForm(f => ({ ...f, kycRequired: v }))} />
@@ -212,15 +220,15 @@ function CreateInvoiceDialog({
           {/* Optional agent */}
           {agents.length > 0 && (
             <details className="group">
-              <summary className="flex items-center gap-2 cursor-pointer text-xs text-slate-500 hover:text-slate-700 select-none list-none">
+              <summary className="flex items-center gap-2 cursor-pointer text-xs text-slate-500 hover:text-slate-300 select-none list-none">
                 <Bot className="h-3.5 w-3.5" />
-                Assign to AI Agent <span className="text-slate-400">(optional)</span>
+                Assign to AI Agent <span className="text-slate-600">(optional)</span>
                 <ChevronRight className="h-3 w-3 group-open:rotate-90 transition-transform ml-auto" />
               </summary>
               <div className="mt-2">
                 <Select value={form.selectedAgentId} onValueChange={handleAgentSelect}>
-                  <SelectTrigger><SelectValue placeholder="Choose an agent…" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="bg-white/[0.04] border-white/10 text-slate-300 rounded-xl"><SelectValue placeholder="Choose an agent…" /></SelectTrigger>
+                  <SelectContent className="bg-[#1e293b] border-white/10 text-slate-300">
                     <SelectItem value="">None</SelectItem>
                     {agents.map(a => (
                       <SelectItem key={a.id} value={a.id}>{a.name}{a.walletAddress ? ` (${a.walletAddress.slice(0, 6)}…)` : ""}</SelectItem>
@@ -234,8 +242,8 @@ function CreateInvoiceDialog({
           {/* Line items */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label className="text-xs text-slate-600">Line Items</Label>
-              <Button variant="ghost" size="sm" className="text-emerald-600 h-6 text-xs"
+              <Label className="text-xs text-slate-400">Line Items</Label>
+              <Button variant="ghost" size="sm" className="text-emerald-400 hover:text-emerald-300 h-6 text-xs"
                 onClick={() => setLineItems([...lineItems, emptyLineItem()])}>
                 <Plus className="h-3 w-3 mr-1" /> Add Item
               </Button>
@@ -243,31 +251,31 @@ function CreateInvoiceDialog({
             <div className="space-y-2">
               {lineItems.map((item, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                  <Input className="col-span-5 text-xs h-8" placeholder="Description" value={item.description}
+                  <Input className="col-span-5 text-xs h-8 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600" placeholder="Description" value={item.description}
                     onChange={e => updateLineItem(idx, "description", e.target.value)} />
-                  <Input className="col-span-2 text-xs h-8" placeholder="Qty" type="number" value={item.quantity}
+                  <Input className="col-span-2 text-xs h-8 bg-white/[0.04] border-white/10 text-white" placeholder="Qty" type="number" value={item.quantity}
                     onChange={e => updateLineItem(idx, "quantity", parseInt(e.target.value) || 1)} />
-                  <Input className="col-span-2 text-xs h-8" placeholder="Price" value={item.unitPrice}
+                  <Input className="col-span-2 text-xs h-8 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600" placeholder="Price" value={item.unitPrice}
                     onChange={e => updateLineItem(idx, "unitPrice", e.target.value)} />
                   <div className="col-span-2 text-right">
-                    <span className="text-emerald-600 text-xs font-mono">${item.total}</span>
+                    <span className="text-emerald-400 text-xs font-mono">${item.total}</span>
                   </div>
-                  <Button variant="ghost" size="sm" className="col-span-1 h-8 w-8 p-0 text-red-400 hover:text-red-600"
+                  <Button variant="ghost" size="sm" className="col-span-1 h-8 w-8 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                     onClick={() => setLineItems(lineItems.filter((_, i) => i !== idx))} disabled={lineItems.length === 1}>
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
               ))}
             </div>
-            <div className="flex justify-end mt-3 pt-3 border-t border-slate-200">
+            <div className="flex justify-end mt-3 pt-3 border-t border-white/[0.06]">
               <div className="text-right">
                 <p className="text-slate-500 text-xs">Total</p>
-                <p className="text-emerald-600 font-bold text-xl font-mono">${totalAmount} <span className="text-sm font-normal">{form.currency}</span></p>
+                <p className="text-emerald-400 font-bold text-xl font-mono">${totalAmount} <span className="text-sm font-normal">{form.currency}</span></p>
               </div>
             </div>
           </div>
 
-          <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={create}
+          <Button className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30" onClick={create}
             disabled={loading || !form.issuedTo || !lineItems[0].description}>
             {loading ? "Creating…" : "Create Invoice & Get Payment Link"}
             <Zap className="ml-2 h-4 w-4" />
@@ -300,10 +308,7 @@ function AIAssistantPanel({ onCreateFromAI }: { onCreateFromAI?: (draft: Partial
       const res = await fetch("/api/ai/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: userMsg,
-          history: messages,
-        }),
+        body: JSON.stringify({ message: userMsg, history: messages }),
       })
       const data = await res.json()
       setMessages(m => [...m, { role: "assistant", content: data.message ?? data.error ?? "Something went wrong." }])
@@ -324,7 +329,7 @@ function AIAssistantPanel({ onCreateFromAI }: { onCreateFromAI?: (draft: Partial
               {m.role === "assistant" ? <Sparkles className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
             </div>
             <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-              m.role === "assistant" ? "bg-slate-100 text-slate-800" : "bg-emerald-600 text-white"
+              m.role === "assistant" ? "bg-white/[0.06] text-slate-200" : "bg-emerald-600 text-white"
             }`}>
               {m.content}
             </div>
@@ -335,9 +340,9 @@ function AIAssistantPanel({ onCreateFromAI }: { onCreateFromAI?: (draft: Partial
             <div className="w-7 h-7 rounded-full bg-indigo-500 shrink-0 flex items-center justify-center">
               <Sparkles className="h-3.5 w-3.5 text-white" />
             </div>
-            <div className="bg-slate-100 rounded-2xl px-4 py-3 flex gap-1">
+            <div className="bg-white/[0.06] rounded-2xl px-4 py-3 flex gap-1">
               {[0, 1, 2].map(i => (
-                <span key={i} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                <span key={i} className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
               ))}
             </div>
           </div>
@@ -346,16 +351,17 @@ function AIAssistantPanel({ onCreateFromAI }: { onCreateFromAI?: (draft: Partial
       </div>
 
       {/* Input */}
-      <div className="flex gap-2 pt-3 border-t border-slate-100">
+      <div className="flex gap-2 pt-3 border-t border-white/[0.06]">
         <Input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && !e.shiftKey && send()}
           placeholder="Ask me to draft an invoice…"
-          className="flex-1"
+          className="flex-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl"
           disabled={loading}
         />
-        <Button onClick={send} disabled={!input.trim() || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0">
+        <Button onClick={send} disabled={!input.trim() || loading}
+          className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shrink-0">
           <Send className="h-4 w-4" />
         </Button>
       </div>
@@ -373,19 +379,19 @@ function InvoiceRow({ invoice, onClick }: { invoice: Invoice; onClick: () => voi
   return (
     <div
       onClick={onClick}
-      className="p-4 bg-white border border-slate-200 rounded-xl hover:border-slate-300 hover:shadow-sm transition-all cursor-pointer"
+      className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] hover:border-white/[0.10] transition-all cursor-pointer"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="p-2 bg-emerald-50 rounded-lg shrink-0">
-            <FileText className="h-4 w-4 text-emerald-600" />
+          <div className="p-2 bg-emerald-500/10 rounded-lg shrink-0">
+            <FileText className="h-4 w-4 text-emerald-400" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-slate-900 text-sm">{invoice.invoiceNumber}</span>
-              <span className="text-xs text-slate-400 bg-slate-100 rounded px-1.5 py-0.5">{netLabel}</span>
+              <span className="font-medium text-white text-sm">{invoice.invoiceNumber}</span>
+              <span className="text-xs text-slate-400 bg-white/[0.06] rounded px-1.5 py-0.5">{netLabel}</span>
               {invoice.agentName && (
-                <span className="text-xs text-indigo-600 bg-indigo-50 rounded px-1.5 py-0.5 flex items-center gap-1">
+                <span className="text-xs text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 rounded px-1.5 py-0.5 flex items-center gap-1">
                   <Bot className="h-3 w-3" />{invoice.agentName}
                 </span>
               )}
@@ -397,8 +403,8 @@ function InvoiceRow({ invoice, onClick }: { invoice: Invoice; onClick: () => voi
           <Badge className={`text-xs border ${status.color} flex items-center gap-1`}>
             <StatusIcon className="h-3 w-3" />{status.label}
           </Badge>
-          <p className="text-emerald-600 font-bold font-mono text-sm">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
-          {invoice.dueAt && <p className="text-slate-400 text-xs">Due {new Date(invoice.dueAt).toLocaleDateString()}</p>}
+          <p className="text-emerald-400 font-bold font-mono text-sm">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
+          {invoice.dueAt && <p className="text-slate-500 text-xs">Due {new Date(invoice.dueAt).toLocaleDateString()}</p>}
         </div>
       </div>
     </div>
@@ -459,20 +465,21 @@ export function AIInvoiceModule() {
     <div className="space-y-5">
       {/* Payment link created banner */}
       {createdPaymentLink && (
-        <div className="flex items-center justify-between gap-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+        <div className="flex items-center justify-between gap-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
           <div className="flex items-center gap-3 min-w-0">
-            <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
+            <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
             <div className="min-w-0">
-              <p className="text-emerald-800 font-semibold text-sm">Invoice created — share with your client</p>
-              <p className="font-mono text-xs text-emerald-600 truncate">{createdPaymentLink}</p>
+              <p className="text-emerald-400 font-semibold text-sm">Invoice created — share with your client</p>
+              <p className="font-mono text-xs text-emerald-400/60 truncate">{createdPaymentLink}</p>
             </div>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-              onClick={() => navigator.clipboard.writeText(createdPaymentLink)}>
+            <Button size="sm" className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20 rounded-xl"
+              onClick={() => copyToClipboard(createdPaymentLink)}>
               <Copy className="h-3 w-3 mr-1" /> Copy
             </Button>
-            <Button size="sm" variant="ghost" className="text-slate-400" onClick={() => setCreatedPaymentLink(null)}>
+            <Button size="sm" className="bg-white/[0.04] border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white rounded-xl"
+              onClick={() => setCreatedPaymentLink(null)}>
               <X className="h-3 w-3" />
             </Button>
           </div>
@@ -499,154 +506,177 @@ export function AIInvoiceModule() {
             svg: <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="13" y1="3" x2="13" y2="23"/><path d="M18,7 H10.5 C8.5,7 7,8.5 7,10.5 C7,12.5 8.5,14 10.5,14 H15.5 C17.5,14 19,15.5 19,17.5 C19,19.5 17.5,21 15.5,21 H8"/></svg>
           },
         ].map(s => (
-          <Card key={s.label}>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md shrink-0" style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}>
-                {s.svg}
-              </div>
-              <div><p className="text-slate-500 text-xs">{s.label}</p><p className="text-slate-900 font-bold text-lg">{s.value}</p></div>
-            </CardContent>
-          </Card>
+          <div key={s.label} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-4 hover:bg-white/[0.05] transition-colors">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md shrink-0" style={{ background: 'linear-gradient(135deg, #0a2e2e 0%, #0f3d3d 100%)' }}>
+              {s.svg}
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs uppercase tracking-wide">{s.label}</p>
+              <p className="text-white font-bold text-2xl mt-0.5 leading-none">{s.value}</p>
+            </div>
+          </div>
         ))}
       </div>
 
       {/* Main tabs */}
-      <Card>
-        <CardContent className="pt-5">
-          <Tabs defaultValue="invoices">
-            <TabsList className="mb-5">
-              <TabsTrigger value="invoices" className="gap-1.5"><FileText className="h-3.5 w-3.5" />Invoices</TabsTrigger>
-              <TabsTrigger value="ai" className="gap-1.5"><Sparkles className="h-3.5 w-3.5" />AI Assistant</TabsTrigger>
-              <TabsTrigger value="agents" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Agents</TabsTrigger>
-            </TabsList>
+      <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5">
+        <Tabs defaultValue="invoices">
+          <TabsList className="mb-5 bg-white/[0.04] border border-white/[0.06] p-1 rounded-xl h-auto gap-0.5">
+            <TabsTrigger value="invoices"
+              className="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all gap-1.5">
+              <FileText className="h-3.5 w-3.5" />Invoices
+            </TabsTrigger>
+            <TabsTrigger value="ai"
+              className="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />AI Assistant
+            </TabsTrigger>
+            <TabsTrigger value="agents"
+              className="data-[state=active]:bg-white/[0.08] data-[state=active]:text-white text-slate-500 rounded-lg px-4 py-2 text-sm font-medium transition-all gap-1.5">
+              <Bot className="h-3.5 w-3.5" />Agents
+            </TabsTrigger>
+          </TabsList>
 
-            {/* ── Invoices tab ── */}
-            <TabsContent value="invoices" className="mt-0">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div className="flex gap-1.5 flex-wrap">
-                  {["all", "pending", "paid", "overdue", "draft"].map(s => (
-                    <button key={s} onClick={() => setFilterStatus(s)}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${filterStatus === s ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-600 hover:text-slate-900"}`}>
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </button>
-                  ))}
+          {/* ── Invoices tab ── */}
+          <TabsContent value="invoices" className="mt-0">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <div className="flex gap-1 bg-white/[0.04] border border-white/[0.06] rounded-xl p-1 flex-wrap">
+                {["all", "pending", "paid", "overdue", "draft"].map(s => (
+                  <button key={s} onClick={() => setFilterStatus(s)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${
+                      filterStatus === s ? "bg-white/[0.08] text-white" : "text-slate-500 hover:text-slate-300"
+                    }`}>
+                    {s === "all" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <Button className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30 gap-2"
+                onClick={() => setShowCreate(true)}>
+                <Plus className="h-4 w-4" /> New Invoice
+              </Button>
+            </div>
+
+            {invoices.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <FileText className="h-7 w-7 text-emerald-400" />
                 </div>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={() => setShowCreate(true)}>
+                <p className="font-semibold text-white text-base">No invoices yet</p>
+                <p className="text-slate-500 text-sm mt-1">Create your first invoice to get a shareable payment link</p>
+                <Button className="mt-5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30 gap-2"
+                  onClick={() => setShowCreate(true)}>
                   <Plus className="h-4 w-4" /> New Invoice
                 </Button>
               </div>
+            ) : (
+              <div className="space-y-2">
+                {invoices.map(inv => (
+                  <InvoiceRow key={inv.id} invoice={inv} onClick={() => setSelectedInvoice(inv)} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-              {invoices.length === 0 ? (
-                <div className="text-center py-16 text-slate-400">
-                  <FileText className="h-12 w-12 mx-auto mb-3 text-slate-200" />
-                  <p className="font-medium text-slate-500">No invoices yet</p>
-                  <p className="text-xs mt-1">Create your first invoice to get a shareable payment link</p>
-                  <Button className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white gap-2" onClick={() => setShowCreate(true)}>
-                    <Plus className="h-4 w-4" /> New Invoice
+          {/* ── AI Assistant tab ── */}
+          <TabsContent value="ai" className="mt-0">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                <Sparkles className="h-5 w-5 text-emerald-400" />
+              </div>
+              <div>
+                <span className="font-semibold text-white text-sm">AI Invoice Assistant</span>
+                <p className="text-xs text-slate-500">Describe your invoice and the AI will help you draft and send it to clients.</p>
+              </div>
+            </div>
+            <AIAssistantPanel />
+          </TabsContent>
+
+          {/* ── Agents tab ── */}
+          <TabsContent value="agents" className="mt-0">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-slate-500 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
+              <Dialog open={showRegisterAgent} onOpenChange={setShowRegisterAgent}>
+                <DialogTrigger asChild>
+                  <Button className="bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2">
+                    <Plus className="h-4 w-4" /> Register Agent
                   </Button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {invoices.map(inv => (
-                    <InvoiceRow key={inv.id} invoice={inv} onClick={() => setSelectedInvoice(inv)} />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-
-            {/* ── AI Assistant tab ── */}
-            <TabsContent value="ai" className="mt-0">
-              <div className="mb-4 flex items-center gap-3">
-                <img src="/ai-assistant-icon.png" alt="AI" className="w-10 h-10 rounded-xl object-cover shadow-sm shrink-0" />
-                <div>
-                  <span className="font-semibold text-slate-900 text-sm">AI Invoice Assistant</span>
-                  <p className="text-xs text-slate-500">Describe your invoice and the AI will help you draft and send it to clients.</p>
-                </div>
-              </div>
-              <AIAssistantPanel />
-            </TabsContent>
-
-            {/* ── Agents tab ── */}
-            <TabsContent value="agents" className="mt-0">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-slate-600 text-sm">{agents.length} registered agent{agents.length !== 1 ? "s" : ""}</p>
-                <Dialog open={showRegisterAgent} onOpenChange={setShowRegisterAgent}>
-                  <DialogTrigger asChild>
-                    <Button className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
-                      <Plus className="h-4 w-4" /> Register Agent
+                </DialogTrigger>
+                <DialogContent className="max-w-lg bg-[#0f172a] border border-white/10">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-white"><Bot className="h-5 w-5 text-emerald-400" />Register Agent</DialogTitle>
+                    <DialogDescription className="text-slate-500">Register an AI agent with a wallet to issue invoices on-chain autonomously.</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 mt-2">
+                    <div>
+                      <Label className="text-xs text-slate-400">Agent Name *</Label>
+                      <Input value={agentForm.name} onChange={e => setAgentForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Analytics Agent"
+                        className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-slate-400">Description</Label>
+                      <Textarea value={agentForm.description} onChange={e => setAgentForm(f => ({ ...f, description: e.target.value }))} placeholder="What does this agent do?"
+                        className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl resize-none" rows={2} />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-slate-400">Wallet Address</Label>
+                      <Input value={agentForm.walletAddress} onChange={e => setAgentForm(f => ({ ...f, walletAddress: e.target.value }))} placeholder="0x…"
+                        className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl font-mono text-sm" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-slate-400">Capabilities (comma-separated)</Label>
+                      <Input value={agentForm.capabilitiesText} onChange={e => setAgentForm(f => ({ ...f, capabilitiesText: e.target.value }))} placeholder="data-analysis, reporting"
+                        className="mt-1 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-600 focus:border-emerald-500/50 rounded-xl" />
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30"
+                      onClick={registerAgent} disabled={agentLoading || !agentForm.name}>
+                      {agentLoading ? "Registering…" : "Register Agent"}<Bot className="ml-2 h-4 w-4" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-lg">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-2"><Bot className="h-5 w-5 text-emerald-600" />Register Agent</DialogTitle>
-                      <DialogDescription>Register an AI agent with a wallet to issue invoices on-chain autonomously.</DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 mt-2">
-                      <div>
-                        <Label className="text-xs text-slate-600">Agent Name *</Label>
-                        <Input value={agentForm.name} onChange={e => setAgentForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Analytics Agent" className="mt-1" />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-slate-600">Description</Label>
-                        <Textarea value={agentForm.description} onChange={e => setAgentForm(f => ({ ...f, description: e.target.value }))} placeholder="What does this agent do?" className="mt-1" rows={2} />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-slate-600">Wallet Address</Label>
-                        <Input value={agentForm.walletAddress} onChange={e => setAgentForm(f => ({ ...f, walletAddress: e.target.value }))} placeholder="0x…" className="mt-1" />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-slate-600">Capabilities (comma-separated)</Label>
-                        <Input value={agentForm.capabilitiesText} onChange={e => setAgentForm(f => ({ ...f, capabilitiesText: e.target.value }))} placeholder="data-analysis, reporting" className="mt-1" />
-                      </div>
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" onClick={registerAgent} disabled={agentLoading || !agentForm.name}>
-                        {agentLoading ? "Registering…" : "Register Agent"}<Bot className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
 
-              {agents.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
-                  <Bot className="h-12 w-12 mx-auto mb-3 text-slate-200" />
-                  <p className="font-medium text-slate-500">No agents registered</p>
-                  <p className="text-xs mt-1">Agents can autonomously issue invoices and receive payments to their own wallet</p>
+            {agents.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto" style={{ background: "linear-gradient(135deg, #0a2e2e, #0f3d3d)" }}>
+                  <Bot className="h-7 w-7 text-emerald-400" />
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {agents.map(agent => (
-                    <div key={agent.id} className="p-4 bg-white border border-slate-200 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-indigo-50 rounded-lg"><Bot className="h-4 w-4 text-indigo-600" /></div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <p className="text-slate-900 font-medium text-sm">{agent.name}</p>
-                              <Badge className={`text-xs border ${agent.status === "active" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-600 border-slate-200"}`}>{agent.status}</Badge>
-                            </div>
-                            {agent.description && <p className="text-slate-500 text-xs mt-0.5">{agent.description}</p>}
-                            {agent.walletAddress && (
-                              <div className="flex items-center gap-1 mt-1">
-                                <Wallet className="h-3 w-3 text-slate-400" />
-                                <span className="text-slate-600 text-xs font-mono">{agent.walletAddress.slice(0, 10)}…{agent.walletAddress.slice(-6)}</span>
-                                <button onClick={() => copyToClipboard(agent.walletAddress!)} className="text-slate-400 hover:text-slate-600"><Copy className="h-3 w-3" /></button>
-                              </div>
-                            )}
+                <p className="font-semibold text-white">No agents registered</p>
+                <p className="text-slate-500 text-xs mt-1">Agents can autonomously issue invoices and receive payments to their own wallet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {agents.map(agent => (
+                  <div key={agent.id} className="p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-500/10 rounded-lg"><Bot className="h-4 w-4 text-indigo-400" /></div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-white font-medium text-sm">{agent.name}</p>
+                            <Badge className={`text-xs border ${agent.status === "active" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-white/[0.06] text-slate-400 border-white/[0.08]"}`}>{agent.status}</Badge>
                           </div>
-                        </div>
-                        <div className="text-right space-y-1">
-                          <p className="text-slate-500 text-xs">{agent.invoiceCount} invoice{agent.invoiceCount !== 1 ? "s" : ""}</p>
-                          <p className="text-emerald-600 text-xs font-mono">${agent.totalEarned.toLocaleString()} earned</p>
+                          {agent.description && <p className="text-slate-500 text-xs mt-0.5">{agent.description}</p>}
+                          {agent.walletAddress && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Wallet className="h-3 w-3 text-slate-500" />
+                              <span className="text-slate-400 text-xs font-mono">{agent.walletAddress.slice(0, 10)}…{agent.walletAddress.slice(-6)}</span>
+                              <button onClick={() => copyToClipboard(agent.walletAddress!)} className="text-slate-500 hover:text-slate-300"><Copy className="h-3 w-3" /></button>
+                            </div>
+                          )}
                         </div>
                       </div>
+                      <div className="text-right space-y-1">
+                        <p className="text-slate-500 text-xs">{agent.invoiceCount} invoice{agent.invoiceCount !== 1 ? "s" : ""}</p>
+                        <p className="text-emerald-400 text-xs font-mono">${agent.totalEarned.toLocaleString()} earned</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Create invoice dialog */}
       <CreateInvoiceDialog
@@ -658,13 +688,13 @@ export function AIInvoiceModule() {
 
       {/* Invoice detail dialog */}
       <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0f172a] border border-white/10">
           {selectedInvoice && (
             <>
               <DialogHeader>
-                <div className="flex items-center justify-between">
-                  <DialogTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-emerald-600" />
+                <div className="flex items-center justify-between pr-6">
+                  <DialogTitle className="flex items-center gap-2 text-white">
+                    <FileText className="h-5 w-5 text-emerald-400" />
                     {selectedInvoice.invoiceNumber}
                   </DialogTitle>
                   <Badge className={`border ${statusConfig[selectedInvoice.status].color}`}>
@@ -675,86 +705,96 @@ export function AIInvoiceModule() {
 
               <div className="space-y-4 mt-2">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-white/[0.04] border border-white/[0.06] rounded-xl">
                     <p className="text-slate-500 text-xs font-medium mb-1">From</p>
-                    <p className="text-slate-900 font-medium text-sm">
+                    <p className="text-white font-medium text-sm">
                       {selectedInvoice.agentName ? (
-                        <span className="flex items-center gap-1"><Bot className="h-3.5 w-3.5 text-indigo-500" />{selectedInvoice.agentName}</span>
+                        <span className="flex items-center gap-1"><Bot className="h-3.5 w-3.5 text-indigo-400" />{selectedInvoice.agentName}</span>
                       ) : "You"}
                     </p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-white/[0.04] border border-white/[0.06] rounded-xl">
                     <p className="text-slate-500 text-xs font-medium mb-1">Billed To</p>
-                    <p className="text-slate-900 font-medium text-sm">{selectedInvoice.issuedTo}</p>
+                    <p className="text-white font-medium text-sm">{selectedInvoice.issuedTo}</p>
                     {selectedInvoice.issuedToAddress && (
                       <div className="flex items-center gap-1 mt-1">
                         <p className="text-slate-500 text-xs font-mono">{selectedInvoice.issuedToAddress.slice(0, 10)}…</p>
-                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress!)} className="text-slate-400 hover:text-slate-600"><Copy className="h-3 w-3" /></button>
+                        <button onClick={() => copyToClipboard(selectedInvoice.issuedToAddress!)} className="text-slate-500 hover:text-slate-300"><Copy className="h-3 w-3" /></button>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {selectedInvoice.description && (
-                  <div><p className="text-slate-500 text-xs mb-1">Description</p><p className="text-slate-900 text-sm">{selectedInvoice.description}</p></div>
+                  <div><p className="text-slate-500 text-xs mb-1">Description</p><p className="text-slate-300 text-sm">{selectedInvoice.description}</p></div>
                 )}
 
                 <div>
                   <p className="text-slate-500 text-xs mb-2">Line Items</p>
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-slate-200">
-                        <TableHead className="text-slate-500 text-xs">Description</TableHead>
-                        <TableHead className="text-slate-500 text-xs text-center">Qty</TableHead>
-                        <TableHead className="text-slate-500 text-xs text-right">Unit Price</TableHead>
-                        <TableHead className="text-slate-500 text-xs text-right">Total</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedInvoice.lineItems.map((item, idx) => (
-                        <TableRow key={idx} className="border-slate-100">
-                          <TableCell className="text-slate-900 text-sm">{item.description}</TableCell>
-                          <TableCell className="text-slate-700 text-sm text-center">{item.quantity}</TableCell>
-                          <TableCell className="text-slate-700 text-sm text-right font-mono">${item.unitPrice}</TableCell>
-                          <TableCell className="text-emerald-600 text-sm text-right font-mono font-bold">${item.total}</TableCell>
+                  <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-white/[0.04] border-white/[0.06]">
+                          <TableHead className="text-slate-400 text-xs">Description</TableHead>
+                          <TableHead className="text-slate-400 text-xs text-center">Qty</TableHead>
+                          <TableHead className="text-slate-400 text-xs text-right">Unit Price</TableHead>
+                          <TableHead className="text-slate-400 text-xs text-right">Total</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  <div className="flex justify-end mt-2 pt-2 border-t border-slate-200">
+                      </TableHeader>
+                      <TableBody>
+                        {selectedInvoice.lineItems.map((item, idx) => (
+                          <TableRow key={idx} className="border-white/[0.04] even:bg-white/[0.02] hover:bg-white/[0.04]">
+                            <TableCell className="text-slate-300 text-sm">{item.description}</TableCell>
+                            <TableCell className="text-slate-400 text-sm text-center">{item.quantity}</TableCell>
+                            <TableCell className="text-slate-400 text-sm text-right font-mono">${item.unitPrice}</TableCell>
+                            <TableCell className="text-emerald-400 text-sm text-right font-mono font-bold">${item.total}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="flex justify-end mt-2 pt-2 border-t border-white/[0.06]">
                     <div className="text-right">
                       <p className="text-slate-500 text-xs">Total Due</p>
-                      <p className="text-emerald-600 font-bold text-2xl font-mono">${parseFloat(String(selectedInvoice.amount)).toLocaleString()} {selectedInvoice.currency}</p>
+                      <p className="text-emerald-400 font-bold text-2xl font-mono">${parseFloat(String(selectedInvoice.amount)).toLocaleString()} {selectedInvoice.currency}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div className="p-2 bg-slate-50 rounded"><p className="text-slate-500">Issued</p><p className="text-slate-900">{new Date(selectedInvoice.createdAt).toLocaleDateString()}</p></div>
-                  <div className="p-2 bg-slate-50 rounded">
+                  <div className="p-2 bg-white/[0.04] border border-white/[0.06] rounded-lg">
+                    <p className="text-slate-500">Issued</p>
+                    <p className="text-slate-300">{new Date(selectedInvoice.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-2 bg-white/[0.04] border border-white/[0.06] rounded-lg">
                     <p className="text-slate-500">Due</p>
-                    <p className={selectedInvoice.status === "overdue" ? "text-red-600" : "text-slate-900"}>{new Date(selectedInvoice.dueAt).toLocaleDateString()}</p>
+                    <p className={selectedInvoice.status === "overdue" ? "text-red-400" : "text-slate-300"}>{new Date(selectedInvoice.dueAt).toLocaleDateString()}</p>
                   </div>
                   {selectedInvoice.paidAt && (
-                    <div className="p-2 bg-emerald-50 rounded"><p className="text-slate-500">Paid</p><p className="text-emerald-600">{new Date(selectedInvoice.paidAt).toLocaleDateString()}</p></div>
+                    <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+                      <p className="text-slate-500">Paid</p>
+                      <p className="text-emerald-400">{new Date(selectedInvoice.paidAt).toLocaleDateString()}</p>
+                    </div>
                   )}
                 </div>
 
                 {selectedInvoice.paymentLinkCode && selectedInvoice.status !== "paid" && (
                   <div className="space-y-2">
                     <a href={`/l/${selectedInvoice.paymentLinkCode}`} target="_blank" rel="noopener noreferrer">
-                      <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2">
+                      <Button className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-xl shadow-lg shadow-emerald-900/30 gap-2">
                         <ExternalLink className="h-4 w-4" /> Pay Now
                       </Button>
                     </a>
-                    <Button variant="outline" className="w-full gap-2" onClick={() => copyToClipboard(`${window.location.origin}/l/${selectedInvoice.paymentLinkCode}`)}>
+                    <Button className="w-full bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2"
+                      onClick={() => copyToClipboard(`${window.location.origin}/l/${selectedInvoice.paymentLinkCode}`)}>
                       <Copy className="h-4 w-4" /> Copy Payment Link
                     </Button>
                   </div>
                 )}
 
                 {selectedInvoice.status !== "paid" && selectedInvoice.status !== "cancelled" && (
-                  <Button className="w-full bg-slate-800 hover:bg-slate-900 text-white gap-2" onClick={() => markAsPaid(selectedInvoice)}>
+                  <Button className="w-full bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2"
+                    onClick={() => markAsPaid(selectedInvoice)}>
                     <CheckCircle className="h-4 w-4" /> Mark as Paid
                   </Button>
                 )}
