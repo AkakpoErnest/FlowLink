@@ -351,7 +351,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     : "FL"
 
   return (
-    <div className="min-h-screen bg-[#0f172a]">
+    <div className="dark min-h-screen bg-[#0f172a]">
       {/* Fixed sidebar */}
       <aside className="w-64 bg-[#0a1628] border-r border-white/[0.06] flex flex-col h-screen fixed left-0 top-0 z-40">
         {/* Logo */}
