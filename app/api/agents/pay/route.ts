@@ -5,7 +5,9 @@ import { prisma } from '@/lib/prisma'
 import { agentSendERC20, agentSendNative, deriveAgentWallet } from '@/lib/agent-wallet'
 import { logAudit } from '@/lib/audit'
 import { hspClient } from '@/lib/hsp-client'
+import { runComplianceCheck } from '@/lib/compliance'
 import { z } from 'zod'
+import crypto from 'crypto'
 
 // Token addresses on HashKey Testnet
 const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
@@ -90,8 +92,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'toAddress or toAgentId required' }, { status: 400 })
   }
 
-  // Deterministic wallet index from agent ID
-  const agentIndex = agent.id.charCodeAt(0) % 100
+  // Run compliance check on destination address before touching the chain
+  const compliance = await runComplianceCheck(destAddress)
+  if (!compliance.sanctionsOk || compliance.complianceScore < 60) {
+    await logAudit({
+      userId,
+      action: 'agent.payment.blocked',
+      entityId: agentId,
+      entityType: 'Agent',
+      metadata: {
+        destAddress,
+        reason: compliance.detail ?? 'Failed compliance screening',
+        complianceScore: compliance.complianceScore,
+      },
+    })
+    return NextResponse.json(
+      {
+        error: 'Payment blocked by compliance screening',
+        detail: compliance.detail ?? 'Address failed sanctions or risk check',
+        complianceScore: compliance.complianceScore,
+      },
+      { status: 403 },
+    )
+  }
+
+  // Collision-resistant deterministic wallet index from agent ID
+  const idHash = crypto.createHash('sha256').update(agent.id).digest()
+  const agentIndex = idHash.readUInt32BE(0) % 2_147_483_647
 
   // Execute on-chain payment
   let txResult
@@ -127,9 +154,9 @@ export async function POST(req: Request) {
         ? `${memo || ''}${memo ? ' | ' : ''}hsp_mandate:${hspMultipayMandateId}`.trim()
         : memo,
       paymentType,
-      kycPassed: true,
-      sanctionsChecked: true,
-      complianceScore: 95,
+      kycPassed: compliance.kycOk,
+      sanctionsChecked: compliance.sanctionsOk,
+      complianceScore: compliance.complianceScore,
     },
   })
 

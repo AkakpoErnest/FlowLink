@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { logAudit } from '@/lib/audit'
+import { runComplianceCheck } from '@/lib/compliance'
 
 function unauth() {
   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -64,6 +65,20 @@ export async function POST(request: NextRequest) {
     userId = link?.userId
   }
 
+  // Run real compliance check on the payer address
+  const compliance = await runComplianceCheck(body.payer)
+  if (!compliance.sanctionsOk || compliance.complianceScore < 60) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Payment blocked by compliance screening',
+        detail: compliance.detail ?? 'Address failed sanctions or risk check',
+        complianceScore: compliance.complianceScore,
+      },
+      { status: 403 },
+    )
+  }
+
   const payment = await prisma.payment.create({
     data: {
       userId: userId ?? null,
@@ -74,9 +89,9 @@ export async function POST(request: NextRequest) {
       txHash: body.txHash ?? null,
       status: body.status || 'pending',
       network: body.network || 'celo',
-      kycPassed: body.kycPassed ?? false,
-      sanctionsChecked: body.sanctionsChecked ?? false,
-      complianceScore: body.complianceScore ?? 0,
+      kycPassed: compliance.kycOk,
+      sanctionsChecked: compliance.sanctionsOk,
+      complianceScore: compliance.complianceScore,
       gasUsed: body.gasUsed ?? null,
     },
   })
