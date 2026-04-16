@@ -28,6 +28,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing signature headers' }, { status: 400 })
     }
 
+    // Replay protection — reject requests outside a 5-minute window
+    const ts = parseInt(timestamp, 10)
+    const now = Math.floor(Date.now() / 1000)
+    if (isNaN(ts) || Math.abs(now - ts) > 300) {
+      console.error('[HSP webhook] Timestamp out of acceptable window')
+      return NextResponse.json({ error: 'Request timestamp out of window' }, { status: 400 })
+    }
+
     const valid = hspClient.verifyWebhookSignature(
       'POST',
       path,

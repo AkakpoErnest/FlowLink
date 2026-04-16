@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { deriveAgentWallet } from "@/lib/agent-wallet"
 import { z } from "zod"
+import crypto from "crypto"
 
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
@@ -57,7 +58,9 @@ export async function POST(request: NextRequest) {
   let walletAddress = agent.walletAddress
   if (!walletAddress && process.env.DEPLOYER_MNEMONIC) {
     try {
-      const agentIndex = agent.id.charCodeAt(0) % 100
+      // Derive a stable, collision-resistant index from the full agent ID (32-bit from SHA-256)
+      const idHash = crypto.createHash('sha256').update(agent.id).digest()
+      const agentIndex = idHash.readUInt32BE(0) % 2_147_483_647
       const { address } = deriveAgentWallet(agentIndex)
       walletAddress = address
       await prisma.agent.update({ where: { id: agent.id }, data: { walletAddress: address } })
