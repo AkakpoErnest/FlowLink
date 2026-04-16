@@ -127,7 +127,7 @@ export function ComplianceVaultsModule() {
           <p className="text-muted-foreground mt-1">Smart-account factories with programmable compliance policies</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setShowSimulator(true)}>
+          <Button variant="outline" onClick={() => setShowSimulator(true)} className="text-slate-200 border-white/[0.12] hover:bg-white/[0.06] hover:text-white bg-transparent">
             <BarChart3 className="h-4 w-4 mr-2" />
             Policy Simulator
           </Button>
@@ -257,11 +257,11 @@ function VaultCard({ vault, onSelect }: { vault: ComplianceVault; onSelect: (vau
           </div>
 
           <div className="flex gap-2 pt-2">
-            <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+            <Button variant="outline" size="sm" className="flex-1 bg-transparent text-slate-200 border-white/[0.12] hover:bg-white/[0.06] hover:text-white">
               <Settings className="h-4 w-4 mr-2" />
               Configure
             </Button>
-            <Button variant="outline" size="sm" className="bg-transparent">
+            <Button variant="outline" size="sm" className="bg-transparent text-slate-300 border-white/[0.12] hover:bg-white/[0.06] hover:text-white">
               {vault.status === "active" ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
           </div>
@@ -415,7 +415,7 @@ function CreateVaultForm({ onClose, onSuccess }: { onClose: () => void; onSucces
       </div>
 
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={onClose} disabled={saving}>
+        <Button variant="outline" onClick={onClose} disabled={saving} className="text-slate-200 border-white/[0.12] hover:bg-white/[0.06] hover:text-white bg-transparent">
           Cancel
         </Button>
         <Button className="bg-primary hover:bg-primary/90" onClick={handleCreate} disabled={!vaultName.trim() || saving}>
@@ -476,7 +476,7 @@ function VaultDetails({ vault }: { vault: ComplianceVault }) {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-card-foreground">Active Policies</h3>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="text-slate-200 border-white/[0.12] hover:bg-white/[0.06] hover:text-white bg-transparent">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Policy
               </Button>
