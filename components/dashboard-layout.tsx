@@ -48,7 +48,7 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
   if (sessionWallet || dismissed) return null
 
   return (
-    <div className="mx-6 mt-4 flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+    <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
       <Wallet className="h-4 w-4 text-amber-400 shrink-0" />
       <p className="flex-1 text-sm text-amber-300">
         No wallet linked. Set one up to send and receive payments.
@@ -56,12 +56,12 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
       <Button
         size="sm"
         onClick={onSetup}
-        className="shrink-0 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 text-xs"
+        className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs"
         variant="outline"
       >
-        Set up wallet
+        Set up
       </Button>
-      <button onClick={() => setDismissed(true)} className="text-amber-500 hover:text-amber-300 shrink-0">
+      <button onClick={() => setDismissed(true)} className="text-amber-500/60 hover:text-amber-400 shrink-0">
         <X className="h-4 w-4" />
       </button>
     </div>
@@ -105,7 +105,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
     setSaving(true)
     setMsg("")
     try {
-      // Save avatar if changed
       if (avatarPreview) {
         setUploadingAvatar(true)
         const avatarRes = await fetch('/api/user/avatar', {
@@ -118,7 +117,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
         if (!avatarData.success) { setMsg(avatarData.error ?? "Failed to upload avatar."); return }
         await update({ picture: avatarPreview })
       }
-      // Save name if changed
       if (editName !== currentName) {
         const res = await fetch('/api/user', {
           method: 'PATCH',
@@ -171,31 +169,31 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm bg-[#0f172a] border border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle>Profile Settings</DialogTitle>
+          <DialogTitle className="text-white">Profile Settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-5 pt-1">
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center border-2 border-white shadow-sm">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-900/50 flex items-center justify-center border-2 border-white/10 shadow-sm">
                 {currentAvatar ? (
                   <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-emerald-700 font-bold text-2xl">{initials}</span>
+                  <span className="text-emerald-400 font-bold text-2xl">{initials}</span>
                 )}
               </div>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Camera className="h-5 w-5 text-white" />
               </button>
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
             >
               Change photo
             </button>
@@ -210,19 +208,19 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
           {/* Name */}
           <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Display Name</Label>
+            <Label className="text-xs text-slate-400">Display Name</Label>
             <Input
               value={editName}
               onChange={e => setEditName(e.target.value)}
               placeholder="Your name"
-              className="border-slate-200"
+              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50"
             />
           </div>
 
           {/* Email (read-only) */}
           <div className="space-y-1">
-            <Label className="text-xs text-slate-500">Email <span className="text-slate-400">(read-only)</span></Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-slate-50 border-slate-200 text-slate-500" />
+            <Label className="text-xs text-slate-400">Email <span className="text-slate-600">(read-only)</span></Label>
+            <Input value={session?.user?.email ?? "—"} readOnly className="bg-white/5 border-white/10 text-slate-400" />
           </div>
 
           {/* Save button */}
@@ -237,19 +235,19 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
           )}
 
           {/* Wallet */}
-          <div className="pt-2 border-t border-slate-100 space-y-3">
+          <div className="pt-2 border-t border-white/10 space-y-3">
             <div className="space-y-1">
-              <Label className="text-xs text-slate-500">Linked wallet</Label>
+              <Label className="text-xs text-slate-400">Linked wallet</Label>
               <Input
                 value={sessionWallet ?? "No wallet linked"}
                 readOnly
-                className="bg-slate-50 font-mono text-xs"
+                className="bg-white/5 border-white/10 font-mono text-xs text-slate-300"
               />
             </div>
 
             {/* @ts-ignore */}
             {(session?.user as any)?.walletType === "managed" && sessionWallet && (
-              <p className="text-xs text-emerald-600 flex items-center gap-1.5">
+              <p className="text-xs text-emerald-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                 FlowLink managed — signs automatically, no reconnect needed
               </p>
@@ -257,7 +255,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
             {(session?.user as any)?.walletType !== "managed" && !isConnected && sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">External wallet — reconnect MetaMask for on-chain actions</Label>
+                <Label className="text-xs text-slate-400">External wallet — reconnect MetaMask for on-chain actions</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Reconnect Wallet" accountStatus="address" showBalance={false} />
                 </div>
@@ -266,7 +264,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
             {!sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">No wallet linked yet</Label>
+                <Label className="text-xs text-slate-400">No wallet linked yet</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Connect Wallet" accountStatus="address" showBalance={false} />
                 </div>
@@ -275,9 +273,9 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
             {isConnected && address && address.toLowerCase() !== sessionWallet?.toLowerCase() && (session?.user as any)?.walletType !== "managed" && (
               <div className="space-y-2">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Connected:{" "}
-                  <span className="font-mono text-slate-700">{address.slice(0, 8)}…{address.slice(-6)}</span>
+                  <span className="font-mono text-slate-300">{address.slice(0, 8)}…{address.slice(-6)}</span>
                 </p>
                 <Button size="sm" onClick={linkWallet} disabled={saving}
                   className="w-full bg-emerald-600 hover:bg-emerald-500 text-white">
@@ -289,7 +287,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
           </div>
 
           {msg && (
-            <p className={`text-xs ${msg.includes("!") ? "text-emerald-600" : "text-red-500"}`}>{msg}</p>
+            <p className={`text-xs ${msg.includes("!") ? "text-emerald-400" : "text-red-400"}`}>{msg}</p>
           )}
         </div>
       </DialogContent>
@@ -347,20 +345,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const name = session?.user?.name ?? ""
+  const email = session?.user?.email ?? ""
   const initials = name
     ? name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
     : "FL"
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#0f172a]">
       {/* Fixed sidebar */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 z-40">
+      <aside className="w-64 bg-[#0a1628] border-r border-white/[0.06] flex flex-col h-screen fixed left-0 top-0 z-40">
         {/* Logo */}
-        <div className="p-5 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-9 h-9 rounded-xl object-cover shadow-sm" />
+        <div className="p-5 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg shadow-emerald-900/30 ring-1 ring-white/10">
+              <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-full h-full object-cover" />
+            </div>
             <span className="font-bold text-xl tracking-tight">
-              <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
+              <span className="text-white">Flow</span><span className="text-emerald-400">Link</span>
             </span>
           </div>
         </div>
@@ -369,7 +370,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="p-4">
           <button
             onClick={() => setActiveTab("payment-links")}
-            className="w-full bg-emerald-600 text-white rounded-lg py-2.5 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
+            className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-lg shadow-emerald-900/30"
           >
             <Send className="w-4 h-4" />
             Send Payment
@@ -377,7 +378,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto py-2">
           {navigation.map((item) => {
             const isActive = activeTab === item.id
             return (
@@ -385,16 +386,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                   isActive
-                    ? "bg-emerald-50 text-emerald-700 border-l-2 border-emerald-600 pl-[10px]"
-                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    ? "bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-400 pl-[10px]"
+                    : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
                 )}
               >
-                <item.icon className="w-4 h-4 shrink-0" strokeWidth={1.5} />
+                <item.icon className={cn("w-4 h-4 shrink-0", isActive ? "text-emerald-400" : "text-slate-500")} strokeWidth={1.5} />
                 {item.name}
                 {item.badge && (
-                  <span className="ml-auto text-xs bg-slate-100 text-slate-500 rounded px-1.5 py-0.5">
+                  <span className={cn(
+                    "ml-auto text-xs rounded-md px-1.5 py-0.5 font-medium",
+                    isActive ? "bg-emerald-500/20 text-emerald-400" : "bg-white/[0.06] text-slate-500"
+                  )}>
                     {item.badge}
                   </span>
                 )}
@@ -404,26 +408,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-4 border-t border-white/[0.06]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setProfileOpen(true)}
-              className="flex-1 flex items-center gap-3 hover:bg-slate-50 rounded-lg p-1.5 transition-colors text-left cursor-pointer min-w-0"
+              className="flex-1 flex items-center gap-3 hover:bg-white/[0.04] rounded-xl p-2 transition-colors text-left cursor-pointer min-w-0"
               title="Edit profile"
             >
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm shrink-0 overflow-hidden ring-2 ring-transparent hover:ring-emerald-200 transition-all">
+              <div className="w-9 h-9 rounded-full bg-emerald-900/60 flex items-center justify-center text-emerald-400 font-semibold text-sm shrink-0 overflow-hidden ring-1 ring-white/10">
                 {session?.user?.image ? (
                   <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
                 ) : initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-900 truncate">{session?.user?.name}</p>
-                <p className="text-xs text-slate-400 truncate">Edit profile</p>
+                <p className="text-sm font-medium text-slate-200 truncate leading-tight">{session?.user?.name ?? "User"}</p>
+                <p className="text-xs text-slate-500 truncate leading-tight mt-0.5">{email}</p>
               </div>
             </button>
             <button
               onClick={handleLogout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-300 hover:bg-white/[0.04] transition-colors shrink-0"
               title="Log out"
             >
               <LogOut className="h-4 w-4" />
@@ -435,16 +439,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main content — offset by sidebar width */}
       <div className="ml-64 flex flex-col min-h-screen">
         {/* Slim topbar */}
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-end px-6 sticky top-0 z-30">
+        <header className="h-14 bg-[#0f172a] border-b border-white/[0.06] flex items-center justify-end px-6 sticky top-0 z-30">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 h-8 w-8 p-0">
+            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] h-8 w-8 p-0 relative">
               <Bell className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-semibold text-sm">
-                {initials}
+              <div className="w-8 h-8 rounded-full bg-emerald-900/60 flex items-center justify-center text-emerald-400 font-semibold text-sm ring-1 ring-white/10 overflow-hidden">
+                {session?.user?.image ? (
+                  <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                ) : initials}
               </div>
-              <span className="text-sm font-medium text-slate-900 hidden md:block">{session?.user?.name}</span>
+              <span className="text-sm font-medium text-slate-300 hidden md:block">{session?.user?.name}</span>
             </div>
           </div>
         </header>
