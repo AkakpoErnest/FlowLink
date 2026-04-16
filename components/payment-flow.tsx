@@ -53,6 +53,8 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
   const [step, setStep] = useState<Step>('connect')
   const [amount, setAmount] = useState(paymentLink.amountMin?.toString() ?? '')
   const [complianceScore, setComplianceScore] = useState(0)
+  const [complianceDetail, setComplianceDetail] = useState<string | null>(null)
+  const [complianceBlocked, setComplianceBlocked] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const targetChain = getChain(paymentLink.network)
@@ -102,10 +104,8 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             txHash,
             status: 'completed',
             network: paymentLink.network,
-            kycPassed: true,
-            sanctionsChecked: true,
-            complianceScore,
             createInvoice: true,  // signal API to auto-create invoice proof
+            // compliance values are computed server-side by /api/payments
           }),
         })
       } catch (e) {
@@ -126,11 +126,38 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
   }, [sendError, writeError])
 
   const runCompliance = async () => {
+    if (!address) return
     setStep('compliance')
     setError(null)
-    await new Promise(r => setTimeout(r, 1500))
-    setComplianceScore(95)
-    setStep('confirm')
+    setComplianceBlocked(false)
+    setComplianceDetail(null)
+
+    try {
+      const params = new URLSearchParams({ addr: address })
+      if (paymentLink.id) params.append('linkId', paymentLink.id)
+      const res = await fetch(`/api/compliance/preflight?${params}`)
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        // Address blocked — show reason, don't allow payment
+        setComplianceScore(data.compliance?.complianceScore ?? 0)
+        setComplianceDetail(data.error ?? data.compliance?.detail ?? 'Address failed compliance screening')
+        setComplianceBlocked(true)
+        setStep('confirm')
+        return
+      }
+
+      setComplianceScore(data.compliance.complianceScore)
+      setComplianceDetail(null)
+      setComplianceBlocked(false)
+      setStep('confirm')
+    } catch {
+      // Network error — fail open so a server issue doesn't block all payments
+      setComplianceScore(70)
+      setComplianceDetail(null)
+      setComplianceBlocked(false)
+      setStep('confirm')
+    }
   }
 
   const handleSend = () => {
@@ -323,14 +350,29 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
       {/* Step: Confirm */}
       {step === 'confirm' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5 shadow-sm">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-teal-50 border border-teal-100">
-            <CheckCircle className="h-5 w-5 text-teal-600 shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-teal-800">Compliance passed</p>
-              <p className="text-xs text-teal-600">KYC · Sanctions · AML — all clear</p>
+          {/* Compliance result banner */}
+          {complianceBlocked ? (
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-red-50 border border-red-200">
+              <XCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800">Payment blocked</p>
+                <p className="text-xs text-red-600 mt-0.5">{complianceDetail ?? 'Address failed compliance screening'}</p>
+              </div>
+              <span className="text-sm font-black text-red-700">{complianceScore}/100</span>
             </div>
-            <span className="text-sm font-black text-teal-700">{complianceScore}/100</span>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-teal-50 border border-teal-100">
+              <CheckCircle className="h-5 w-5 text-teal-600 shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-teal-800">Compliance passed</p>
+                <p className="text-xs text-teal-600">
+                  OFAC sanctions · AML velocity · risk scoring — all clear
+                  {complianceDetail && ` · ${complianceDetail}`}
+                </p>
+              </div>
+              <span className="text-sm font-black text-teal-700">{complianceScore}/100</span>
+            </div>
+          )}
 
           <div className="space-y-2">
             {[
@@ -352,15 +394,25 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             </div>
           )}
 
-          <Button
-            onClick={handleSend}
-            disabled={isSending}
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white h-12 font-semibold"
-          >
-            {isSending
-              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Confirm in wallet…</>
-              : `Send ${amount} ${paymentLink.sourceToken}`}
-          </Button>
+          {complianceBlocked ? (
+            <Button
+              onClick={() => setStep('form')}
+              variant="outline"
+              className="w-full h-12 font-semibold"
+            >
+              Go back
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSend}
+              disabled={isSending}
+              className="w-full bg-teal-600 hover:bg-teal-500 text-white h-12 font-semibold"
+            >
+              {isSending
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Confirm in wallet…</>
+                : `Send ${amount} ${paymentLink.sourceToken}`}
+            </Button>
+          )}
         </div>
       )}
 

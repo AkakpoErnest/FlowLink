@@ -44,7 +44,7 @@ const steps = [
           {[
             { label: "Sanctions Screening", status: "Clear" },
             { label: "KYC Verification", status: "Passed" },
-            { label: "FATF Travel Rule", status: "Satisfied" },
+            { label: "Vault Policy Check", status: "Passed" },
             { label: "AML Monitoring", status: "No flags" },
           ].map((check, i) => (
             <motion.div

@@ -11,7 +11,7 @@ const layers = [
     tagStyle: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     live: true,
     dim: false,
-    desc: "Instant, compliant stablecoin payments between verified businesses. KYC, sanctions screening, and FATF Travel Rule built in from day one.",
+    desc: "Instant, compliant stablecoin payments between verified businesses. Real-time OFAC sanctions screening, AML velocity checks, and programmable compliance vaults built in from day one.",
   },
   {
     num: "02",

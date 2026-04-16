@@ -20,8 +20,8 @@ const features = [
   {
     num: "03",
     icon: Globe,
-    title: "FATF Travel Rule Compliance",
-    desc: "Originator and beneficiary data travels with every payment. Full VASP-to-VASP messaging for cross-border transfers.",
+    title: "Programmable Compliance Vaults",
+    desc: "Smart-account factories with configurable policy rules — geofencing, transaction limits, time windows, and sanctions screening enforced on every payment.",
   },
   {
     num: "04",

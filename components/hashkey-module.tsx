@@ -202,7 +202,7 @@ export function HashKeyModule() {
               {[
                 { label: "KYC Verification", status: true, detail: hashkeyCompliance.kycProviders.join(", ") },
                 { label: "Sanctions Screening", status: true, detail: "Real-time OFAC & global screening" },
-                { label: "Travel Rule Compliant", status: true, detail: "FATF Travel Rule compliance" },
+                { label: "Programmable Vault Policies", status: true, detail: "Geofencing, limits, and time windows per vault" },
                 { label: "AML Monitoring", status: true, detail: "Automated transaction monitoring" },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3 p-3 bg-white/[0.04] border border-white/[0.06] rounded-xl">
