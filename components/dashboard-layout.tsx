@@ -48,20 +48,20 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
   if (sessionWallet || dismissed) return null
 
   return (
-    <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+    <div className="mx-4 mt-3 flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.07] backdrop-blur-sm px-4 py-3">
       <Wallet className="h-4 w-4 text-amber-400 shrink-0" />
-      <p className="flex-1 text-sm text-amber-300">
+      <p className="flex-1 text-sm text-amber-300/90">
         No wallet linked. Set one up to send and receive payments.
       </p>
       <Button
         size="sm"
         onClick={onSetup}
-        className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs"
+        className="shrink-0 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs"
         variant="outline"
       >
         Set up
       </Button>
-      <button onClick={() => setDismissed(true)} className="text-amber-500/60 hover:text-amber-400 shrink-0">
+      <button onClick={() => setDismissed(true)} className="text-amber-500/50 hover:text-amber-400 shrink-0">
         <X className="h-4 w-4" />
       </button>
     </div>
@@ -169,15 +169,15 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-sm bg-[#0f172a] border border-white/10 text-white">
+      <DialogContent className="max-w-sm bg-[#0a1220]/95 backdrop-blur-xl border border-white/[0.08] text-white shadow-2xl shadow-black/60">
         <DialogHeader>
-          <DialogTitle className="text-white">Profile Settings</DialogTitle>
+          <DialogTitle className="text-white font-semibold tracking-tight">Profile Settings</DialogTitle>
         </DialogHeader>
         <div className="space-y-5 pt-1">
           {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-900/50 flex items-center justify-center border-2 border-white/10 shadow-sm">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-900/40 flex items-center justify-center border border-white/[0.08] shadow-lg shadow-black/40 ring-2 ring-emerald-500/10">
                 {currentAvatar ? (
                   <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
@@ -186,14 +186,14 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               </div>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <Camera className="h-5 w-5 text-white" />
               </button>
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium"
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-medium tracking-wide"
             >
               Change photo
             </button>
@@ -207,20 +207,20 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
           </div>
 
           {/* Name */}
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Display Name</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-500 tracking-wider uppercase">Display Name</Label>
             <Input
               value={editName}
               onChange={e => setEditName(e.target.value)}
               placeholder="Your name"
-              className="bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50"
+              className="bg-white/[0.04] border-white/[0.08] text-white placeholder:text-slate-600 focus:border-emerald-500/40 focus:bg-white/[0.06]"
             />
           </div>
 
           {/* Email (read-only) */}
-          <div className="space-y-1">
-            <Label className="text-xs text-slate-400">Email <span className="text-slate-600">(read-only)</span></Label>
-            <Input value={session?.user?.email ?? "—"} readOnly className="bg-white/5 border-white/10 text-slate-400" />
+          <div className="space-y-1.5">
+            <Label className="text-xs text-slate-500 tracking-wider uppercase">Email <span className="text-slate-700 normal-case">(read-only)</span></Label>
+            <Input value={session?.user?.email ?? "—"} readOnly className="bg-white/[0.02] border-white/[0.06] text-slate-400 cursor-default" />
           </div>
 
           {/* Save button */}
@@ -228,34 +228,34 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <Button
               onClick={saveProfile}
               disabled={saving}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-lg shadow-emerald-900/40"
             >
               {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{uploadingAvatar ? "Uploading…" : "Saving…"}</> : "Save Changes"}
             </Button>
           )}
 
           {/* Wallet */}
-          <div className="pt-2 border-t border-white/10 space-y-3">
-            <div className="space-y-1">
-              <Label className="text-xs text-slate-400">Linked wallet</Label>
+          <div className="pt-2 border-t border-white/[0.06] space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-slate-500 tracking-wider uppercase">Linked Wallet</Label>
               <Input
                 value={sessionWallet ?? "No wallet linked"}
                 readOnly
-                className="bg-white/5 border-white/10 font-mono text-xs text-slate-300"
+                className="bg-white/[0.02] border-white/[0.06] font-mono text-xs text-slate-300 cursor-default"
               />
             </div>
 
             {/* @ts-ignore */}
             {(session?.user as any)?.walletType === "managed" && sessionWallet && (
               <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
                 FlowLink managed — signs automatically, no reconnect needed
               </p>
             )}
 
             {(session?.user as any)?.walletType !== "managed" && !isConnected && sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-400">External wallet — reconnect MetaMask for on-chain actions</Label>
+                <Label className="text-xs text-slate-500 tracking-wider uppercase">External wallet — reconnect MetaMask for on-chain actions</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Reconnect Wallet" accountStatus="address" showBalance={false} />
                 </div>
@@ -264,7 +264,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
             {!sessionWallet && (
               <div className="space-y-1.5">
-                <Label className="text-xs text-slate-400">No wallet linked yet</Label>
+                <Label className="text-xs text-slate-500 tracking-wider uppercase">No wallet linked yet</Label>
                 <div className="flex justify-center pt-1">
                   <ConnectButton label="Connect Wallet" accountStatus="address" showBalance={false} />
                 </div>
@@ -278,7 +278,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
                   <span className="font-mono text-slate-300">{address.slice(0, 8)}…{address.slice(-6)}</span>
                 </p>
                 <Button size="sm" onClick={linkWallet} disabled={saving}
-                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white">
+                  className="w-full bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40">
                   <Wallet className="h-3.5 w-3.5 mr-1.5" />
                   {saving ? "Linking…" : "Link this wallet"}
                 </Button>
@@ -351,18 +351,40 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     : "FL"
 
   return (
-    <div className="dark min-h-screen bg-[#0f172a]">
+    <div
+      className="dark min-h-screen"
+      style={{
+        backgroundColor: "#080e1a",
+        backgroundImage: [
+          "radial-gradient(ellipse 80% 50% at 15% 40%, rgba(16,185,129,0.055) 0%, transparent 60%)",
+          "radial-gradient(ellipse 60% 40% at 85% 15%, rgba(99,102,241,0.04) 0%, transparent 55%)",
+          "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px)",
+          "linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+        ].join(", "),
+        backgroundSize: "100% 100%, 100% 100%, 28px 28px, 28px 28px",
+      }}
+    >
       {/* Fixed sidebar */}
-      <aside className="w-64 bg-[#0a1628] border-r border-white/[0.06] flex flex-col h-screen fixed left-0 top-0 z-40">
+      <aside
+        className="w-64 flex flex-col h-screen fixed left-0 top-0 z-40 border-r border-white/[0.05]"
+        style={{
+          background: "rgba(6, 11, 22, 0.88)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        }}
+      >
         {/* Logo */}
-        <div className="p-5 border-b border-white/[0.06]">
+        <div className="p-5 border-b border-white/[0.05]">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg shadow-emerald-900/30 ring-1 ring-white/10">
+            <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg shadow-emerald-900/40 ring-1 ring-emerald-500/20">
               <img src="/ai-assistant-icon.png" alt="FlowLink" className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-xl tracking-tight">
               <span className="text-white">Flow</span><span className="text-emerald-400">Link</span>
             </span>
+            <div className="ml-auto flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
           </div>
         </div>
 
@@ -370,10 +392,15 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="p-4">
           <button
             onClick={() => setActiveTab("payment-links")}
-            className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-lg shadow-emerald-900/30"
+            className="w-full relative overflow-hidden rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 group"
+            style={{
+              background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%)",
+              boxShadow: "0 0 20px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+            }}
           >
-            <Send className="w-4 h-4" />
-            Send Payment
+            <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors rounded-xl" />
+            <Send className="w-4 h-4 text-white relative z-10" />
+            <span className="text-white relative z-10">Send Payment</span>
           </button>
         </div>
 
@@ -386,18 +413,30 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative group",
                   isActive
-                    ? "bg-emerald-500/10 text-emerald-400 border-l-2 border-emerald-400 pl-[10px]"
-                    : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                    ? "text-emerald-300"
+                    : "text-slate-500 hover:text-slate-200"
                 )}
+                style={isActive ? {
+                  background: "rgba(16,185,129,0.08)",
+                  boxShadow: "inset 2px 0 0 rgba(52,211,153,0.7), inset 0 0 20px rgba(16,185,129,0.04)",
+                } : undefined}
               >
-                <item.icon className={cn("w-4 h-4 shrink-0", isActive ? "text-emerald-400" : "text-slate-500")} strokeWidth={1.5} />
-                {item.name}
+                {!isActive && (
+                  <span className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/[0.03] transition-colors" />
+                )}
+                <item.icon
+                  className={cn("w-4 h-4 shrink-0 relative z-10", isActive ? "text-emerald-400" : "text-slate-600 group-hover:text-slate-400")}
+                  strokeWidth={isActive ? 2 : 1.5}
+                />
+                <span className="relative z-10">{item.name}</span>
                 {item.badge && (
                   <span className={cn(
-                    "ml-auto text-xs rounded-md px-1.5 py-0.5 font-medium",
-                    isActive ? "bg-emerald-500/20 text-emerald-400" : "bg-white/[0.06] text-slate-500"
+                    "ml-auto text-[10px] rounded-md px-1.5 py-0.5 font-semibold tracking-wider relative z-10",
+                    isActive
+                      ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                      : "bg-white/[0.05] text-slate-600 border border-white/[0.06]"
                   )}>
                     {item.badge}
                   </span>
@@ -408,26 +447,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
 
         {/* User section */}
-        <div className="p-4 border-t border-white/[0.06]">
+        <div className="p-4 border-t border-white/[0.05]">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setProfileOpen(true)}
-              className="flex-1 flex items-center gap-3 hover:bg-white/[0.04] rounded-xl p-2 transition-colors text-left cursor-pointer min-w-0"
+              className="flex-1 flex items-center gap-3 hover:bg-white/[0.04] rounded-xl p-2 transition-colors text-left cursor-pointer min-w-0 group"
               title="Edit profile"
             >
-              <div className="w-9 h-9 rounded-full bg-emerald-900/60 flex items-center justify-center text-emerald-400 font-semibold text-sm shrink-0 overflow-hidden ring-1 ring-white/10">
+              <div className="w-9 h-9 rounded-full bg-emerald-900/40 flex items-center justify-center text-emerald-400 font-semibold text-sm shrink-0 overflow-hidden ring-1 ring-emerald-500/20">
                 {session?.user?.image ? (
                   <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
                 ) : initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-200 truncate leading-tight">{session?.user?.name ?? "User"}</p>
-                <p className="text-xs text-slate-500 truncate leading-tight mt-0.5">{email}</p>
+                <p className="text-sm font-medium text-slate-200 truncate leading-tight group-hover:text-white transition-colors">{session?.user?.name ?? "User"}</p>
+                <p className="text-xs text-slate-600 truncate leading-tight mt-0.5">{email}</p>
               </div>
             </button>
             <button
               onClick={handleLogout}
-              className="p-2 rounded-xl text-slate-600 hover:text-slate-300 hover:bg-white/[0.04] transition-colors shrink-0"
+              className="p-2 rounded-xl text-slate-700 hover:text-slate-300 hover:bg-white/[0.04] transition-colors shrink-0"
               title="Log out"
             >
               <LogOut className="h-4 w-4" />
@@ -438,20 +477,35 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content — offset by sidebar width */}
       <div className="ml-64 flex flex-col min-h-screen">
-        {/* Slim topbar */}
-        <header className="h-14 bg-[#0f172a] border-b border-white/[0.06] flex items-center justify-end px-6 sticky top-0 z-30">
+        {/* Topbar */}
+        <header
+          className="h-14 flex items-center justify-end px-6 sticky top-0 z-30 border-b border-white/[0.04]"
+          style={{
+            background: "rgba(8, 14, 26, 0.80)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+          }}
+        >
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-300 hover:bg-white/[0.04] h-8 w-8 p-0 relative">
+            {/* Active page label */}
+            <span className="text-xs text-slate-600 font-mono tracking-widest uppercase mr-2 hidden md:block">
+              {navigation.find(n => n.id === activeTab)?.name ?? "Dashboard"}
+            </span>
+            <div className="w-px h-4 bg-white/[0.06] hidden md:block" />
+            <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-300 hover:bg-white/[0.04] h-8 w-8 p-0 relative">
               <Bell className="h-4 w-4" />
             </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-900/60 flex items-center justify-center text-emerald-400 font-semibold text-sm ring-1 ring-white/10 overflow-hidden">
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="flex items-center gap-2 hover:bg-white/[0.04] rounded-xl px-2 py-1.5 transition-colors"
+            >
+              <div className="w-7 h-7 rounded-full bg-emerald-900/40 flex items-center justify-center text-emerald-400 font-semibold text-xs ring-1 ring-emerald-500/20 overflow-hidden">
                 {session?.user?.image ? (
                   <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
                 ) : initials}
               </div>
-              <span className="text-sm font-medium text-slate-300 hidden md:block">{session?.user?.name}</span>
-            </div>
+              <span className="text-sm font-medium text-slate-400 hidden md:block">{session?.user?.name}</span>
+            </button>
           </div>
         </header>
 

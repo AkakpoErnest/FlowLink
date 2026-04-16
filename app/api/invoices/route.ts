@@ -282,6 +282,6 @@ export async function PUT(request: NextRequest) {
   }
   if (updates.dueAt) data.dueAt = new Date(updates.dueAt)
 
-  const invoice = await prisma.invoice.update({ where: { id }, data })
+  const invoice = await prisma.invoice.update({ where: { id, userId }, data })
   return NextResponse.json({ success: true, data: invoice })
 }

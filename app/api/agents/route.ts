@@ -94,7 +94,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Agent not found" }, { status: 404 })
   }
 
-  const agent = await prisma.agent.update({ where: { id }, data: updates })
+  const agent = await prisma.agent.update({ where: { id, userId }, data: updates })
   return NextResponse.json({ success: true, data: agent })
 }
 
@@ -115,6 +115,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: false, error: "Agent not found" }, { status: 404 })
   }
 
-  await prisma.agent.delete({ where: { id } })
+  await prisma.agent.delete({ where: { id, userId } })
   return NextResponse.json({ success: true })
 }
