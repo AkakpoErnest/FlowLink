@@ -4,10 +4,11 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, CheckCircle, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus } from "lucide-react"
+import { Shield, CheckCircle, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus, Loader2 } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 interface Stats {
   totalVolume: number
@@ -34,11 +35,25 @@ interface ComplianceMetrics {
   score: number
 }
 
-async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
+async function downloadReport(
+  type: 'payments' | 'invoices' | 'payroll',
+  setExporting: (v: boolean) => void,
+) {
+  setExporting(true)
   try {
     const res = await fetch(`/api/reports?type=${type}`)
-    if (!res.ok) return
-    const blob = await res.blob()
+    if (!res.ok) {
+      toast.error(`Export failed (${res.status}) — please try again.`)
+      return
+    }
+    const text = await res.text()
+    // Only count data rows (header doesn't count as content)
+    const lines = text.trim().split('\n')
+    if (lines.length <= 1) {
+      toast.info(`No ${type} data to export yet.`)
+      return
+    }
+    const blob = new Blob([text], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -47,8 +62,12 @@ async function downloadReport(type: 'payments' | 'invoices' | 'payroll') {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    toast.success(`${lines.length - 1} ${type} record${lines.length - 1 === 1 ? '' : 's'} exported.`)
   } catch (e) {
     console.error('Export failed:', e)
+    toast.error('Export failed — check your connection and try again.')
+  } finally {
+    setExporting(false)
   }
 }
 
@@ -129,6 +148,7 @@ export function DashboardOverview() {
   const [recent, setRecent] = useState<RecentPayment[]>([])
   const [compliance, setCompliance] = useState<ComplianceMetrics | null>(null)
   const [loading, setLoading] = useState(true)
+  const [exporting, setExporting] = useState(false)
   const [agents, setAgents] = useState<{ id: string; name: string; walletAddress?: string | null }[]>([])
   const [hasPaymentLink, setHasPaymentLink] = useState(false)
   const [hasInvoice, setHasInvoice] = useState(false)
@@ -270,20 +290,22 @@ export function DashboardOverview() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="sm" className="bg-white/[0.06] hover:bg-white/10 text-slate-300 border border-white/10 hover:border-white/20">
-              <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Button size="sm" disabled={exporting} className="bg-white/[0.06] hover:bg-white/10 text-slate-300 border border-white/10 hover:border-white/20">
+              {exporting
+                ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                : <Download className="h-3.5 w-3.5 mr-1.5" />}
               Export
               <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-[#1e293b] border-white/10 text-slate-300">
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payments')}>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payments', setExporting)}>
               Payments CSV
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('invoices')}>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('invoices', setExporting)}>
               Invoices CSV
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payroll')}>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payroll', setExporting)}>
               Payroll CSV
             </DropdownMenuItem>
           </DropdownMenuContent>

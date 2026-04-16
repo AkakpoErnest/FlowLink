@@ -35,7 +35,34 @@ import {
   Eye,
   Settings,
   BarChart3,
+  Loader2,
 } from "lucide-react"
+import { toast } from "sonner"
+
+async function exportPayrollCsv(setExporting: (v: boolean) => void) {
+  setExporting(true)
+  try {
+    const res = await fetch('/api/reports?type=payroll')
+    if (!res.ok) { toast.error(`Export failed (${res.status})`); return }
+    const text = await res.text()
+    const lines = text.trim().split('\n')
+    if (lines.length <= 1) { toast.info('No payroll data to export yet.'); return }
+    const blob = new Blob([text], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `flowlink-payroll-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success(`${lines.length - 1} payroll record${lines.length - 1 === 1 ? '' : 's'} exported.`)
+  } catch {
+    toast.error('Export failed — check your connection and try again.')
+  } finally {
+    setExporting(false)
+  }
+}
 
 interface PayrollBatch {
   id: string
@@ -692,6 +719,7 @@ function CountryLimitsPanel({ limits }: { limits: CountryLimit[] }) {
 }
 
 function PayrollBatchDetails({ batch, recipients }: { batch: PayrollBatch; recipients: Recipient[] }) {
+  const [exporting, setExporting] = useState(false)
   return (
     <div className="space-y-6">
       <Tabs defaultValue="overview" className="space-y-6">
@@ -788,8 +816,16 @@ function PayrollBatchDetails({ batch, recipients }: { batch: PayrollBatch; recip
             <CardHeader>
               <CardTitle className="text-lg flex items-center justify-between">
                 Audit Trail
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={exporting}
+                  onClick={() => exportPayrollCsv(setExporting)}
+                  className="text-slate-200 border-white/[0.12] hover:bg-white/[0.06] hover:text-white bg-transparent"
+                >
+                  {exporting
+                    ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    : <Download className="h-4 w-4 mr-2" />}
                   Export CSV
                 </Button>
               </CardTitle>
