@@ -11,17 +11,17 @@ const layers = [
     tagStyle: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
     live: true,
     dim: false,
-    desc: "Instant, compliant stablecoin payments between verified businesses. Real-time OFAC sanctions screening, AML velocity checks, and programmable compliance vaults built in from day one.",
+    desc: "Create invoices, generate payment links, and receive stablecoin payments on HashKey Chain. Every settled payment is recorded on-chain and contributes to your verifiable payment reputation.",
   },
   {
     num: "02",
-    title: "Human-to-Agent & Agent-to-Human",
+    title: "Human-to-Agent",
     subtitle: "AI-Assisted Transactions",
     tag: "Q1 2026",
     tagStyle: "bg-white/[0.08] text-white/50 border-white/15",
     live: false,
     dim: true,
-    desc: "Agents that pay and get paid on behalf of humans. Every transaction carries a verifiable compliance certificate.",
+    desc: "Register AI agents with dedicated wallets. Issue invoices on their behalf, let clients pay directly to agent wallets. Agents earn autonomously, every transaction logged on-chain.",
   },
   {
     num: "03",
@@ -31,7 +31,7 @@ const layers = [
     tagStyle: "bg-white/[0.08] text-white/50 border-white/15",
     live: false,
     dim: true,
-    desc: "Fully autonomous agents transacting with each other. FlowLink's KYA framework ensures every agent identity is verified and auditable.",
+    desc: "Agents with established on-chain reputation transact directly with other agents. FlowLink's ProofLink engine verifies agent identity and payment history, enabling trustless autonomous commerce.",
   },
 ]
 

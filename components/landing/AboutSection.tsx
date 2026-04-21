@@ -1,50 +1,15 @@
 "use client"
 
-import { useRef, useEffect, useState } from "react"
+import { useRef } from "react"
 import Link from "next/link"
 import { motion, useInView } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 
-function CountUp({
-  to,
-  suffix = "",
-  prefix = "",
-  duration = 2,
-}: {
-  to: number
-  suffix?: string
-  prefix?: string
-  duration?: number
-}) {
-  const [value, setValue] = useState(0)
-  const ref = useRef<HTMLSpanElement>(null)
-  const inView = useInView(ref, { once: true, margin: "-100px" })
-
-  useEffect(() => {
-    if (!inView) return
-    const start = performance.now()
-    const tick = (now: number) => {
-      const elapsed = Math.min((now - start) / (duration * 1000), 1)
-      const eased = 1 - Math.pow(1 - elapsed, 3)
-      setValue(Math.round(eased * to))
-      if (elapsed < 1) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  }, [inView, to, duration])
-
-  return (
-    <span ref={ref}>
-      {prefix}
-      {value.toLocaleString()}
-      {suffix}
-    </span>
-  )
-}
 
 const stats = [
-  { label: "Stablecoin Market", value: 260, prefix: "$", suffix: "B+", duration: 1.8 },
-  { label: "AI Agents Active", value: 49000, prefix: "", suffix: "+", duration: 2.0 },
-  { label: "Compliance Layers", value: 3, prefix: "", suffix: "", duration: 1.2 },
+  { label: "Built on HashKey Chain" },
+  { label: "Agent-to-Agent Ready" },
+  { label: "ProofLink Verified" },
 ]
 
 export function AboutSection() {
@@ -87,9 +52,9 @@ export function AboutSection() {
               transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
               className="text-4xl md:text-5xl font-light text-white leading-tight mb-8"
             >
-              Compliance for the
+              Payment infrastructure for
               <br />
-              <span className="text-emerald-300">agentic economy</span>
+              <span className="text-emerald-300">the agent economy</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -97,10 +62,10 @@ export function AboutSection() {
               transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
               className="text-white/45 leading-relaxed mb-10 text-base"
             >
-              As AI agents become economic actors, the compliance layer must
-              evolve. FlowLink's ProofLink Engine verifies every participant —
-              human or agent — before value moves. Built on HashKey Chain, the
-              only regulated blockchain for institutional finance.
+              As AI agents become economic actors, they need payment infrastructure
+              that builds trust over time. FlowLink records every transaction on
+              HashKey Chain, the only regulated blockchain for institutional finance,
+              creating a reputation layer that agents carry into every interaction.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -131,17 +96,9 @@ export function AboutSection() {
                 initial={{ opacity: 0, x: 30 }}
                 animate={inView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                 transition={{ duration: 0.7, delay: 0.15 + i * 0.12, ease: "easeOut" }}
-                className="flex items-center justify-between p-6 rounded-2xl border border-white/8 bg-white/[0.03]"
+                className="flex items-center p-6 rounded-2xl border border-white/8 bg-white/[0.03]"
               >
-                <span className="text-white/45 text-sm font-medium">{stat.label}</span>
-                <span className="text-3xl font-light text-white">
-                  <CountUp
-                    to={stat.value}
-                    prefix={stat.prefix}
-                    suffix={stat.suffix}
-                    duration={stat.duration}
-                  />
-                </span>
+                <span className="text-white/70 text-base font-light">{stat.label}</span>
               </motion.div>
             ))}
           </div>

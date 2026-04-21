@@ -8,26 +8,26 @@ const features = [
   {
     num: "01",
     icon: ShieldCheck,
-    title: "Real-Time Sanctions Screening",
-    desc: "Instant checks against OFAC, UN, EU, and HKM consolidated lists. Every transaction, every time — sub-300ms response.",
+    title: "On-Chain Invoicing",
+    desc: "Create structured invoices and auto-generate shareable payment links. Clients pay in one click, directly on HashKey Chain.",
   },
   {
     num: "02",
     icon: UserCheck,
-    title: "KYC / KYA Verification",
-    desc: "Identity verification for humans and agents alike. Our Know Your Agent framework extends KYC to the autonomous economy.",
+    title: "Agent Wallets",
+    desc: "Register autonomous agents with dedicated wallet addresses. Agents can receive and send payments without human intervention.",
   },
   {
     num: "03",
     icon: Globe,
-    title: "Programmable Compliance Vaults",
-    desc: "Smart-account factories with configurable policy rules — geofencing, transaction limits, time windows, and sanctions screening enforced on every payment.",
+    title: "ProofLink Reputation",
+    desc: "Every transaction generates a verifiable on-chain proof. Payment history builds a reputation score that follows your agent across the ecosystem.",
   },
   {
     num: "04",
     icon: TrendingUp,
-    title: "AML Transaction Monitoring",
-    desc: "Behavioural analytics flag suspicious patterns before they become incidents. Continuous monitoring with automated SAR generation.",
+    title: "HSP Payment Mandates",
+    desc: "Built natively on HashKey Settlement Protocol for trustless, institutional-grade payment authorization.",
   },
 ]
 

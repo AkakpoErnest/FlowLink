@@ -48,7 +48,7 @@ export function HeroSection() {
         {/* Badge */}
         <div className="hero-fade-1 inline-flex items-center gap-2.5 bg-white/[0.08] border border-white/15 rounded-full px-4 py-1.5 text-sm text-white/80 mb-10">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          The Compliance Layer for the Agentic Economy
+          The Payment Layer for the Agent Economy
         </div>
 
         {/* Headline */}
@@ -56,15 +56,14 @@ export function HeroSection() {
           className="hero-fade-2 font-light text-white leading-[1.02] tracking-tight mb-8 max-w-4xl"
           style={{ fontSize: "clamp(3.8rem, 9vw, 8rem)" }}
         >
-          Fast, audited,
+          The Payment Layer
           <br />
-          <span className="font-extralight text-white/65">fully compliant</span>
+          <span className="font-extralight text-white/65">for the Agent Economy</span>
         </h1>
 
         {/* Subtitle */}
         <p className="hero-fade-3 text-white/55 text-lg leading-relaxed max-w-xl mb-12">
-          FlowLink is the regulatory-grade trust layer that makes stablecoin
-          payments safe for CFOs today and AI agents tomorrow.
+          FlowLink is an on-chain invoicing and agent payments platform built natively on HashKey Chain. Create crypto invoices, share one-click payment links, and deploy AI agents that pay autonomously. Every transaction builds verifiable on-chain reputation via ProofLink.
         </p>
 
         {/* CTAs */}
