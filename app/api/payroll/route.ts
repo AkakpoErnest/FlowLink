@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
+import { logNotification } from "@/lib/notifications"
 
 function unauth() {
   return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
@@ -60,6 +61,14 @@ export async function POST(request: NextRequest) {
         : undefined,
     },
     include: { recipients: true },
+  })
+
+  await logNotification({
+    userId,
+    type: 'payroll',
+    title: 'Payroll batch created',
+    message: `Batch "${batch.name}" created with ${batch.recipients.length} recipient${batch.recipients.length === 1 ? '' : 's'} — ${batch.totalAmount} ${batch.currency}.`,
+    link: 'payroll-rails',
   })
 
   return NextResponse.json({ success: true, data: batch }, { status: 201 })

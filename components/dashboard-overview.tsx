@@ -43,16 +43,21 @@ async function downloadReport(
   try {
     const res = await fetch(`/api/reports?type=${type}`)
     if (!res.ok) {
-      toast.error(`Export failed (${res.status}) — please try again.`)
+      const body = await res.text().catch(() => '')
+      toast.error(`Export failed (${res.status})${body ? ': ' + body.slice(0, 80) : ' — please try again.'}`)
       return
     }
+
+    const contentType = res.headers.get('content-type') ?? ''
+    if (!contentType.includes('text/csv')) {
+      toast.error('Export failed — unexpected response. Try signing out and back in.')
+      return
+    }
+
     const text = await res.text()
-    // Only count data rows (header doesn't count as content)
-    const lines = text.trim().split('\n')
-    if (lines.length <= 1) {
-      toast.info(`No ${type} data to export yet.`)
-      return
-    }
+    const lines = text.trim().split('\n').filter(Boolean)
+    const dataRows = lines.length - 1 // minus header
+
     const blob = new Blob([text], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -62,7 +67,12 @@ async function downloadReport(
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success(`${lines.length - 1} ${type} record${lines.length - 1 === 1 ? '' : 's'} exported.`)
+
+    if (dataRows <= 0) {
+      toast.info(`${type.charAt(0).toUpperCase() + type.slice(1)} CSV downloaded — no records yet.`)
+    } else {
+      toast.success(`${dataRows} ${type} record${dataRows === 1 ? '' : 's'} exported.`)
+    }
   } catch (e) {
     console.error('Export failed:', e)
     toast.error('Export failed — check your connection and try again.')

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 import { logAudit } from '@/lib/audit'
 import { runComplianceCheck } from '@/lib/compliance'
+import { logNotification } from '@/lib/notifications'
 
 function unauth() {
   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
@@ -160,6 +161,13 @@ export async function POST(request: NextRequest) {
       entityId: payment.id,
       entityType: 'Payment',
       metadata: { amount: payment.amount, network: payment.network, token: payment.currency },
+    })
+    await logNotification({
+      userId,
+      type: 'payment',
+      title: 'Payment received',
+      message: `${payment.amount} ${payment.currency} received${payment.payer ? ` from ${payment.payer.slice(0, 8)}…` : ''}.`,
+      link: 'payment-links',
     })
   }
 

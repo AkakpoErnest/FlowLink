@@ -26,6 +26,7 @@ model User {
   auditLogs           AuditLog[]
   vaults              ComplianceVault[]
   invoices            Invoice[]
+  notifications       Notification[]
   payments            Payment[]
   paymentLinks        PaymentLink[]
   payrollBatches      PayrollBatch[]
@@ -245,4 +246,18 @@ model AuditLog {
 
   @@index([userId, createdAt])
   @@index([action])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
 }

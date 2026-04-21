@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { logAudit } from "@/lib/audit"
+import { logNotification } from "@/lib/notifications"
 import { hspClient } from "@/lib/hsp-client"
 import { z } from "zod"
 
@@ -240,6 +241,13 @@ export async function POST(request: NextRequest) {
     action: 'invoice.created',
     entityId: invoice.id,
     entityType: 'Invoice',
+  })
+  await logNotification({
+    userId,
+    type: 'invoice',
+    title: 'Invoice created',
+    message: `Invoice ${invoiceNumber} for ${amount} ${currency}${body.issuedTo ? ` — ${body.issuedTo}` : ''} created.`,
+    link: 'ai-invoices',
   })
 
   return NextResponse.json({
