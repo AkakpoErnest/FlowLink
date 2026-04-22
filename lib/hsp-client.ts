@@ -1,9 +1,5 @@
 import crypto from 'crypto'
 
-// ============================================================
-// Request / Response types
-// ============================================================
-
 export interface SinglePayParams {
   merchant_order_id: string
   amount: string
@@ -87,10 +83,6 @@ export interface HSPWebhookPayload {
   created_at: number
 }
 
-// ============================================================
-// HSP Client
-// ============================================================
-
 class HSPClient {
   private appKey: string
   private appSecret: string
@@ -104,19 +96,12 @@ class HSPClient {
     this.ready = !!(appKey && appSecret)
 
     if (!this.ready) {
-      console.warn(
-        '[HSP] HSP_APP_KEY or HSP_APP_SECRET not configured — HSP features disabled. ' +
-          'Add credentials to .env to enable HSP checkout.',
-      )
+      console.warn('[HSP] credentials not configured — HSP features disabled')
     }
   }
 
   get isConfigured(): boolean {
     return this.ready
-  }
-
-  private generateNonce(): string {
-    return crypto.randomBytes(16).toString('hex')
   }
 
   private buildSignature(
@@ -132,16 +117,10 @@ class HSPClient {
     return crypto.createHmac('sha256', this.appSecret).update(message).digest('hex')
   }
 
-  private buildHeaders(
-    method: string,
-    path: string,
-    query: string,
-    body: string,
-  ): Record<string, string> {
+  private buildHeaders(method: string, path: string, query: string, body: string): Record<string, string> {
     const timestamp = Math.floor(Date.now() / 1000).toString()
-    const nonce = this.generateNonce()
+    const nonce = crypto.randomBytes(16).toString('hex')
     const signature = this.buildSignature(method, path, query, body, timestamp, nonce)
-
     return {
       'Content-Type': 'application/json',
       'X-App-Key': this.appKey,
@@ -164,11 +143,7 @@ class HSPClient {
     const url = `${this.baseUrl}${path}${query ? `?${query}` : ''}`
     const headers = this.buildHeaders(method.toUpperCase(), path, query, bodyStr)
 
-    const res = await fetch(url, {
-      method,
-      headers,
-      body: bodyStr || undefined,
-    })
+    const res = await fetch(url, { method, headers, body: bodyStr || undefined })
 
     if (!res.ok) {
       const text = await res.text()
@@ -178,39 +153,28 @@ class HSPClient {
     return res.json() as Promise<T>
   }
 
-  // ── Public API methods ─────────────────────────────────────
-
-  /** Create a single-pay Cart Mandate (one-time checkout). */
   async createSinglePayMandate(params: SinglePayParams): Promise<CartMandateResponse | null> {
-    const defaultExpiry = Math.floor(Date.now() / 1000) + 2 * 60 * 60 // 2 hours
+    const defaultExpiry = Math.floor(Date.now() / 1000) + 2 * 60 * 60
     return this.request<CartMandateResponse>('POST', '/api/v1/public/cartmandate', undefined, {
       ...params,
       expire_time: params.expire_time ?? defaultExpiry,
     })
   }
 
-  /** Create a multi-pay Cart Mandate (reusable, accepts multiple payments). */
   async createMultiPayMandate(params: MultiPayParams): Promise<CartMandateResponse | null> {
-    const defaultExpiry = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // 30 days
-    return this.request<CartMandateResponse>(
-      'POST',
-      '/api/v1/public/cart-mandate/multipay',
-      undefined,
-      {
-        ...params,
-        expire_time: params.expire_time ?? defaultExpiry,
-      },
-    )
+    const defaultExpiry = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60
+    return this.request<CartMandateResponse>('POST', '/api/v1/public/cart-mandate/multipay', undefined, {
+      ...params,
+      expire_time: params.expire_time ?? defaultExpiry,
+    })
   }
 
-  /** Query all payments under a Cart Mandate. */
   async getPaymentStatus(cartMandateId: string): Promise<PaymentStatus | null> {
     return this.request<PaymentStatus>('GET', '/api/v1/public/payments/cart-mandate', {
       cart_mandate_id: cartMandateId,
     })
   }
 
-  /** Query a specific payment by payment_request_id. */
   async queryByPaymentRequestId(paymentRequestId: string): Promise<HSPPayment | null> {
     const result = await this.request<{ code: string; data: HSPPayment }>(
       'GET',
@@ -220,18 +184,10 @@ class HSPClient {
     return result?.data ?? null
   }
 
-  /** Fetch supported chains and tokens. */
   async getChainConfig(): Promise<ChainConfig | null> {
     return this.request<ChainConfig>('GET', '/api/v1/payment/chain-config')
   }
 
-  // ── Webhook verification ───────────────────────────────────
-
-  /**
-   * Verify an inbound HSP webhook signature.
-   * HSP signs webhook deliveries with the same HMAC scheme used for outbound requests.
-   * Returns false if not configured (caller should decide whether to accept unsigned webhooks).
-   */
   verifyWebhookSignature(
     method: string,
     path: string,
@@ -244,7 +200,6 @@ class HSPClient {
     if (!this.ready) return false
     try {
       const expected = this.buildSignature(method, path, query, body, timestamp, nonce)
-      // Use timing-safe comparison to prevent timing attacks
       const a = Buffer.from(expected.toLowerCase(), 'hex')
       const b = Buffer.from(receivedSignature.toLowerCase(), 'hex')
       if (a.length !== b.length) return false
@@ -255,7 +210,6 @@ class HSPClient {
   }
 }
 
-// Singleton — reads from env at module load time (server-side only)
 export const hspClient = new HSPClient(
   process.env.HSP_APP_KEY,
   process.env.HSP_APP_SECRET,

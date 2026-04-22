@@ -26,12 +26,12 @@ const layers = [
   {
     num: "03",
     title: "Agent-to-Agent",
-    subtitle: "Autonomous Agentic Commerce",
+    subtitle: "Agents paying agents directly",
     tag: "Q1 2026",
     tagStyle: "bg-white/[0.08] text-white/50 border-white/15",
     live: false,
     dim: true,
-    desc: "Agents with established on-chain reputation transact directly with other agents. FlowLink's ProofLink engine verifies agent identity and payment history, enabling trustless autonomous commerce.",
+    desc: "Agents with verified on-chain history pay each other directly. FlowLink checks agent identity and payment reputation before each transaction — no human approval needed.",
   },
 ]
 

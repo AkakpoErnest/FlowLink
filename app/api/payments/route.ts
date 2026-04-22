@@ -66,16 +66,10 @@ export async function POST(request: NextRequest) {
     userId = link?.userId
   }
 
-  // Run real compliance check on the payer address
   const compliance = await runComplianceCheck(body.payer)
   if (!compliance.sanctionsOk || compliance.complianceScore < 60) {
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Payment blocked by compliance screening',
-        detail: compliance.detail ?? 'Address failed sanctions or risk check',
-        complianceScore: compliance.complianceScore,
-      },
+      { success: false, error: compliance.detail ?? 'Payment blocked by compliance screening' },
       { status: 403 },
     )
   }

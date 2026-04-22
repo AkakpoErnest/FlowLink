@@ -9,20 +9,12 @@ const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:7b'
 const MOONSHOT_BASE = 'https://api.moonshot.cn/v1'
 const MOONSHOT_MODEL = process.env.MOONSHOT_MODEL ?? 'moonshot-v1-8k'
 
-// Patterns that signal prompt injection attempts
 const INJECTION_PATTERNS = [
-  /ignore\s+(previous|all|prior|above)\s+(instructions?|prompts?|context|directives?)/i,
+  /ignore\s+(previous|all|prior|above)\s+(instructions?|prompts?|context)/i,
   /you\s+are\s+now\s+(a|an)\s+/i,
-  /\bsystem\s*:/i,
-  /\[SYSTEM\]/i,
   /act\s+as\s+(a|an)\s+/i,
-  /pretend\s+(you\s+are|to\s+be)/i,
   /\bjailbreak\b/i,
-  /\bDAN\s+mode\b/i,
-  /override\s+(your\s+)?(instructions?|guidelines?|safety|rules?)/i,
-  /forget\s+(your\s+)?(previous|all|prior)\s+(instructions?|training)/i,
-  /new\s+persona/i,
-  /disregard\s+(all\s+)?(previous|prior)\s+/i,
+  /override\s+(your\s+)?(instructions?|guidelines?|rules?)/i,
 ]
 
 function detectInjection(text: string): boolean {
@@ -53,7 +45,6 @@ When a user requests a payment (e.g. "pay 10 USDC to 0x...", "agent pay John", "
 
 For all other questions, respond normally as a helpful compliance and payments assistant. Keep responses concise but comprehensive. For specific legal advice, recommend consulting their compliance team.`
 
-// ── Moonshot (primary — OpenAI-compatible) ─────────────────────────────────
 
 async function askMoonshot(message: string, history: { role: string; content: string }[]) {
   const apiKey = process.env.MOONSHOT_API_KEY!
@@ -91,7 +82,6 @@ async function askMoonshot(message: string, history: { role: string; content: st
   return reply as string
 }
 
-// ── Anthropic (secondary) ──────────────────────────────────────────────────
 
 async function askClaude(message: string, history: { role: string; content: string }[]) {
   const client = new Anthropic()
@@ -115,7 +105,6 @@ async function askClaude(message: string, history: { role: string; content: stri
   return block.text
 }
 
-// ── Ollama (local fallback) ────────────────────────────────────────────────
 
 async function askOllama(message: string, history: { role: string; content: string }[]) {
   const messages = [
@@ -146,7 +135,6 @@ async function askOllama(message: string, history: { role: string; content: stri
   return reply
 }
 
-// ── Request schema ─────────────────────────────────────────────────────────
 
 const chatSchema = z.object({
   message: z.string().min(1, 'Message is required').max(4000, 'Message too long'),
@@ -158,7 +146,6 @@ const chatSchema = z.object({
   ).max(50).optional(),
 })
 
-// ── Handler ────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions)

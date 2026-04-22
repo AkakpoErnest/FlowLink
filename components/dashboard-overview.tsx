@@ -42,23 +42,18 @@ async function downloadReport(
   setExporting(true)
   try {
     const res = await fetch(`/api/reports?type=${type}`)
-    if (!res.ok) {
-      const body = await res.text().catch(() => '')
-      toast.error(`Export failed (${res.status})${body ? ': ' + body.slice(0, 80) : ' — please try again.'}`)
-      return
-    }
 
-    const contentType = res.headers.get('content-type') ?? ''
-    if (!contentType.includes('text/csv')) {
-      toast.error('Export failed — unexpected response. Try signing out and back in.')
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: 'Export failed' }))
+      toast.error(data.error ?? `Export failed (${res.status})`)
       return
     }
 
     const text = await res.text()
     const lines = text.trim().split('\n').filter(Boolean)
-    const dataRows = lines.length - 1 // minus header
+    const dataRows = lines.length - 1
 
-    const blob = new Blob([text], { type: 'text/csv' })
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

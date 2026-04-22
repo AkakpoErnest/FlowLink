@@ -40,11 +40,6 @@ export interface AgentRule {
   updatedAt: Date
 }
 
-/**
- * Compute the next run time for a scheduled rule based on its cron expression.
- * Supports 5-part (standard) and 6-part (with seconds) cron expressions via croner.
- * Falls back to 1 hour from now if the expression is invalid.
- */
 export function computeNextRun(cronExpr: string, from: Date = new Date()): Date | null {
   try {
     const job = new Cron(cronExpr, { startAt: from })
