@@ -288,6 +288,23 @@ This project is submitted to the **PayFi** and **AI** tracks of the [HashKey On-
 
 ---
 
+## Companion Project: ProofLink
+
+The `prooflink-master/` directory contains **ProofLink** — a standalone compliance-as-a-service infrastructure built by the same team. ProofLink is a separate monorepo (Turborepo + pnpm) that exposes real-time sanctions screening, AML risk scoring, FATF Travel Rule transmission, and cryptographic EAS attestations as a drop-in API layer for any payment protocol (x402, MPP, A2A, etc.).
+
+**FlowLink does not depend on ProofLink.** FlowLink's compliance engine (`lib/compliance.ts`) implements equivalent OFAC screening and velocity checks natively. ProofLink is included as a reference showing the broader compliance infrastructure vision — a shared layer the industry can adopt across all agent payment protocols.
+
+To run ProofLink separately:
+
+```bash
+cd prooflink-master
+npm install -g pnpm   # requires pnpm 9.15+
+pnpm install
+pnpm build
+```
+
+---
+
 ## Links
 
 - **Live app:** [https://flowlink.ink](https://flowlink.ink)
