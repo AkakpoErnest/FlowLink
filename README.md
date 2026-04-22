@@ -269,6 +269,31 @@ This project is submitted to the **PayFi** and **AI** tracks of the [HashKey On-
 
 ---
 
+## Smart Contract Deployment
+
+**FlowLinkPayments.sol** — deployed on HashKey Chain Testnet
+
+| | |
+|---|---|
+| Network | HashKey Chain Testnet (Chain ID 133) |
+| Contract | `FlowLinkPayments` |
+| Deployer | `0xac5E3fd8772bb03d7cc83421D13C942735f74506` |
+| Explorer | [View on HashKey Testnet Explorer](https://testnet-explorer.hsk.xyz) |
+
+The contract handles both ERC-20 token payments (`pay()`) and native HSK payments (`payNative()`), emitting a `PaymentProcessed` event for every transaction that FlowLink indexes for real-time dashboard updates.
+
+To deploy your own instance:
+
+```bash
+cd contracts
+forge create FlowLinkPayments \
+  --rpc-url https://hashkeychain-testnet.alt.technology \
+  --private-key <YOUR_PRIVATE_KEY> \
+  --broadcast
+```
+
+---
+
 ## HashKey Chain Reference
 
 | | Testnet | Mainnet |
@@ -276,7 +301,7 @@ This project is submitted to the **PayFi** and **AI** tracks of the [HashKey On-
 | Chain ID | 133 | 177 |
 | Native token | HSK | HSK |
 | RPC | `https://hashkeychain-testnet.alt.technology` | `https://mainnet.hsk.xyz` |
-| Explorer | `https://hashkeychain-testnet-explorer.alt.technology` | `https://explorer.hsk.xyz` |
+| Explorer | `https://testnet-explorer.hsk.xyz` | `https://explorer.hsk.xyz` |
 
 **Supported payment tokens on Testnet**
 
