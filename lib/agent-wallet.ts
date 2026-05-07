@@ -1,10 +1,15 @@
 import { HDKey } from '@scure/bip32'
 import { mnemonicToSeedSync } from '@scure/bip39'
 import { privateKeyToAccount } from 'viem/accounts'
-import { createWalletClient, createPublicClient, http, parseUnits, parseAbi } from 'viem'
+import { createWalletClient, createPublicClient, http, parseUnits, parseAbi, parseEther, formatEther } from 'viem'
 import { hashkey } from 'viem/chains'
 
 const RPC = process.env.NEXT_PUBLIC_HASHKEY_MAINNET_RPC || 'https://mainnet.hsk.xyz'
+
+// Minimum HSK balance an agent wallet must hold to cover gas
+const GAS_THRESHOLD = parseEther('0.005')
+// Amount sent from deployer when agent balance is below threshold
+const GAS_TOP_UP = parseEther('0.01')
 
 export function deriveAgentWallet(agentIndex: number) {
   const mnemonic = process.env.DEPLOYER_MNEMONIC
@@ -31,6 +36,23 @@ export function getPublicClient() {
     chain: hashkey,
     transport: http(RPC),
   })
+}
+
+// Funds the agent wallet from the deployer if balance is below GAS_THRESHOLD.
+// Silent no-op if DEPLOYER_PRIVATE_KEY is not set.
+export async function fundAgentIfNeeded(agentAddress: `0x${string}`): Promise<void> {
+  const deployerKey = process.env.DEPLOYER_PRIVATE_KEY as `0x${string}` | undefined
+  if (!deployerKey) return
+
+  const publicClient = getPublicClient()
+  const balance = await publicClient.getBalance({ address: agentAddress })
+  if (balance >= GAS_THRESHOLD) return
+
+  const deployer = privateKeyToAccount(deployerKey)
+  const deployerClient = createWalletClient({ account: deployer, chain: hashkey, transport: http(RPC) })
+
+  console.log(`[agent-wallet] Funding ${agentAddress} with ${formatEther(GAS_TOP_UP)} HSK for gas`)
+  await deployerClient.sendTransaction({ to: agentAddress, value: GAS_TOP_UP })
 }
 
 export const ERC20_ABI = parseAbi([
@@ -73,7 +95,6 @@ export async function agentSendNative(
 ): Promise<{ txHash: string; success: boolean; error?: string }> {
   try {
     const client = getAgentWalletClient(agentIndex)
-    const { parseEther } = await import('viem')
     const hash = await client.sendTransaction({
       to: toAddress,
       value: parseEther(amountHSK.toString()),

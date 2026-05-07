@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
-import { agentSendERC20, agentSendNative, deriveAgentWallet } from '@/lib/agent-wallet'
+import { agentSendERC20, agentSendNative, deriveAgentWallet, fundAgentIfNeeded } from '@/lib/agent-wallet'
 import { logAudit } from '@/lib/audit'
 import { hspClient } from '@/lib/hsp-client'
 import { runComplianceCheck } from '@/lib/compliance'
@@ -120,6 +120,10 @@ export async function POST(req: Request) {
   const idHash = crypto.createHash('sha256').update(agent.id).digest()
   const agentIndex = idHash.readUInt32BE(0) % 2_147_483_647
 
+  // Auto-fund agent wallet with gas if balance is too low
+  const agentAddress = deriveAgentWallet(agentIndex).address
+  await fundAgentIfNeeded(agentAddress)
+
   // Execute on-chain payment
   let txResult
   if (token === 'HSK') {
@@ -133,10 +137,20 @@ export async function POST(req: Request) {
 
   if (!txResult.success) {
     console.error('[agents/pay] Transaction failed:', txResult.error)
-    return NextResponse.json({ error: 'Transaction failed', code: 'TX_FAILED' }, { status: 500 })
+    const isInsufficientFunds = txResult.error?.toLowerCase().includes('insufficient')
+    return NextResponse.json(
+      {
+        error: isInsufficientFunds
+          ? 'Agent wallet has insufficient HSK for gas. Top up the agent wallet and retry.'
+          : 'Transaction failed',
+        detail: txResult.error,
+        code: isInsufficientFunds ? 'INSUFFICIENT_GAS' : 'TX_FAILED',
+      },
+      { status: 500 },
+    )
   }
 
-  const payerAddress = deriveAgentWallet(agentIndex).address
+  const payerAddress = agentAddress
 
   // Record payment in DB
   const payment = await prisma.payment.create({
