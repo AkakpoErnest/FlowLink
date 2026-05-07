@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       userId,
       code: body.code || `pay-${Date.now()}`,
       name: body.name || null,
-      network: body.network || "hashkey-testnet",
+      network: body.network || "hashkey",
       sourceToken: body.sourceToken || "USDC",
       destStable: body.destStable || "USDC",
       amountMin: body.amountMin ?? null,
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       merchant_order_id: link.id,
       amount: String(body.amountMin ?? 0),
       token: ["USDC", "USDT", "HSK"].includes(token) ? token : "USDC",
-      chain_id: 133, // HashKey Testnet
+      chain_id: 177, // HashKey Chain mainnet
       webhook_url: `${appUrl}/api/webhooks/hsp`,
       redirect_url: `${appUrl}/l/${link.code}`,
       description: body.name || `FlowLink Payment ${link.code}`,

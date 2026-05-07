@@ -12,16 +12,16 @@ export const hashkeyChain = {
   },
   rpcUrls: {
     default: {
-      http: ['https://hashkeychain-testnet.alt.technology'],
+      http: ['https://testnet.hsk.xyz'],
     },
     public: {
-      http: ['https://hashkeychain-testnet.alt.technology'],
+      http: ['https://testnet.hsk.xyz'],
     },
   },
   blockExplorers: {
     default: {
       name: 'HashKey Testnet Explorer',
-      url: 'https://hashkeychain-testnet-explorer.alt.technology',
+      url: 'https://testnet.explorer.hsk.xyz',
     },
   },
   testnet: true,
@@ -56,13 +56,13 @@ export const hashkeyTokens = {
     {
       symbol: 'USDC',
       name: 'USD Coin',
-      address: '0x47725537961326e4b906558BD208012c6C11aCa2' as string,
+      address: '0x8845E8C74cE5dF8E0d37bf0fe57dc5E0ddD8021b' as string,
       decimals: 6,
     },
     {
       symbol: 'USDT',
       name: 'Tether USD',
-      address: '0x60EFCa24B785391C6063ba37fF917Ff0edEb9f4a' as string,
+      address: '0xF1B50eD67A9e2CC94Ad3c477779E2d4cBfFf9029' as string,
       decimals: 6,
     },
   ],

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   useAccount,
   useSendTransaction,
@@ -30,6 +30,19 @@ const ERC20_TRANSFER_ABI = [
   },
 ] as const
 
+const ERC20_APPROVE_ABI = [
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+] as const
+
 interface PaymentFlowProps {
   paymentLink: {
     id: string
@@ -44,7 +57,7 @@ interface PaymentFlowProps {
   }
 }
 
-type Step = 'connect' | 'form' | 'compliance' | 'confirm' | 'sending' | 'complete' | 'failed'
+type Step = 'connect' | 'form' | 'compliance' | 'confirm' | 'approving' | 'sending' | 'complete' | 'failed'
 
 export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
   const { address, isConnected, chain } = useAccount()
@@ -76,6 +89,17 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
     error: writeError,
     reset: resetWrite,
   } = useWriteContract()
+
+  const {
+    writeContract: approveWrite,
+    data: approveTxHash,
+    isPending: isApprovePending,
+    reset: resetApprove,
+  } = useWriteContract()
+
+  const pendingPay = useRef<(() => void) | null>(null)
+
+  const { isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({ hash: approveTxHash })
 
   const txHash = nativeTxHash ?? erc20TxHash
   const isSending = isSendingNative || isSendingErc20
@@ -124,6 +148,15 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
       setStep('confirm')
     }
   }, [sendError, writeError])
+
+  // After approval confirms, execute the queued pay call
+  useEffect(() => {
+    if (isApproveSuccess && pendingPay.current) {
+      pendingPay.current()
+      pendingPay.current = null
+      setStep('sending')
+    }
+  }, [isApproveSuccess])
 
   const runCompliance = async () => {
     if (!address) return
@@ -196,9 +229,9 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
         }
       } else {
         if (useFlowLinkContract) {
-          // Route ERC20 through FlowLink contract — requires prior approval of contract
-          // User must approve: token.approve(contractAddress, amount) before this call
-          writeContract({
+          // ERC20 through FlowLink contract: approve first, then pay
+          const parsedAmount = parseUnits(amount, token.decimals)
+          pendingPay.current = () => writeContract({
             address: contractAddress,
             abi: FLOWLINK_PAYMENTS_ABI,
             functionName: 'pay',
@@ -206,10 +239,19 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
               paymentLinkId32,
               paymentLink.recipientAddress as `0x${string}`,
               token.address as `0x${string}`,
-              parseUnits(amount, token.decimals),
+              parsedAmount,
             ],
             chainId: targetChain!.id,
           })
+          approveWrite({
+            address: token.address as `0x${string}`,
+            abi: ERC20_APPROVE_ABI,
+            functionName: 'approve',
+            args: [contractAddress, parsedAmount],
+            chainId: targetChain!.id,
+          })
+          setStep('approving')
+          return
         } else {
           writeContract({
             address: token.address as `0x${string}`,
@@ -335,6 +377,17 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             <Shield className="h-4 w-4 mr-2" />
             Run Compliance Check
           </Button>
+        </div>
+      )}
+
+      {/* Step: Approving */}
+      {step === 'approving' && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-4 shadow-sm">
+          <Loader2 className="h-10 w-10 text-teal-600 animate-spin mx-auto" />
+          <p className="font-semibold text-slate-900">
+            {isApprovePending ? 'Confirm approval in wallet…' : 'Waiting for approval…'}
+          </p>
+          <p className="text-sm text-slate-500">Step 1 of 2 — Approve {paymentLink.sourceToken} spend</p>
         </div>
       )}
 
@@ -465,7 +518,7 @@ export function PaymentFlow({ paymentLink }: PaymentFlowProps) {
             )}
             <Button
               className="flex-1 bg-teal-600 hover:bg-teal-500 text-white"
-              onClick={() => { resetTx(); resetWrite(); setStep('form'); setAmount(paymentLink.amountMin?.toString() ?? '') }}
+              onClick={() => { resetTx(); resetWrite(); resetApprove(); pendingPay.current = null; setStep('form'); setAmount(paymentLink.amountMin?.toString() ?? '') }}
             >
               Pay again
             </Button>

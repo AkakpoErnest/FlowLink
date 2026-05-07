@@ -9,10 +9,10 @@ import { runComplianceCheck } from '@/lib/compliance'
 import { z } from 'zod'
 import crypto from 'crypto'
 
-// Token addresses on HashKey Testnet
+// Token addresses on HashKey Chain mainnet
 const HASHKEY_TOKENS: Record<string, `0x${string}`> = {
-  USDC: '0x9a6522395d7b3e6a95B3A6B7F7BAf7F4E3e5e33' as `0x${string}`,
-  USDT: '0x2B3e4A3E5e6E7f8A9b0c1D2e3F4a5B6c7D8e9F0' as `0x${string}`,
+  USDC: '0x8845E8C74cE5dF8E0d37bf0fe57dc5E0ddD8021b' as `0x${string}`,
+  USDT: '0xF1B50eD67A9e2CC94Ad3c477779E2d4cBfFf9029' as `0x${string}`,
 }
 
 const agentPaySchema = z.object({
@@ -145,7 +145,7 @@ export async function POST(req: Request) {
       agentId,
       amount,
       token,
-      network: 'hashkey-testnet',
+      network: 'hashkey',
       txHash: txResult.txHash,
       status: 'completed',
       payerAddress,

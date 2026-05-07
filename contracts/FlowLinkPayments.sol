@@ -7,8 +7,6 @@ interface IERC20 {
 }
 
 contract FlowLinkPayments {
-    address public owner;
-
     event PaymentProcessed(
         bytes32 indexed paymentLinkId,
         address indexed payer,
@@ -17,10 +15,6 @@ contract FlowLinkPayments {
         uint256 amount,
         uint256 timestamp
     );
-
-    constructor() {
-        owner = msg.sender;
-    }
 
     function pay(
         bytes32 paymentLinkId,
@@ -31,19 +25,12 @@ contract FlowLinkPayments {
         require(recipient != address(0), "Invalid recipient");
         require(amount > 0, "Amount must be > 0");
 
-        IERC20(token).transferFrom(msg.sender, recipient, amount);
+        bool ok = IERC20(token).transferFrom(msg.sender, recipient, amount);
+        require(ok, "ERC20 transfer failed");
 
-        emit PaymentProcessed(
-            paymentLinkId,
-            msg.sender,
-            recipient,
-            token,
-            amount,
-            block.timestamp
-        );
+        emit PaymentProcessed(paymentLinkId, msg.sender, recipient, token, amount, block.timestamp);
     }
 
-    // For native HSK payments
     function payNative(
         bytes32 paymentLinkId,
         address payable recipient
@@ -51,15 +38,11 @@ contract FlowLinkPayments {
         require(recipient != address(0), "Invalid recipient");
         require(msg.value > 0, "Must send HSK");
 
-        recipient.transfer(msg.value);
+        (bool ok, ) = recipient.call{value: msg.value}("");
+        require(ok, "HSK transfer failed");
 
-        emit PaymentProcessed(
-            paymentLinkId,
-            msg.sender,
-            recipient,
-            address(0),
-            msg.value,
-            block.timestamp
-        );
+        emit PaymentProcessed(paymentLinkId, msg.sender, recipient, address(0), msg.value, block.timestamp);
     }
+
+    receive() external payable {}
 }

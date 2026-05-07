@@ -40,7 +40,7 @@ export function HashKeyModule() {
   const { isConnected, chain } = useAccount()
 
   useEffect(() => {
-    fetch("/api/payments?limit=10&network=hashkey-testnet")
+    fetch("/api/payments?limit=10&network=hashkey")
       .then((r) => r.json())
       .then((json) => {
         if (json.success) {

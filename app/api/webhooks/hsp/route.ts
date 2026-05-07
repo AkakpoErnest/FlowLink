@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
           token: token ?? 'USDC',
           txHash: tx_hash ?? null,
           status: 'completed',
-          network: 'hashkey-testnet',
+          network: 'hashkey',
           paymentType: 'hsp',
           kycPassed: true,
           sanctionsChecked: true,
