@@ -33,14 +33,14 @@ export function ShaderBackground() {
       alpha: number
     }[] = []
 
-    for (let i = 0; i < 180; i++) {
+    for (let i = 0; i < 300; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        size: Math.random() * 4 + 1.5,
-        alpha: Math.random() * 0.7 + 0.2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 5 + 2,
+        alpha: Math.random() * 0.75 + 0.35,
       })
     }
 
@@ -79,10 +79,10 @@ export function ShaderBackground() {
         const dx = mouse.x - p.x
         const dy = mouse.y - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 250) {
-          const force = (250 - dist) / 250
-          p.vx += (dx / dist) * force * 0.08
-          p.vy += (dy / dist) * force * 0.08
+        if (dist < 280) {
+          const force = (280 - dist) / 280
+          p.vx += (dx / dist) * force * 0.12
+          p.vy += (dy / dist) * force * 0.12
         }
 
         p.vx *= 0.96
@@ -122,7 +122,7 @@ export function ShaderBackground() {
     <canvas
       ref={canvasRef}
       className="pointer-events-none fixed inset-0 z-0"
-      style={{ opacity: 0.35 }}
+      style={{ opacity: 0.65 }}
     />
   )
 }

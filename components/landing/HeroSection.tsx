@@ -56,14 +56,14 @@ export function HeroSection() {
           className="hero-fade-2 font-light text-white leading-[1.02] tracking-tight mb-8 max-w-4xl"
           style={{ fontSize: "clamp(3.8rem, 9vw, 8rem)" }}
         >
-          Crypto payments
+          Invoice, pay,
           <br />
-          <span className="font-extralight text-white/65">that run themselves</span>
+          <span className="font-extralight text-white/65">and automate.</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="hero-fade-3 text-white/55 text-lg leading-relaxed max-w-xl mb-12">
-          Send invoices, create payment links, and set up AI agents that pay people and each other — all on HashKey Chain with compliance built in. No MetaMask required for your clients.
+        <p className="hero-fade-3 text-white/55 text-lg leading-relaxed max-w-lg mb-12">
+          Invoices, payment links, payroll, and AI agents — all on HashKey Chain with compliance built in.
         </p>
 
         {/* CTAs */}
