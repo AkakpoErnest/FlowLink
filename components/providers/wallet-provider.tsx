@@ -33,7 +33,7 @@ const config = getDefaultConfig({
     [arbitrum.id]: http(),
     [optimism.id]: http(),
     [hashkey.id]: http('https://mainnet.hsk.xyz'),
-    [hashkeyTestnet.id]: http('https://hashkeychain-testnet.alt.technology'),
+    [hashkeyTestnet.id]: http('https://testnet.hsk.xyz'),
     [celoAlfajores.id]: http(),
   },
   ssr: true, // Enable SSR support
@@ -65,7 +65,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
               </Text>
             ),
           }}
-          initialChain={hashkeyTestnet}
+          initialChain={hashkey}
           showRecentTransactions={true}
         >
           {children}

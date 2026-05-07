@@ -34,7 +34,7 @@ FlowLink specializes in:
 - HashKey Chain integration — a regulated blockchain for institutional finance
 
 Platform facts:
-- Built on HashKey Chain Testnet (Chain ID: 133)
+- Built on HashKey Chain Mainnet (Chain ID: 177)
 - Real-time sanctions screening against OFAC, UN, and EU lists
 - Compliance status tracked per payment (KYC passed, sanctions checked)
 - Each AI agent has its own embedded wallet derived via BIP-44 from the master key

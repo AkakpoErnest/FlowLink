@@ -18,7 +18,7 @@ import {
   DollarSign,
   Activity,
 } from "lucide-react"
-import { hashkeyChain, hashkeyTokens, hashkeyCompliance } from "@/lib/hashkey"
+import { hashkeyMainnet, hashkeyTokens, hashkeyCompliance } from "@/lib/hashkey"
 import { useAccount } from "wagmi"
 
 interface TxRow {
@@ -85,7 +85,7 @@ export function HashKeyModule() {
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 HashKey Chain
-                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20 text-xs">Testnet</Badge>
+                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs">Mainnet</Badge>
               </h2>
               <p className="text-slate-400 text-sm">Compliance-ready blockchain for regulated finance</p>
             </div>
@@ -93,7 +93,7 @@ export function HashKeyModule() {
           <div className="flex items-center gap-2">
             <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
             <span className={`text-sm font-medium ${isConnected ? 'text-emerald-600' : 'text-slate-500'}`}>
-              {isConnected ? (chain?.id === 133 ? 'HashKey Testnet' : `Wrong network`) : 'Not connected'}
+              {isConnected ? (chain?.id === 177 ? 'HashKey Chain' : `Wrong network`) : 'Not connected'}
             </span>
           </div>
         </div>
@@ -101,8 +101,8 @@ export function HashKeyModule() {
         {/* Chain stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5">
           {[
-            { label: "Chain ID", value: `${hashkeyChain.id}`, icon: Layers },
-            { label: "Native Token", value: hashkeyChain.nativeCurrency.symbol, icon: DollarSign },
+            { label: "Chain ID", value: `${hashkeyMainnet.id}`, icon: Layers },
+            { label: "Native Token", value: hashkeyMainnet.nativeCurrency.symbol, icon: DollarSign },
             { label: "Block Explorer", value: "Blockscout", icon: ExternalLink },
             { label: "KYC Required", value: hashkeyCompliance.kycRequired ? "Yes" : "No", icon: Shield },
           ].map(stat => (
@@ -120,13 +120,13 @@ export function HashKeyModule() {
         <div className="flex flex-wrap gap-2 mt-4">
           <div className="flex items-center gap-2 bg-white/[0.06] border border-white/[0.08] rounded-xl px-3 py-1.5">
             <Globe className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-slate-300 text-xs font-mono">{hashkeyChain.rpcUrls.default.http[0]}</span>
-            <button onClick={() => copy(hashkeyChain.rpcUrls.default.http[0], "rpc")} className="text-slate-500 hover:text-slate-300">
+            <span className="text-slate-300 text-xs font-mono">{hashkeyMainnet.rpcUrls.default.http[0]}</span>
+            <button onClick={() => copy(hashkeyMainnet.rpcUrls.default.http[0], "rpc")} className="text-slate-500 hover:text-slate-300">
               {copied === "rpc" ? <CheckCircle className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
             </button>
           </div>
           <a
-            href={hashkeyChain.blockExplorers.default.url}
+            href={hashkeyMainnet.blockExplorers.default.url}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5 hover:bg-emerald-500/20 transition-all"
@@ -175,7 +175,7 @@ export function HashKeyModule() {
                     <p className="text-slate-500 text-xs font-mono">
                       {token.address
                         ? `${token.address.slice(0, 10)}...${token.address.slice(-6)}`
-                        : 'Address TBD — check HashKey testnet explorer'}
+                        : 'Address TBD — check HashKey explorer'}
                     </p>
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export function HashKeyModule() {
                 <p className="text-slate-500 text-xs">{tx.time}</p>
               </div>
               <a
-                href={`${hashkeyChain.blockExplorers.default.url}/tx/${tx.hash}`}
+                href={`${hashkeyMainnet.blockExplorers.default.url}/tx/${tx.hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-slate-500 hover:text-emerald-400 shrink-0"

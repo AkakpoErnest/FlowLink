@@ -178,7 +178,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     success: true,
     txHash: txResult.txHash,
-    txUrl: `https://testnet-explorer.hsk.xyz/tx/${txResult.txHash}`,
+    txUrl: `https://hashkey.blockscout.com/tx/${txResult.txHash}`,
     payment,
     hspMultipayMandateId: hspMultipayMandateId ?? null,
     message:

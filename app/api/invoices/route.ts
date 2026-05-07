@@ -211,7 +211,7 @@ export async function POST(request: NextRequest) {
         merchant_order_id: invoice.id,
         amount: String(amount),
         token: ['USDC', 'USDT', 'HSK'].includes(token) ? token : 'USDC',
-        chain_id: 133, // HashKey Testnet
+        chain_id: 177, // HashKey Chain mainnet
         webhook_url: `${appUrl}/api/webhooks/hsp`,
         redirect_url: `${appUrl}/pay/invoice/${invoice.id}`,
         description: body.description || `Invoice ${invoice.invoiceNumber}`,

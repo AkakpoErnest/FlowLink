@@ -92,7 +92,7 @@ class HSPClient {
   constructor(appKey?: string, appSecret?: string, baseUrl?: string) {
     this.appKey = appKey || ''
     this.appSecret = appSecret || ''
-    this.baseUrl = baseUrl || 'https://api-testnet.hsp.hashkey.com'
+    this.baseUrl = baseUrl || 'https://api.hsp.hashkey.com'
     this.ready = !!(appKey && appSecret)
 
     if (!this.ready) {

@@ -2,9 +2,9 @@ import { HDKey } from '@scure/bip32'
 import { mnemonicToSeedSync } from '@scure/bip39'
 import { privateKeyToAccount } from 'viem/accounts'
 import { createWalletClient, createPublicClient, http, parseUnits, parseAbi } from 'viem'
-import { hashkeyTestnet } from 'viem/chains'
+import { hashkey } from 'viem/chains'
 
-const RPC = process.env.NEXT_PUBLIC_HASHKEY_TESTNET_RPC || 'https://hashkeychain-testnet.alt.technology'
+const RPC = process.env.NEXT_PUBLIC_HASHKEY_MAINNET_RPC || 'https://mainnet.hsk.xyz'
 
 export function deriveAgentWallet(agentIndex: number) {
   const mnemonic = process.env.DEPLOYER_MNEMONIC
@@ -21,14 +21,14 @@ export function getAgentWalletClient(agentIndex: number) {
   const { account } = deriveAgentWallet(agentIndex)
   return createWalletClient({
     account,
-    chain: hashkeyTestnet,
+    chain: hashkey,
     transport: http(RPC),
   })
 }
 
 export function getPublicClient() {
   return createPublicClient({
-    chain: hashkeyTestnet,
+    chain: hashkey,
     transport: http(RPC),
   })
 }

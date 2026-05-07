@@ -5,11 +5,11 @@
  */
 import { privateKeyToAccount } from "viem/accounts"
 import { createWalletClient, createPublicClient, http, parseUnits, parseAbi } from "viem"
-import { hashkeyTestnet } from "viem/chains"
+import { hashkey } from "viem/chains"
 import { prisma } from "@/lib/prisma"
 import { decrypt } from "@/lib/wallet-crypto"
 
-const RPC = process.env.NEXT_PUBLIC_HASHKEY_TESTNET_RPC || "https://hashkeychain-testnet.alt.technology"
+const RPC = process.env.NEXT_PUBLIC_HASHKEY_MAINNET_RPC || "https://mainnet.hsk.xyz"
 
 export const ERC20_ABI = parseAbi([
   "function transfer(address to, uint256 amount) returns (bool)",
@@ -21,7 +21,7 @@ export const ERC20_ABI = parseAbi([
 
 export function getPublicClient() {
   return createPublicClient({
-    chain: hashkeyTestnet,
+    chain: hashkey,
     transport: http(RPC),
   })
 }
@@ -49,7 +49,7 @@ export async function getUserWalletClient(userId: string) {
   const account = privateKeyToAccount(privateKey)
   return createWalletClient({
     account,
-    chain: hashkeyTestnet,
+    chain: hashkey,
     transport: http(RPC),
   })
 }

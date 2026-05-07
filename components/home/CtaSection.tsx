@@ -34,10 +34,10 @@ export default function CtaSection() {
           variants={containerVariants}
         >
           <motion.h2 className="text-4xl font-extrabold text-white tracking-tight leading-tight" variants={itemVariants}>
-            Try it on testnet
+            Start getting paid on-chain
           </motion.h2>
           <motion.p className="text-lg text-white/80" variants={itemVariants}>
-            FlowLink is live on HashKey Chain Testnet. Create a payment link, go through the full KYC and sanctions flow, and watch settlement happen on-chain. No real money involved.
+            FlowLink is live on HashKey Chain Mainnet. Create a payment link, go through the full KYC and sanctions flow, and watch settlement happen on-chain in seconds.
           </motion.p>
 
           <motion.div variants={itemVariants}>
