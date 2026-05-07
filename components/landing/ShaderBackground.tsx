@@ -20,6 +20,9 @@ export function ShaderBackground() {
     cv.width = width
     cv.height = height
 
+    const isMobile = width < 768
+    const particleCount = isMobile ? 120 : 320
+
     const mouse = { x: width / 2, y: height / 2 }
     let animId: number
     let time = 0
@@ -33,7 +36,7 @@ export function ShaderBackground() {
       alpha: number
     }[] = []
 
-    for (let i = 0; i < 320; i++) {
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -70,22 +73,24 @@ export function ShaderBackground() {
       time += 0.003
       cx.clearRect(0, 0, width, height)
 
-      // Draw connection lines between nearby particles
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i]
-          const b = particles[j]
-          const dx = a.x - b.x
-          const dy = a.y - b.y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < 100) {
-            const lineAlpha = (1 - dist / 100) * 0.18
-            cx.beginPath()
-            cx.moveTo(a.x, a.y)
-            cx.lineTo(b.x, b.y)
-            cx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`
-            cx.lineWidth = 0.6
-            cx.stroke()
+      // Connection lines — desktop only (O(n²) is fine at 320 particles, too slow on mobile)
+      if (!isMobile) {
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const a = particles[i]
+            const b = particles[j]
+            const dx = a.x - b.x
+            const dy = a.y - b.y
+            const dist = Math.sqrt(dx * dx + dy * dy)
+            if (dist < 100) {
+              const lineAlpha = (1 - dist / 100) * 0.18
+              cx.beginPath()
+              cx.moveTo(a.x, a.y)
+              cx.lineTo(b.x, b.y)
+              cx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`
+              cx.lineWidth = 0.6
+              cx.stroke()
+            }
           }
         }
       }
@@ -148,7 +153,7 @@ export function ShaderBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none fixed inset-0 z-0"
+      className="pointer-events-none absolute inset-0 z-0"
       style={{ opacity: 0.9 }}
     />
   )
