@@ -803,26 +803,47 @@ export function AIInvoiceModule() {
                   <Button className="w-full bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2"
                     onClick={() => {
                       const inv = selectedInvoice
-                      const rows = inv.lineItems.map((it: LineItem) =>
+                      const itemRows = inv.lineItems.map((it: LineItem) =>
                         `<tr><td>${it.description}</td><td style="text-align:center">${it.quantity}</td><td style="text-align:right">$${it.unitPrice}</td><td style="text-align:right">$${it.total}</td></tr>`
                       ).join("")
                       const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt ${inv.invoiceNumber}</title>
-<style>body{font-family:sans-serif;padding:40px;color:#111;max-width:700px;margin:auto}h1{font-size:22px;margin-bottom:4px}p{margin:2px 0;color:#555;font-size:14px}table{width:100%;border-collapse:collapse;margin:24px 0}th{text-align:left;border-bottom:2px solid #ddd;padding:8px 4px;font-size:13px}td{padding:8px 4px;border-bottom:1px solid #eee;font-size:13px}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:8px}.badge{display:inline-block;background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;margin-bottom:16px}@media print{button{display:none}}</style></head>
-<body>
-<h1>FlowLink Receipt</h1>
-<div class="badge">PAID</div>
-<p><strong>Invoice:</strong> ${inv.invoiceNumber}</p>
-<p><strong>Billed to:</strong> ${inv.issuedTo ?? "—"}${inv.issuedToAddress ? ` · ${inv.issuedToAddress}` : ""}</p>
+<style>
+  body{font-family:sans-serif;padding:40px;color:#111;max-width:700px;margin:auto}
+  h1{font-size:22px;margin-bottom:4px}
+  p{margin:4px 0;color:#555;font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:24px 0}
+  th{text-align:left;border-bottom:2px solid #ddd;padding:8px 4px;font-size:13px}
+  td{padding:8px 4px;border-bottom:1px solid #eee;font-size:13px}
+  .total{text-align:right;font-size:18px;font-weight:bold;margin-top:8px}
+  .badge{display:inline-block;background:#d1fae5;color:#065f46;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:700;margin-bottom:16px;letter-spacing:.04em}
+  .divider{border:none;border-top:1px solid #eee;margin:20px 0}
+  .footer{font-size:11px;color:#aaa;margin-top:32px}
+  @media print{.no-print{display:none}}
+</style>
+</head><body>
+<h1 style="color:#059669">FlowLink</h1>
+<div class="badge">✓ PAID</div>
+<hr class="divider">
+<p><strong>Invoice #:</strong> ${inv.invoiceNumber}</p>
+<p><strong>Billed to:</strong> ${inv.issuedTo ?? "—"}${inv.issuedToAddress ? ` &lt;${inv.issuedToAddress}&gt;` : ""}</p>
 <p><strong>Issued:</strong> ${new Date(inv.createdAt).toLocaleDateString()}</p>
 ${inv.paidAt ? `<p><strong>Paid:</strong> ${new Date(inv.paidAt).toLocaleDateString()}</p>` : ""}
 <p><strong>Network:</strong> ${inv.network} &nbsp;·&nbsp; <strong>Token:</strong> ${inv.currency}</p>
-<table><thead><tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="total">Total Paid: $${parseFloat(String(inv.amount)).toFixed(2)} ${inv.currency}</div>
-${inv.txHash ? `<p style="margin-top:16px;font-size:12px;color:#888">Tx: ${inv.txHash}</p>` : ""}
-<button onclick="window.print()" style="margin-top:24px;padding:10px 20px;background:#059669;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px">Print / Save as PDF</button>
+${itemRows ? `<table><thead><tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead><tbody>${itemRows}</tbody></table>` : ""}
+<div class="total">Total Paid: ${parseFloat(String(inv.amount)).toFixed(2)} ${inv.currency}</div>
+${inv.txHash ? `<p class="footer">Transaction: ${inv.txHash}<br>Verified on HashKey Chain · flowlink.ink</p>` : ""}
+<button class="no-print" onclick="window.print()" style="margin-top:28px;padding:10px 24px;background:#059669;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">Print / Save as PDF</button>
 </body></html>`
-                      const w = window.open("", "_blank")
-                      if (w) { w.document.write(html); w.document.close() }
+                      // Use blob URL — avoids popup blockers entirely
+                      const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `receipt-${inv.invoiceNumber}.html`
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      setTimeout(() => URL.revokeObjectURL(url), 10000)
                     }}>
                     <FileText className="h-4 w-4" /> Download Receipt
                   </Button>
