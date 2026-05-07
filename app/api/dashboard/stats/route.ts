@@ -10,14 +10,15 @@ export async function GET() {
     const userId = session.user.id
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const [activeLinks, payments, pendingInvoices] = await Promise.all([
+    // Single round-trip: aggregate + two counts in parallel
+    const [volumeAgg, activeLinks, totalPayments, pendingInvoices] = await Promise.all([
+      prisma.payment.aggregate({ where: { userId }, _sum: { amount: true }, _count: true }),
       prisma.paymentLink.count({ where: { userId, status: 'active' } }),
-      prisma.payment.findMany({ where: { userId }, select: { amount: true }, take: 1000 }),
+      prisma.payment.count({ where: { userId } }),
       prisma.invoice.count({ where: { userId, status: 'pending' } }),
     ])
 
-    const totalVolume = payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-    const totalPayments = payments.length
+    const totalVolume = Number(volumeAgg._sum.amount ?? 0)
 
     return NextResponse.json({ totalVolume, activePaymentLinks: activeLinks, totalPayments, pendingInvoices })
   } catch (e) {

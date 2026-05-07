@@ -41,7 +41,7 @@ async function downloadReport(
 ) {
   setExporting(true)
   try {
-    const res = await fetch(`/api/reports?type=${type}`)
+    const res = await fetch(`/api/reports?type=${type}`, { credentials: 'include' })
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: 'Export failed' }))
@@ -50,10 +50,17 @@ async function downloadReport(
     }
 
     const text = await res.text()
+    if (!text || !text.trim()) {
+      toast.error('Export returned empty data — please try again.')
+      return
+    }
+
     const lines = text.trim().split('\n').filter(Boolean)
     const dataRows = lines.length - 1
 
-    const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' })
+    // BOM prefix so Excel opens UTF-8 correctly
+    const bom = '﻿'
+    const blob = new Blob([bom + text], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -61,7 +68,8 @@ async function downloadReport(
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    // Revoke after a delay so the download can start
+    setTimeout(() => URL.revokeObjectURL(url), 10000)
 
     if (dataRows <= 0) {
       toast.info(`${type.charAt(0).toUpperCase() + type.slice(1)} CSV downloaded — no records yet.`)
