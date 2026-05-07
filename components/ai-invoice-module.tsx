@@ -17,7 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Bot, Plus, FileText, CheckCircle, Clock, AlertTriangle, DollarSign,
   Send, Copy, ExternalLink, Zap, Shield, X, Wallet, Sparkles,
-  ChevronRight, MessageSquare, User,
+  ChevronRight, MessageSquare, User, Ban,
 } from "lucide-react"
 import type { Invoice } from "@/app/api/invoices/route"
 import { SUPPORTED_CHAINS, DEFAULT_CHAIN_KEY } from "@/lib/chains"
@@ -422,6 +422,7 @@ export function AIInvoiceModule() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [createdPaymentLink, setCreatedPaymentLink] = useState<string | null>(null)
   const [filterStatus, setFilterStatus] = useState("all")
+  const [confirmVoidId, setConfirmVoidId] = useState<string | null>(null)
   const [agentLoading, setAgentLoading] = useState(false)
   const [agentForm, setAgentForm] = useState({ name: "", description: "", walletAddress: "", capabilitiesText: "" })
 
@@ -457,6 +458,12 @@ export function AIInvoiceModule() {
     await fetch("/api/invoices", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: invoice.id, status: "paid" }) })
     fetchInvoices()
     if (selectedInvoice?.id === invoice.id) setSelectedInvoice({ ...selectedInvoice, status: "paid", paidAt: new Date().toISOString() })
+  }
+
+  const voidInvoice = async (invoice: Invoice) => {
+    await fetch("/api/invoices", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: invoice.id, status: "cancelled" }) })
+    fetchInvoices()
+    if (selectedInvoice?.id === invoice.id) setSelectedInvoice({ ...selectedInvoice, status: "cancelled" })
   }
 
   const copyToClipboard = (text: string) => navigator.clipboard.writeText(text)
@@ -687,7 +694,7 @@ export function AIInvoiceModule() {
       />
 
       {/* Invoice detail dialog */}
-      <Dialog open={!!selectedInvoice} onOpenChange={() => setSelectedInvoice(null)}>
+      <Dialog open={!!selectedInvoice} onOpenChange={() => { setSelectedInvoice(null); setConfirmVoidId(null) }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0f172a] border border-white/10">
           {selectedInvoice && (
             <>
@@ -799,6 +806,26 @@ export function AIInvoiceModule() {
                     onClick={() => markAsPaid(selectedInvoice)}>
                     <CheckCircle className="h-4 w-4" /> Mark as Paid
                   </Button>
+                )}
+
+                {selectedInvoice.status !== "paid" && selectedInvoice.status !== "cancelled" && (
+                  confirmVoidId === selectedInvoice.id ? (
+                    <div className="flex gap-2">
+                      <Button className="flex-1 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl gap-2"
+                        onClick={async () => { setConfirmVoidId(null); await voidInvoice(selectedInvoice) }}>
+                        <Ban className="h-4 w-4" /> Confirm Void
+                      </Button>
+                      <Button className="flex-1 bg-white/[0.04] border border-white/10 text-slate-400 hover:bg-white/10 rounded-xl"
+                        onClick={() => setConfirmVoidId(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button className="w-full bg-white/[0.04] border border-white/[0.08] text-slate-500 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 rounded-xl gap-2 transition-colors"
+                      onClick={() => setConfirmVoidId(selectedInvoice.id)}>
+                      <Ban className="h-4 w-4" /> Void Invoice
+                    </Button>
+                  )
                 )}
 
                 {(selectedInvoice.status === "paid" || selectedInvoice.txHash) && (
