@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Shield, Users, Bell,
-  LogOut, Layers, Wallet, X, Link2,
+  LogOut, Wallet, X, Link2,
   LayoutDashboard, FileText, Send, Settings, Camera, Loader2,
   CreditCard, AlertCircle
 } from "lucide-react"
@@ -16,7 +16,6 @@ import { PaymentLinksModule } from "@/components/payment-links-module"
 import { ComplianceVaultsModule } from "@/components/compliance-vaults-module"
 import { PayrollRailsModule } from "@/components/payroll-rails-module"
 import { AIInvoiceModule } from "@/components/ai-invoice-module"
-import { HashKeyModule } from "@/components/hashkey-module"
 import { SettingsModule } from "@/components/settings-module"
 import { WalletSetupModal } from "@/components/wallet-setup-modal"
 import { WalletOnboardingModal } from "@/components/wallet-onboarding-modal"
@@ -173,7 +172,6 @@ const navigation = [
   { id: "ai-invoices", name: "Invoicing", icon: FileText, badge: "AI" },
   { id: "payroll-rails", name: "Payroll", icon: Users },
   { id: "compliance-vaults", name: "Vaults", icon: Shield },
-  { id: "hashkey-chain", name: "HashKey Chain", icon: Layers, badge: "HSK" },
   { id: "settings", name: "Settings", icon: Settings },
 ]
 
@@ -474,7 +472,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       case "compliance-vaults": return <ComplianceVaultsModule />
       case "payroll-rails": return <PayrollRailsModule />
       case "ai-invoices": return <AIInvoiceModule />
-      case "hashkey-chain": return <HashKeyModule />
       case "settings": return <SettingsModule />
       default: return children
     }
