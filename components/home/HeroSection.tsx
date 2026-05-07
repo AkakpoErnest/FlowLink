@@ -52,14 +52,15 @@ export default function HeroSection() {
                 className="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight"
                 {...fadeUp(0)}
               >
-                Crypto Payments with{' '}
-                <span className="text-emerald-600">Built-in Compliance Tools</span>
+                Invoice, pay, and{' '}
+                <span className="text-emerald-600">automate</span>
+                {' '}— on HashKey Chain
               </motion.h1>
               <motion.p
                 className="text-xl text-slate-500 leading-relaxed max-w-xl"
                 {...fadeUp(0.15)}
               >
-                KYC checks, sanctions screening, and on-chain settlement on HashKey Chain — tools to help your team stay on top of compliance from day one.
+                Invoices, payment links, payroll, and AI agents that pay automatically. Compliance built in.
               </motion.p>
             </div>
 
@@ -90,11 +91,11 @@ export default function HeroSection() {
               className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-sm text-slate-400 border-t border-slate-100 pt-6"
               {...fadeUp(0.4)}
             >
-              <span>Built on HashKey Chain</span>
+              <span>Invoices & payment links</span>
+              <span className="w-1 h-1 rounded-full bg-slate-300" />
+              <span>AI agent payments</span>
               <span className="w-1 h-1 rounded-full bg-slate-300" />
               <span>KYC & sanctions screening</span>
-              <span className="w-1 h-1 rounded-full bg-slate-300" />
-              <span>On-chain settlement</span>
             </motion.div>
           </div>
 
