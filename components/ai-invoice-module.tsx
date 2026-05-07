@@ -799,7 +799,7 @@ export function AIInvoiceModule() {
                   </Button>
                 )}
 
-                {selectedInvoice.status === "paid" && (
+                {(selectedInvoice.status === "paid" || selectedInvoice.txHash) && (
                   <Button className="w-full bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2"
                     onClick={() => {
                       const inv = selectedInvoice
@@ -834,16 +834,20 @@ ${itemRows ? `<table><thead><tr><th>Description</th><th style="text-align:center
 ${inv.txHash ? `<p class="footer">Transaction: ${inv.txHash}<br>Verified on HashKey Chain · flowlink.ink</p>` : ""}
 <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:10px 24px;background:#059669;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">Print / Save as PDF</button>
 </body></html>`
-                      // Use blob URL — avoids popup blockers entirely
+                      // Open receipt in a new tab so user can read + print/save as PDF
                       const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
                       const url = URL.createObjectURL(blob)
-                      const a = document.createElement('a')
-                      a.href = url
-                      a.download = `receipt-${inv.invoiceNumber}.html`
-                      document.body.appendChild(a)
-                      a.click()
-                      document.body.removeChild(a)
-                      setTimeout(() => URL.revokeObjectURL(url), 10000)
+                      const tab = window.open(url, '_blank')
+                      // Fallback: if popup blocked, download the file instead
+                      if (!tab) {
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `receipt-${inv.invoiceNumber}.html`
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                      }
+                      setTimeout(() => URL.revokeObjectURL(url), 30000)
                     }}>
                     <FileText className="h-4 w-4" /> Download Receipt
                   </Button>
