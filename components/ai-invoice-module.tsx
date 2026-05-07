@@ -404,7 +404,7 @@ function InvoiceRow({ invoice, onClick }: { invoice: Invoice; onClick: () => voi
             <StatusIcon className="h-3 w-3" />{status.label}
           </Badge>
           <p className="text-emerald-400 font-bold font-mono text-sm">${parseFloat(String(invoice.amount)).toLocaleString()} {invoice.currency}</p>
-          {invoice.dueAt && <p className="text-slate-500 text-xs">Due {new Date(invoice.dueAt).toLocaleDateString()}</p>}
+          {invoice.dueAt ? <p className="text-slate-500 text-xs">Due {new Date(invoice.dueAt).toLocaleDateString()}</p> : null}
         </div>
       </div>
     </div>
@@ -742,7 +742,7 @@ export function AIInvoiceModule() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {selectedInvoice.lineItems.map((item, idx) => (
+                        {(selectedInvoice.lineItems ?? []).map((item, idx) => (
                           <TableRow key={idx} className="border-white/[0.04] even:bg-white/[0.02] hover:bg-white/[0.04]">
                             <TableCell className="text-slate-300 text-sm">{item.description}</TableCell>
                             <TableCell className="text-slate-400 text-sm text-center">{item.quantity}</TableCell>
@@ -768,7 +768,9 @@ export function AIInvoiceModule() {
                   </div>
                   <div className="p-2 bg-white/[0.04] border border-white/[0.06] rounded-lg">
                     <p className="text-slate-500">Due</p>
-                    <p className={selectedInvoice.status === "overdue" ? "text-red-400" : "text-slate-300"}>{new Date(selectedInvoice.dueAt).toLocaleDateString()}</p>
+                    <p className={selectedInvoice.status === "overdue" ? "text-red-400" : "text-slate-300"}>
+                      {selectedInvoice.dueAt ? new Date(selectedInvoice.dueAt).toLocaleDateString() : "—"}
+                    </p>
                   </div>
                   {selectedInvoice.paidAt && (
                     <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
@@ -803,7 +805,7 @@ export function AIInvoiceModule() {
                   <Button className="w-full bg-white/[0.04] border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white rounded-xl gap-2"
                     onClick={() => {
                       const inv = selectedInvoice
-                      const itemRows = inv.lineItems.map((it: LineItem) =>
+                      const itemRows = (inv.lineItems ?? []).map((it: LineItem) =>
                         `<tr><td>${it.description}</td><td style="text-align:center">${it.quantity}</td><td style="text-align:right">$${it.unitPrice}</td><td style="text-align:right">$${it.total}</td></tr>`
                       ).join("")
                       const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt ${inv.invoiceNumber}</title>

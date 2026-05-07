@@ -50,25 +50,27 @@ export async function GET(request: NextRequest) {
   const network = searchParams.get("network")
   const creatorType = searchParams.get("creatorType") // "human" | "agent" | null
 
-  const invoices = await prisma.invoice.findMany({
-    where: {
-      userId,
-      ...(status ? { status } : {}),
-      ...(agentId ? { agentId } : {}),
-      ...(network ? { network } : {}),
-      ...(creatorType === "human" ? { agentId: null } : {}),
-      ...(creatorType === "agent" ? { agentId: { not: null } } : {}),
-    },
-    orderBy: { createdAt: "desc" },
-  })
+  const filterWhere = {
+    userId,
+    ...(status ? { status } : {}),
+    ...(agentId ? { agentId } : {}),
+    ...(network ? { network } : {}),
+    ...(creatorType === "human" ? { agentId: null } : {}),
+    ...(creatorType === "agent" ? { agentId: { not: null } } : {}),
+  }
+
+  const [invoices, allInvoices] = await Promise.all([
+    prisma.invoice.findMany({ where: filterWhere, orderBy: { createdAt: "desc" } }),
+    prisma.invoice.findMany({ where: { userId }, select: { status: true, amount: true } }),
+  ])
 
   const stats = {
-    total: invoices.length,
-    pending: invoices.filter((i) => i.status === "pending").length,
-    paid: invoices.filter((i) => i.status === "paid").length,
-    overdue: invoices.filter((i) => i.status === "overdue").length,
-    totalValue: invoices.reduce((sum, i) => sum + i.amount, 0).toFixed(2),
-    paidValue: invoices
+    total: allInvoices.length,
+    pending: allInvoices.filter((i) => i.status === "pending").length,
+    paid: allInvoices.filter((i) => i.status === "paid").length,
+    overdue: allInvoices.filter((i) => i.status === "overdue").length,
+    totalValue: allInvoices.reduce((sum, i) => sum + i.amount, 0).toFixed(2),
+    paidValue: allInvoices
       .filter((i) => i.status === "paid")
       .reduce((sum, i) => sum + i.amount, 0)
       .toFixed(2),
