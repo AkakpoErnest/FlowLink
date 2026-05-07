@@ -33,14 +33,14 @@ export function ShaderBackground() {
       alpha: number
     }[] = []
 
-    for (let i = 0; i < 300; i++) {
+    for (let i = 0; i < 320; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 5 + 2,
-        alpha: Math.random() * 0.75 + 0.35,
+        size: Math.random() * 3 + 1.2,
+        alpha: Math.random() * 0.5 + 0.55,
       })
     }
 
@@ -70,6 +70,26 @@ export function ShaderBackground() {
       time += 0.003
       cx.clearRect(0, 0, width, height)
 
+      // Draw connection lines between nearby particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i]
+          const b = particles[j]
+          const dx = a.x - b.x
+          const dy = a.y - b.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 100) {
+            const lineAlpha = (1 - dist / 100) * 0.18
+            cx.beginPath()
+            cx.moveTo(a.x, a.y)
+            cx.lineTo(b.x, b.y)
+            cx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`
+            cx.lineWidth = 0.6
+            cx.stroke()
+          }
+        }
+      }
+
       for (const p of particles) {
         const n = noise(p.x, p.y, time)
         const angle = n * Math.PI * 2
@@ -95,14 +115,21 @@ export function ShaderBackground() {
         if (p.y < 0) p.y = height
         if (p.y > height) p.y = 0
 
-        const r = p.size * 10
-        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r)
-        gradient.addColorStop(0, `rgba(52, 211, 153, ${p.alpha})`)
-        gradient.addColorStop(0.4, `rgba(52, 211, 153, ${p.alpha * 0.3})`)
+        // Outer glow — tight so it's concentrated
+        const glowR = p.size * 7
+        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR)
+        gradient.addColorStop(0, `rgba(52, 211, 153, ${p.alpha * 0.9})`)
+        gradient.addColorStop(0.35, `rgba(52, 211, 153, ${p.alpha * 0.45})`)
         gradient.addColorStop(1, "rgba(52, 211, 153, 0)")
         cx.beginPath()
-        cx.arc(p.x, p.y, r, 0, Math.PI * 2)
+        cx.arc(p.x, p.y, glowR, 0, Math.PI * 2)
         cx.fillStyle = gradient
+        cx.fill()
+
+        // Bright solid core — makes each particle actually visible as a dot
+        cx.beginPath()
+        cx.arc(p.x, p.y, p.size * 0.55, 0, Math.PI * 2)
+        cx.fillStyle = `rgba(167, 243, 208, ${p.alpha})`
         cx.fill()
       }
 
@@ -122,7 +149,7 @@ export function ShaderBackground() {
     <canvas
       ref={canvasRef}
       className="pointer-events-none fixed inset-0 z-0"
-      style={{ opacity: 0.65 }}
+      style={{ opacity: 0.9 }}
     />
   )
 }
