@@ -2,7 +2,7 @@
 
 **AI-powered crypto payment infrastructure on HashKey Chain**
 
-[![HashKey Chain](https://img.shields.io/badge/HashKey-Chain%20Testnet-00b4d8?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+)](https://hashkeychain-testnet-explorer.alt.technology)
+[![HashKey Chain](https://img.shields.io/badge/HashKey-Chain%20Mainnet-00b4d8?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PC9zdmc+)](https://hashkey.blockscout.com)
 [![PayFi Track](https://img.shields.io/badge/Track-PayFi-8b5cf6)](https://dorahacks.io/hackathon/2045)
 [![AI Track](https://img.shields.io/badge/Track-AI%20Agents-f59e0b)](https://dorahacks.io/hackathon/2045)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
@@ -23,7 +23,7 @@ FlowLink is a complete B2B payment platform for the Web3 era. Businesses can inv
 
 ## Why HashKey Chain + HSP
 
-FlowLink is built **natively** on HashKey Chain Testnet (Chain ID 133). Every payment flow routes through the HashKey Settlement Protocol (HSP):
+FlowLink is built **natively** on HashKey Chain (Chain ID 177). Every payment flow routes through the HashKey Settlement Protocol (HSP):
 
 - **Single-Pay mandates** — each invoice and payment link auto-registers an HSP Cart Mandate with a hosted checkout URL, giving payers a compliant, branded payment experience.
 - **Multi-Pay mandates** — AI agents use HSP Multi-Pay to execute recurring or rule-based transfers under a single standing mandate — one authorization, unlimited on-chain payments.
@@ -55,7 +55,7 @@ FlowLink is built **natively** on HashKey Chain Testnet (Chain ID 133). Every pa
 | Backend | Next.js API Routes, Prisma ORM |
 | Database | PostgreSQL (Supabase) |
 | Auth | NextAuth.js — Google OAuth, credentials, Sign-In with Ethereum (SIWE) |
-| Blockchain | HashKey Chain Testnet (Chain ID 133), Viem, wagmi v2, RainbowKit |
+| Blockchain | HashKey Chain Mainnet (Chain ID 177), Viem, wagmi v2, RainbowKit |
 | Payments | HSP (HashKey Settlement Protocol) — Single-Pay + Multi-Pay |
 | AI | Anthropic Claude API (`claude-haiku-4-5-20251001`) |
 | Wallets | Managed (AES-256-GCM encrypted) + External (MetaMask / WalletConnect) |
@@ -271,14 +271,15 @@ This project is submitted to the **PayFi** and **AI** tracks of the [HashKey On-
 
 ## Smart Contract Deployment
 
-**FlowLinkPayments.sol** — deployed on HashKey Chain Testnet
+**FlowLinkPayments.sol** — deployed on HashKey Chain Mainnet
 
 | | |
 |---|---|
-| Network | HashKey Chain Testnet (Chain ID 133) |
-| Contract | `FlowLinkPayments` |
+| Network | HashKey Chain Mainnet (Chain ID 177) |
+| Contract | `0x5E0B5320F93C92032B2cEaBd05019D89cF9bddF7` |
 | Deployer | `0xac5E3fd8772bb03d7cc83421D13C942735f74506` |
-| Explorer | [View on HashKey Testnet Explorer](https://testnet-explorer.hsk.xyz) |
+| Explorer | [View on HashKey Explorer](https://hashkey.blockscout.com/address/0x5E0B5320F93C92032B2cEaBd05019D89cF9bddF7) |
+| Deploy tx | `0x11ad23902bfef0ac51b7efb50c2ed14d2c3008f8e0764d643ae9ea8c85f5ca9c` |
 
 The contract handles both ERC-20 token payments (`pay()`) and native HSK payments (`payNative()`), emitting a `PaymentProcessed` event for every transaction that FlowLink indexes for real-time dashboard updates.
 
@@ -287,7 +288,7 @@ To deploy your own instance:
 ```bash
 cd contracts
 forge create FlowLinkPayments \
-  --rpc-url https://hashkeychain-testnet.alt.technology \
+  --rpc-url https://mainnet.hsk.xyz \
   --private-key <YOUR_PRIVATE_KEY> \
   --broadcast
 ```
@@ -300,16 +301,16 @@ forge create FlowLinkPayments \
 |---|---|---|
 | Chain ID | 133 | 177 |
 | Native token | HSK | HSK |
-| RPC | `https://hashkeychain-testnet.alt.technology` | `https://mainnet.hsk.xyz` |
-| Explorer | `https://testnet-explorer.hsk.xyz` | `https://explorer.hsk.xyz` |
+| RPC | `https://testnet.hsk.xyz` | `https://mainnet.hsk.xyz` |
+| Explorer | `https://testnet.explorer.hsk.xyz` | `https://hashkey.blockscout.com` |
 
-**Supported payment tokens on Testnet**
+**Supported payment tokens on Mainnet**
 
-| Token | Type | Decimals |
-|---|---|---|
-| HSK | Native | 18 |
-| USDC | ERC-20 | 6 |
-| USDT | ERC-20 | 6 |
+| Token | Type | Address | Decimals |
+|---|---|---|---|
+| HSK | Native | — | 18 |
+| USDC | ERC-20 | `0x8845E8C74cE5dF8E0d37bf0fe57dc5E0ddD8021b` | 6 |
+| USDT | ERC-20 | `0xF1B50eD67A9e2CC94Ad3c477779E2d4cBfFf9029` | 6 |
 
 ---
 
