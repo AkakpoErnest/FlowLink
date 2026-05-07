@@ -94,6 +94,7 @@ function NotificationBell({ onNavigate }: { onNavigate: (tab: string) => void })
     if (item.link) onNavigate(item.link)
   }
 
+
   const timeAgo = (iso: string) => {
     const diff = Date.now() - new Date(iso).getTime()
     const mins = Math.floor(diff / 60000)
@@ -431,17 +432,26 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [activeTab, setActiveTab] = useState("overview")
-  const [profileOpen, setProfileOpen] = useState(false)
-  const [walletSetupOpen, setWalletSetupOpen] = useState(false)
-  const [walletOnboardingOpen, setWalletOnboardingOpen] = useState(false)
-  const [onboardingShown, setOnboardingShown] = useState(false)
   const { data: session } = useSession()
   const { isConnected } = useAccount()
   const searchParams = useSearchParams()
   const router = useRouter()
 
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get("tab")
+    return navigation.some(n => n.id === tab) ? tab! : "overview"
+  })
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [walletSetupOpen, setWalletSetupOpen] = useState(false)
+  const [walletOnboardingOpen, setWalletOnboardingOpen] = useState(false)
+  const [onboardingShown, setOnboardingShown] = useState(false)
+
   const sessionWalletTop = session?.user?.walletAddress as string | null | undefined
+
+  const navigateTo = (tab: string) => {
+    setActiveTab(tab)
+    router.replace(`/dashboard?tab=${tab}`, { scroll: false })
+  }
 
   useEffect(() => {
     if (
@@ -458,7 +468,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     if (searchParams.get("setup") === "wallet") {
       setWalletSetupOpen(true)
-      router.replace("/dashboard")
+      router.replace(`/dashboard?tab=${activeTab}`)
     }
   }, [searchParams, router])
 
@@ -524,7 +534,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Primary action */}
         <div className="p-4">
           <button
-            onClick={() => setActiveTab("payment-links")}
+            onClick={() => navigateTo("payment-links")}
             className="w-full relative overflow-hidden rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 group"
             style={{
               background: "linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%)",
@@ -544,7 +554,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => navigateTo(item.id)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative group",
                   isActive
@@ -625,7 +635,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {navigation.find(n => n.id === activeTab)?.name ?? "Dashboard"}
             </span>
             <div className="w-px h-4 bg-white/[0.06] hidden md:block" />
-            <NotificationBell onNavigate={setActiveTab} />
+            <NotificationBell onNavigate={navigateTo} />
             <button
               onClick={() => setProfileOpen(true)}
               className="flex items-center gap-2 hover:bg-white/[0.04] rounded-xl px-2 py-1.5 transition-colors"
