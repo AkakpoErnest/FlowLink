@@ -11,7 +11,6 @@ export function ShaderBackground() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
-    // Non-nullable aliases captured by nested functions
     const cv = canvas
     const cx = ctx
 
@@ -21,74 +20,63 @@ export function ShaderBackground() {
     cv.height = height
 
     const isMobile = width < 768
-    const particleCount = isMobile ? 120 : 320
+    // Fewer, smaller particles on mobile for performance
+    const particleCount = isMobile ? 60 : 130
 
-    const mouse = { x: width / 2, y: height / 2 }
+    const mouse = { x: -9999, y: -9999 }
     let animId: number
     let time = 0
 
     const particles: {
-      x: number
-      y: number
-      vx: number
-      vy: number
-      size: number
-      alpha: number
+      x: number; y: number
+      vx: number; vy: number
+      size: number; alpha: number
     }[] = []
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 3 + 1.2,
-        alpha: Math.random() * 0.5 + 0.55,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        // Small — max ~2px core
+        size: Math.random() * 1.2 + 0.4,
+        alpha: Math.random() * 0.45 + 0.25,
       })
     }
 
     function noise(x: number, y: number, t: number) {
       return (
-        Math.sin(x * 0.01 + t) * Math.cos(y * 0.01 + t * 0.7) +
-        Math.sin(x * 0.02 - t * 0.5) * Math.cos(y * 0.015 + t * 0.3) * 0.5
+        Math.sin(x * 0.012 + t) * Math.cos(y * 0.012 + t * 0.7) +
+        Math.sin(x * 0.025 - t * 0.5) * Math.cos(y * 0.018 + t * 0.3) * 0.5
       )
     }
 
-    function handleMouseMove(e: MouseEvent) {
-      mouse.x = e.clientX
-      mouse.y = e.clientY
-    }
-
-    function handleResize() {
+    window.addEventListener("mousemove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY })
+    window.addEventListener("resize", () => {
       width = window.innerWidth
       height = window.innerHeight
       cv.width = width
       cv.height = height
-    }
-
-    window.addEventListener("mousemove", handleMouseMove)
-    window.addEventListener("resize", handleResize)
+    })
 
     function draw() {
-      time += 0.003
+      time += 0.002
       cx.clearRect(0, 0, width, height)
 
-      // Connection lines — desktop only (O(n²) is fine at 320 particles, too slow on mobile)
+      // Subtle connection lines on desktop only
       if (!isMobile) {
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
-            const a = particles[i]
-            const b = particles[j]
-            const dx = a.x - b.x
-            const dy = a.y - b.y
+            const a = particles[i], b = particles[j]
+            const dx = a.x - b.x, dy = a.y - b.y
             const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist < 100) {
-              const lineAlpha = (1 - dist / 100) * 0.18
+            if (dist < 90) {
               cx.beginPath()
               cx.moveTo(a.x, a.y)
               cx.lineTo(b.x, b.y)
-              cx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`
-              cx.lineWidth = 0.6
+              cx.strokeStyle = `rgba(52,211,153,${(1 - dist / 90) * 0.08})`
+              cx.lineWidth = 0.5
               cx.stroke()
             }
           }
@@ -98,20 +86,20 @@ export function ShaderBackground() {
       for (const p of particles) {
         const n = noise(p.x, p.y, time)
         const angle = n * Math.PI * 2
-        p.vx += Math.cos(angle) * 0.015
-        p.vy += Math.sin(angle) * 0.015
+        p.vx += Math.cos(angle) * 0.008
+        p.vy += Math.sin(angle) * 0.008
 
-        const dx = mouse.x - p.x
-        const dy = mouse.y - p.y
+        // Gentle mouse attraction
+        const dx = mouse.x - p.x, dy = mouse.y - p.y
         const dist = Math.sqrt(dx * dx + dy * dy)
-        if (dist < 280) {
-          const force = (280 - dist) / 280
-          p.vx += (dx / dist) * force * 0.12
-          p.vy += (dy / dist) * force * 0.12
+        if (dist < 200 && dist > 0) {
+          const force = (200 - dist) / 200
+          p.vx += (dx / dist) * force * 0.06
+          p.vy += (dy / dist) * force * 0.06
         }
 
-        p.vx *= 0.96
-        p.vy *= 0.96
+        p.vx *= 0.97
+        p.vy *= 0.97
         p.x += p.vx
         p.y += p.vy
 
@@ -120,21 +108,20 @@ export function ShaderBackground() {
         if (p.y < 0) p.y = height
         if (p.y > height) p.y = 0
 
-        // Outer glow — tight so it's concentrated
-        const glowR = p.size * 7
-        const gradient = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR)
-        gradient.addColorStop(0, `rgba(52, 211, 153, ${p.alpha * 0.9})`)
-        gradient.addColorStop(0.35, `rgba(52, 211, 153, ${p.alpha * 0.45})`)
-        gradient.addColorStop(1, "rgba(52, 211, 153, 0)")
+        // Small tight glow (radius = size * 3.5 max ~5.6px)
+        const glowR = p.size * 3.5
+        const grad = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR)
+        grad.addColorStop(0, `rgba(52,211,153,${p.alpha * 0.7})`)
+        grad.addColorStop(1, "rgba(52,211,153,0)")
         cx.beginPath()
         cx.arc(p.x, p.y, glowR, 0, Math.PI * 2)
-        cx.fillStyle = gradient
+        cx.fillStyle = grad
         cx.fill()
 
-        // Bright solid core — makes each particle actually visible as a dot
+        // Bright 1-2px core dot
         cx.beginPath()
-        cx.arc(p.x, p.y, p.size * 0.55, 0, Math.PI * 2)
-        cx.fillStyle = `rgba(167, 243, 208, ${p.alpha})`
+        cx.arc(p.x, p.y, p.size * 0.5, 0, Math.PI * 2)
+        cx.fillStyle = `rgba(167,243,208,${p.alpha})`
         cx.fill()
       }
 
@@ -142,19 +129,14 @@ export function ShaderBackground() {
     }
 
     draw()
-
-    return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener("mousemove", handleMouseMove)
-      window.removeEventListener("resize", handleResize)
-    }
+    return () => cancelAnimationFrame(animId)
   }, [])
 
   return (
     <canvas
       ref={canvasRef}
-      className="pointer-events-none absolute inset-0 z-0"
-      style={{ opacity: 0.9 }}
+      className="pointer-events-none fixed inset-0 z-0"
+      style={{ opacity: 0.3 }}
     />
   )
 }

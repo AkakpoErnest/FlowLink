@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { ShaderBackground } from "./ShaderBackground"
 
 export function HeroSection() {
   return (
@@ -25,9 +24,6 @@ export function HeroSection() {
         }
         .bounce-dot { animation: bounceDot 1.5s ease-in-out infinite; }
       `}</style>
-
-      {/* Particle canvas — scoped to hero only */}
-      <ShaderBackground />
 
       {/* Static bottom glow */}
       <div
