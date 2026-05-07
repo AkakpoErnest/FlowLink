@@ -181,7 +181,6 @@ function WalletBanner({ onSetup }: { onSetup: () => void }) {
   const { data: session } = useSession()
   const [dismissed, setDismissed] = useState(false)
 
-  // @ts-ignore
   const sessionWallet = session?.user?.walletAddress as string | null | undefined
 
   if (sessionWallet || dismissed) return null
@@ -217,7 +216,6 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // @ts-ignore
   const sessionWallet = session?.user?.walletAddress as string | null | undefined
   const currentAvatar = avatarPreview ?? session?.user?.image ?? null
   const currentName = session?.user?.name ?? ""
@@ -384,7 +382,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               />
             </div>
 
-            {/* @ts-ignore */}
+            
             {(session?.user as any)?.walletType === "managed" && sessionWallet && (
               <p className="text-xs text-emerald-400 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
@@ -445,7 +443,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  // @ts-ignore
   const sessionWalletTop = session?.user?.walletAddress as string | null | undefined
 
   useEffect(() => {

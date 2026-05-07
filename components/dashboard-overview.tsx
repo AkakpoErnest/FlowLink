@@ -159,7 +159,6 @@ export function DashboardOverview() {
   const [hasInvoice, setHasInvoice] = useState(false)
   const [dismissedOnboarding, setDismissedOnboarding] = useState(false)
 
-  // @ts-ignore
   const walletAddress = session?.user?.walletAddress as string | null | undefined
   const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
 
