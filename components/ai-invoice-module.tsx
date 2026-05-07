@@ -833,6 +833,7 @@ ${itemRows ? `<table><thead><tr><th>Description</th><th style="text-align:center
 <div class="total">Total Paid: ${parseFloat(String(inv.amount)).toFixed(2)} ${inv.currency}</div>
 ${inv.txHash ? `<p class="footer">Transaction: ${inv.txHash}<br>Verified on HashKey Chain · flowlink.ink</p>` : ""}
 <button class="no-print" onclick="window.print()" style="margin-top:28px;padding:10px 24px;background:#059669;color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">Print / Save as PDF</button>
+<script>window.onload = function(){ window.print(); }</script>
 </body></html>`
                       // Open receipt in a new tab so user can read + print/save as PDF
                       const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
