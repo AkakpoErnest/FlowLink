@@ -150,7 +150,7 @@ FlowLink logs payment, updates agent activity feed
                          ▼
               ┌──────────────────────┐
               │  HashKey Chain       │
-              │  Testnet (ID: 133)   │
+              │  Mainnet (ID: 177)   │
               │  HSK / USDC / USDT   │
               └──────────┬───────────┘
                          │
@@ -205,9 +205,10 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3000
 
 # ── HashKey Chain ─────────────────────────────────────────
-NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://hashkeychain-testnet.alt.technology
-NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_TESTNET=0x...   # optional
-NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x...   # optional
+NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://testnet.hsk.xyz
+NEXT_PUBLIC_HASHKEY_MAINNET_RPC=https://mainnet.hsk.xyz
+NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x5E0B5320F93C92032B2cEaBd05019D89cF9bddF7
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<your walletconnect project id>
 
 # ── Wallet / Key Management ───────────────────────────────
 DEPLOYER_MNEMONIC=<12 or 24 word BIP-39 mnemonic>    # Required for agent on-chain payments
@@ -217,7 +218,7 @@ WALLET_ENCRYPTION_KEY=<64-char hex>                   # AES-256-GCM key for mana
 # Obtain credentials at: https://merchant.hsp.hashkey.com
 HSP_APP_KEY=your_hsp_app_key_here
 HSP_APP_SECRET=your_hsp_app_secret_here
-HSP_BASE_URL=https://api-testnet.hsp.hashkey.com
+HSP_BASE_URL=https://api.hsp.hashkey.com
 HSP_WEBHOOK_SECRET=your_webhook_secret_here
 
 # ── AI ────────────────────────────────────────────────────
@@ -226,9 +227,9 @@ ANTHROPIC_API_KEY=<your anthropic api key>
 
 > **Note:** `HSP_*` variables are optional. The app runs fully without them — HSP features activate automatically once credentials are provided.
 
-### Testnet Tokens
+### Mainnet HSK
 
-Get testnet HSK from the [HashKey Testnet Faucet](https://faucet.hashkeychain-testnet.alt.technology).
+To fund wallets on HashKey Chain mainnet, bridge or purchase HSK and send to your deployer/agent wallet address. The deployer address is `0xac5E3fd8772bb03d7cc83421D13C942735f74506`.
 
 ---
 
