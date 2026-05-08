@@ -5,6 +5,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
 
+function genDocId(userId: string): string {
+  const suffix = Date.now().toString(36).toUpperCase().slice(-5)
+  const prefix = userId.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase()
+  return `FL-${prefix}-${suffix}`
+}
+
 function toCsv(rows: Record<string, unknown>[], headers: string[]): string {
   const escape = (v: unknown) => {
     const s = v == null ? '' : String(v)
@@ -16,6 +22,18 @@ function toCsv(rows: Record<string, unknown>[], headers: string[]): string {
     headers.join(','),
     ...rows.map(row => headers.map(h => escape(row[h])).join(',')),
   ].join('\n')
+}
+
+function csvWithHeader(csv: string, type: string, docId: string, accountEmail: string, date: string): string {
+  const meta = [
+    `"FlowLink Export — flowlink.ink"`,
+    `"Document ID","${docId}"`,
+    `"Export Type","${type}"`,
+    `"Generated","${date}"`,
+    `"Account","${accountEmail}"`,
+    `""`,
+  ].join('\n')
+  return meta + '\n' + csv
 }
 
 function csvResponse(csv: string, filename: string) {
@@ -34,8 +52,10 @@ export async function GET(request: NextRequest) {
   }
 
   const userId = session.user.id
+  const userEmail = session.user.email ?? ''
   const type = new URL(request.url).searchParams.get('type') ?? 'payments'
   const date = new Date().toISOString().split('T')[0]
+  const docId = genDocId(userId)
 
   try {
     if (type === 'payments') {
@@ -62,7 +82,7 @@ export async function GET(request: NextRequest) {
         payment_link_name: p.paymentLink?.name ?? '',
       }))
 
-      return csvResponse(toCsv(rows, headers), `flowlink-payments-${date}.csv`)
+      return csvResponse(csvWithHeader(toCsv(rows, headers), 'Payments', docId, userEmail, date), `flowlink-payments-${date}.csv`)
     }
 
     if (type === 'invoices') {
@@ -88,7 +108,7 @@ export async function GET(request: NextRequest) {
         payment_link: inv.paymentLinkCode ?? '',
       }))
 
-      return csvResponse(toCsv(rows, headers), `flowlink-invoices-${date}.csv`)
+      return csvResponse(csvWithHeader(toCsv(rows, headers), 'Invoices', docId, userEmail, date), `flowlink-invoices-${date}.csv`)
     }
 
     if (type === 'payroll') {
@@ -116,7 +136,7 @@ export async function GET(request: NextRequest) {
         }))
       )
 
-      return csvResponse(toCsv(rows, headers), `flowlink-payroll-${date}.csv`)
+      return csvResponse(csvWithHeader(toCsv(rows, headers), 'Payroll', docId, userEmail, date), `flowlink-payroll-${date}.csv`)
     }
 
     if (type === 'statement') {
@@ -158,8 +178,11 @@ export async function GET(request: NextRequest) {
   body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f6f9fc;margin:0;padding:0;color:#111}
   .page{max-width:900px;margin:0 auto;padding:40px 24px}
   .header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px}
-  .logo{font-size:26px;font-weight:800;letter-spacing:-0.5px}
-  .logo span{color:#059669}
+  .logo-wrap{display:flex;align-items:center;gap:10px}
+  .logo-text{font-size:24px;font-weight:800;letter-spacing:-0.5px;color:#111}
+  .logo-text span{color:#059669}
+  .doc-id-badge{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:4px 10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;font-size:11px;font-weight:700;color:#065f46;letter-spacing:.04em}
+  .verified-dot{width:6px;height:6px;border-radius:50%;background:#059669;display:inline-block}
   .meta{text-align:right;font-size:12px;color:#888;line-height:1.8}
   .divider{border:none;border-top:2px solid #e5e7eb;margin:28px 0}
   .section{margin-bottom:32px}
@@ -175,17 +198,37 @@ export async function GET(request: NextRequest) {
   thead tr{background:#f9fafb}
   th{padding:10px 10px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;border-bottom:2px solid #e5e7eb}
   .empty{text-align:center;padding:32px;color:#9ca3af;font-size:13px}
-  .footer{margin-top:40px;text-align:center;font-size:11px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:20px}
-  .print-btn{display:inline-block;margin:0 0 24px;padding:10px 24px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+  .footer{margin-top:40px;border-top:1px solid #e5e7eb;padding-top:20px;display:flex;align-items:center;justify-content:space-between}
+  .footer-left{display:flex;align-items:center;gap:8px}
+  .footer-right{font-size:11px;color:#9ca3af;text-align:right}
+  .verify-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:8px}
+  .verify-box svg{flex-shrink:0}
+  .print-btn{display:inline-flex;align-items:center;gap:8px;margin:0 0 24px;padding:10px 24px;background:#059669;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
   @media print{.no-print{display:none}body{background:#fff}.page{padding:24px 0}}
 </style></head><body>
 <div class="page">
-  <button class="print-btn no-print" onclick="window.print()">⬇ Print / Save as PDF</button>
+  <button class="print-btn no-print" onclick="window.print()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Print / Save as PDF
+  </button>
 
   <div class="header">
     <div>
-      <div class="logo">Flow<span>Link</span></div>
-      <div style="font-size:13px;color:#6b7280;margin-top:4px">Account Statement</div>
+      <div class="logo-wrap">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#059669"/>
+          <path d="M8 16 C8 11.6 11.6 8 16 8 C18.8 8 21.2 9.4 22.8 11.6" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M24 16 C24 20.4 20.4 24 16 24 C13.2 24 10.8 22.6 9.2 20.4" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <circle cx="22.8" cy="11.6" r="1.8" fill="white"/>
+          <circle cx="9.2" cy="20.4" r="1.8" fill="white"/>
+        </svg>
+        <div class="logo-text">Flow<span>Link</span></div>
+      </div>
+      <div style="font-size:12px;color:#6b7280;margin-top:4px">Official Account Statement</div>
+      <div class="doc-id-badge">
+        <span class="verified-dot"></span>
+        Verified · ${docId}
+      </div>
     </div>
     <div class="meta">
       <div><strong>${user?.name ?? 'Account'}</strong></div>
@@ -300,7 +343,19 @@ export async function GET(request: NextRequest) {
   </div>
 
   <div class="footer">
-    FlowLink · flowlink.ink · Statement generated ${new Date().toISOString()}
+    <div class="footer-left">
+      <div class="verify-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#065f46">Verified by FlowLink</div>
+          <div style="font-size:10px;color:#16a34a;font-family:monospace">${docId}</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-right">
+      flowlink.ink<br>
+      ${new Date().toISOString()}
+    </div>
   </div>
 </div>
 </body></html>`

@@ -381,15 +381,8 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
               />
             </div>
 
-            
-            {(session?.user as any)?.walletType === "managed" && sessionWallet && (
-              <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                FlowLink managed — signs automatically, no reconnect needed
-              </p>
-            )}
 
-            {(session?.user as any)?.walletType !== "managed" && !isConnected && sessionWallet && (
+{(session?.user as any)?.walletType !== "managed" && !isConnected && sessionWallet && (
               <div className="space-y-1.5">
                 <Label className="text-xs text-slate-500 tracking-wider uppercase">External wallet — reconnect MetaMask for on-chain actions</Label>
                 <div className="flex justify-center pt-1">
