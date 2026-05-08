@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { hspClient, HSPWebhookPayload } from '@/lib/hsp-client'
 import { prisma } from '@/lib/prisma'
