@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { hspClient, HSPWebhookPayload } from '@/lib/hsp-client'
 import { prisma } from '@/lib/prisma'
+import { sendInvoicePaidEmail, sendPaymentReceivedEmail } from '@/lib/email'
 
 /**
  * POST /api/webhooks/hsp
@@ -114,6 +115,19 @@ export async function POST(request: NextRequest) {
       })
 
       console.log(`[HSP webhook] Recorded payment on link ${paymentLink.code}`)
+
+      // Email merchant
+      const user = await prisma.user.findUnique({ where: { id: paymentLink.userId }, select: { email: true } })
+      if (user?.email) {
+        sendPaymentReceivedEmail({
+          toEmail: user.email,
+          amount: parseFloat(amount ?? '0'),
+          currency: token ?? 'USDC',
+          network: 'HashKey Chain',
+          txHash: tx_hash,
+          paymentLinkName: paymentLink.name,
+        }).catch(e => console.error('[email] payment received:', e))
+      }
     }
   }
 
@@ -127,6 +141,23 @@ export async function POST(request: NextRequest) {
 
     await prisma.invoice.update({ where: { id: invoice.id }, data: updateData })
     console.log(`[HSP webhook] Updated invoice ${invoice.invoiceNumber} → ${newStatus}`)
+
+    // Email merchant when invoice paid via HSP
+    if (status === 'SUCCESS') {
+      const user = await prisma.user.findUnique({ where: { id: invoice.userId }, select: { email: true } })
+      if (user?.email) {
+        sendInvoicePaidEmail({
+          toEmail: user.email,
+          invoiceNumber: invoice.invoiceNumber,
+          amount: invoice.amount,
+          currency: invoice.currency,
+          issuedTo: invoice.issuedTo,
+          paidAt: new Date().toISOString(),
+          txHash: tx_hash,
+          network: invoice.network,
+        }).catch(e => console.error('[email] invoice paid via HSP:', e))
+      }
+    }
   }
 
   if (!paymentLink && !invoice) {

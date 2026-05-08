@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-config"
 import { prisma } from "@/lib/prisma"
 import { logAudit } from "@/lib/audit"
 import { logNotification } from "@/lib/notifications"
+import { sendInvoiceCreatedEmail, sendInvoicePaidEmail } from "@/lib/email"
 import { hspClient } from "@/lib/hsp-client"
 import { z } from "zod"
 
@@ -252,6 +253,20 @@ export async function POST(request: NextRequest) {
     link: 'ai-invoices',
   })
 
+  // Email the merchant (non-blocking)
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, name: true } })
+  if (user?.email) {
+    sendInvoiceCreatedEmail({
+      toEmail: user.email,
+      invoiceNumber,
+      amount,
+      currency,
+      issuedTo: body.issuedTo ?? null,
+      dueAt: invoice.dueAt?.toISOString() ?? null,
+      paymentLink: paymentLinkCode ? `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://flowlink.ink'}/l/${paymentLinkCode}` : null,
+    }).catch(e => console.error('[email] invoice created:', e))
+  }
+
   return NextResponse.json({
     success: true,
     data: { ...invoice, paymentLinkCode, hspCheckoutUrl, hspMandateId },
@@ -293,5 +308,23 @@ export async function PUT(request: NextRequest) {
   if (updates.dueAt) data.dueAt = new Date(updates.dueAt)
 
   const invoice = await prisma.invoice.update({ where: { id, userId }, data })
+
+  // Email merchant when manually marked as paid
+  if (updates.status === "paid" && !existing.paidAt) {
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } })
+    if (user?.email) {
+      sendInvoicePaidEmail({
+        toEmail: user.email,
+        invoiceNumber: existing.invoiceNumber,
+        amount: existing.amount,
+        currency: existing.currency,
+        issuedTo: existing.issuedTo,
+        paidAt: new Date().toISOString(),
+        txHash: updates.txHash ?? existing.txHash,
+        network: existing.network,
+      }).catch(e => console.error('[email] invoice paid:', e))
+    }
+  }
+
   return NextResponse.json({ success: true, data: invoice })
 }
