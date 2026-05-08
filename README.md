@@ -42,7 +42,9 @@ FlowLink is built **natively** on HashKey Chain (Chain ID 177). Every payment fl
 | 🤖 | **AI Agents** | Autonomous agents with dedicated wallets. Schedule payments via cron, trigger on events, or chain multi-step workflows. Powered by Claude. |
 | 💳 | **Managed Wallets** | Server-side wallets with AES-256-GCM encrypted private keys. No MetaMask needed to receive or send payments. |
 | 🔐 | **HSP Integration** | Single-Pay Cart Mandates for invoices/links; Multi-Pay mandates for agent recurring payments. |
-| 📊 | **Dashboard** | Real-time payment tracking, agent activity feed, and compliance/KYT overview. |
+| 📧 | **Email Notifications** | Automatic emails via Resend when invoices are created, paid, or when a payment link receives a payment. Sent from `noreply@flowlink.ink`. |
+| 📄 | **Verified Exports** | Account statement (printable HTML with FlowLink logo + unique `FL-XXXX` document ID) and CSV exports for payments, invoices, and payroll — each with a branded metadata header. |
+| 📊 | **Dashboard** | Real-time payment tracking, agent activity feed, and tab state persisted via URL so refreshing keeps your place. |
 | 🔒 | **Security** | Zod input validation, rate limiting, CSP headers, HMAC webhook verification, bcrypt-hashed passwords. |
 
 ---
@@ -58,6 +60,7 @@ FlowLink is built **natively** on HashKey Chain (Chain ID 177). Every payment fl
 | Blockchain | HashKey Chain Mainnet (Chain ID 177), Viem, wagmi v2, RainbowKit |
 | Payments | HSP (HashKey Settlement Protocol) — Single-Pay + Multi-Pay |
 | AI | Anthropic Claude API (`claude-haiku-4-5-20251001`) |
+| Email | Resend — transactional emails from `noreply@flowlink.ink` |
 | Wallets | Managed (AES-256-GCM encrypted) + External (MetaMask / WalletConnect) |
 | Deployment | Vercel |
 
@@ -223,6 +226,10 @@ HSP_WEBHOOK_SECRET=your_webhook_secret_here
 
 # ── AI ────────────────────────────────────────────────────
 ANTHROPIC_API_KEY=<your anthropic api key>
+
+# ── Email (Resend) ────────────────────────────────────────
+RESEND_API_KEY=<your resend api key>
+RESEND_FROM=noreply@yourdomain.com    # Must be a verified Resend domain
 ```
 
 > **Note:** `HSP_*` variables are optional. The app runs fully without them — HSP features activate automatically once credentials are provided.
