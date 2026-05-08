@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Shield, CheckCircle, Download, ChevronDown, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus, Loader2 } from "lucide-react"
+import { Shield, CheckCircle, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
 
 interface Stats {
   totalVolume: number
@@ -35,84 +33,6 @@ interface ComplianceMetrics {
   score: number
 }
 
-async function openStatement(setExporting: (v: boolean) => void) {
-  setExporting(true)
-  try {
-    const res = await fetch('/api/reports?type=statement', { credentials: 'include' })
-    if (!res.ok) {
-      toast.error('Failed to generate statement')
-      return
-    }
-    const html = await res.text()
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const tab = window.open(url, '_blank')
-    if (!tab) {
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `flowlink-statement-${new Date().toISOString().split('T')[0]}.html`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    }
-    setTimeout(() => URL.revokeObjectURL(url), 30000)
-    toast.success('Account statement opened — use Print / Save as PDF to export.')
-  } catch (e) {
-    console.error('Statement failed:', e)
-    toast.error('Failed to generate statement.')
-  } finally {
-    setExporting(false)
-  }
-}
-
-async function downloadReport(
-  type: 'payments' | 'invoices' | 'payroll',
-  setExporting: (v: boolean) => void,
-) {
-  setExporting(true)
-  try {
-    const res = await fetch(`/api/reports?type=${type}`, { credentials: 'include' })
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({ error: 'Export failed' }))
-      toast.error(data.error ?? `Export failed (${res.status})`)
-      return
-    }
-
-    const text = await res.text()
-    if (!text || !text.trim()) {
-      toast.error('Export returned empty data — please try again.')
-      return
-    }
-
-    const lines = text.trim().split('\n').filter(Boolean)
-    const dataRows = lines.length - 1
-
-    // BOM prefix so Excel opens UTF-8 correctly
-    const bom = '﻿'
-    const blob = new Blob([bom + text], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `flowlink-${type}-${new Date().toISOString().split('T')[0]}.csv`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    // Revoke after a delay so the download can start
-    setTimeout(() => URL.revokeObjectURL(url), 10000)
-
-    if (dataRows <= 0) {
-      toast.info(`${type.charAt(0).toUpperCase() + type.slice(1)} CSV downloaded — no records yet.`)
-    } else {
-      toast.success(`${dataRows} ${type} record${dataRows === 1 ? '' : 's'} exported.`)
-    }
-  } catch (e) {
-    console.error('Export failed:', e)
-    toast.error('Export failed — check your connection and try again.')
-  } finally {
-    setExporting(false)
-  }
-}
 
 function SkeletonCard() {
   return (
@@ -191,7 +111,6 @@ export function DashboardOverview() {
   const [recent, setRecent] = useState<RecentPayment[]>([])
   const [compliance, setCompliance] = useState<ComplianceMetrics | null>(null)
   const [loading, setLoading] = useState(true)
-  const [exporting, setExporting] = useState(false)
   const [agents, setAgents] = useState<{ id: string; name: string; walletAddress?: string | null }[]>([])
   const [hasPaymentLink, setHasPaymentLink] = useState(false)
   const [hasInvoice, setHasInvoice] = useState(false)
@@ -323,39 +242,11 @@ export function DashboardOverview() {
   return (
     <div className="space-y-6">
       {/* Greeting */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">
-            Good morning, {firstName}
-          </h1>
-          <p className="text-slate-500 mt-1 text-sm">Here&apos;s your payment overview for today.</p>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm" disabled={exporting} className="bg-white/[0.06] hover:bg-white/10 text-slate-300 border border-white/10 hover:border-white/20">
-              {exporting
-                ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                : <Download className="h-3.5 w-3.5 mr-1.5" />}
-              Export
-              <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#1e293b] border-white/10 text-slate-300 w-52">
-            <DropdownMenuItem className="hover:bg-emerald-500/10 cursor-pointer text-emerald-400 font-medium gap-2" onClick={() => openStatement(setExporting)}>
-              <FileText className="h-3.5 w-3.5" /> Account Statement
-            </DropdownMenuItem>
-            <div className="h-px bg-white/[0.06] my-1" />
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('payments', setExporting)}>
-              <Download className="h-3 w-3" /> Payments CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('invoices', setExporting)}>
-              <Download className="h-3 w-3" /> Invoices CSV
-            </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('payroll', setExporting)}>
-              <Download className="h-3 w-3" /> Payroll CSV
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div>
+        <h1 className="text-2xl font-bold text-white tracking-tight">
+          Good morning, {firstName}
+        </h1>
+        <p className="text-slate-500 mt-1 text-sm">Here&apos;s your payment overview for today.</p>
       </div>
 
       {/* Onboarding steps */}

@@ -5,7 +5,7 @@ import {
   Search, User, Lock, Bell, Building2, Users, Shield,
   CreditCard, Plug, Coins, Hash, Store, Wallet, Globe, FileText,
   ChevronRight, ArrowLeft, Loader2, Check, Eye, EyeOff,
-  Camera, Copy, Unlink, Plus, Calendar, Mail, KeyRound, AlertTriangle,
+  Camera, Copy, Unlink, Plus, Calendar, Mail, KeyRound, AlertTriangle, Download,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,6 +20,7 @@ type PanelId =
   | "personal" | "auth" | "notifications"
   | "company" | "team" | "security" | "subscription" | "integrations"
   | "stablecoins" | "wallet-chain" | "payment-links-cfg" | "compliance" | "invoices-cfg" | "vendors"
+  | "exports"
 
 const settingsSections = [
   {
@@ -49,6 +50,12 @@ const settingsSections = [
       { id: "compliance" as PanelId, icon: Shield, title: "Compliance", desc: "Manage KYC/AML rules and compliance thresholds." },
       { id: "invoices-cfg" as PanelId, icon: FileText, title: "Invoice Settings", desc: "Set invoice numbering, templates, and due date defaults." },
       { id: "vendors" as PanelId, icon: Store, title: "Vendor Policy", desc: "Choose who can send bills and block unauthorized vendors." },
+    ],
+  },
+  {
+    title: "Data",
+    items: [
+      { id: "exports" as PanelId, icon: FileText, title: "Export & Reports", desc: "Download your account statement, payments, invoices, and payroll as CSV or PDF." },
     ],
   },
 ]
@@ -692,6 +699,77 @@ function ComingSoonPanel({ title, icon: Icon, onBack }: { title: string; icon: R
   )
 }
 
+// ─── Exports Panel ────────────────────────────────────────────────────────
+
+function ExportsPanel({ onBack }: { onBack: () => void }) {
+  const [loading, setLoading] = useState<string | null>(null)
+  const { toast } = require('sonner')
+
+  const download = async (type: string, filename: string, isHtml = false) => {
+    setLoading(type)
+    try {
+      const res = await fetch(`/api/reports?type=${type}`, { credentials: 'include' })
+      if (!res.ok) { alert('Export failed — please try again.'); return }
+      const text = await res.text()
+      const blob = new Blob([text], { type: isHtml ? 'text/html;charset=utf-8' : '﻿text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      if (isHtml) {
+        const tab = window.open(url, '_blank')
+        if (!tab) { const a = document.createElement('a'); a.href = url; a.download = filename; a.click() }
+      } else {
+        const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a)
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 30000)
+    } catch { alert('Export failed.') } finally { setLoading(null) }
+  }
+
+  const reports = [
+    {
+      type: 'statement', label: 'Account Statement', desc: 'Full summary — payments, invoices, links, wallet. Opens as a printable page (save as PDF).', isHtml: true,
+      filename: `flowlink-statement-${new Date().toISOString().split('T')[0]}.html`,
+    },
+    {
+      type: 'payments', label: 'Payments CSV', desc: 'All received payments with amounts, networks, tx hashes and compliance status.', isHtml: false,
+      filename: `flowlink-payments-${new Date().toISOString().split('T')[0]}.csv`,
+    },
+    {
+      type: 'invoices', label: 'Invoices CSV', desc: 'All invoices — numbers, clients, amounts, due dates and payment status.', isHtml: false,
+      filename: `flowlink-invoices-${new Date().toISOString().split('T')[0]}.csv`,
+    },
+    {
+      type: 'payroll', label: 'Payroll CSV', desc: 'All payroll batches and recipients with wallet addresses and tx hashes.', isHtml: false,
+      filename: `flowlink-payroll-${new Date().toISOString().split('T')[0]}.csv`,
+    },
+  ]
+
+  return (
+    <div className="space-y-5">
+      <PanelHeader title="Export & Reports" icon={Download} onBack={onBack} />
+      <div className="space-y-3">
+        {reports.map(r => (
+          <div key={r.type} className="flex items-center justify-between gap-4 p-4 bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.05] transition-colors">
+            <div className="min-w-0">
+              <p className="text-white font-medium text-sm">{r.label}</p>
+              <p className="text-slate-500 text-xs mt-0.5">{r.desc}</p>
+            </div>
+            <Button
+              size="sm"
+              disabled={loading === r.type}
+              onClick={() => download(r.type, r.filename, r.isHtml)}
+              className="shrink-0 bg-white/[0.06] border border-white/10 text-slate-300 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:text-emerald-400 rounded-xl gap-2 transition-colors"
+            >
+              {loading === r.type
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                : <Download className="h-3.5 w-3.5" />}
+              {r.isHtml ? 'Open' : 'Download'}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main component ────────────────────────────────────────────────────────
 
 export function SettingsModule() {
@@ -713,6 +791,7 @@ export function SettingsModule() {
       case "personal":       return <PersonalDetailsPanel onBack={() => setActivePanel(null)} />
       case "auth":           return <AuthenticationPanel onBack={() => setActivePanel(null)} />
       case "notifications":  return <NotificationsPanel onBack={() => setActivePanel(null)} />
+      case "exports":        return <ExportsPanel onBack={() => setActivePanel(null)} />
       default: {
         const all = settingsSections.flatMap(s => s.items)
         const item = all.find(i => i.id === activePanel)
