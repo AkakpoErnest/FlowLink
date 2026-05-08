@@ -35,6 +35,36 @@ interface ComplianceMetrics {
   score: number
 }
 
+async function openStatement(setExporting: (v: boolean) => void) {
+  setExporting(true)
+  try {
+    const res = await fetch('/api/reports?type=statement', { credentials: 'include' })
+    if (!res.ok) {
+      toast.error('Failed to generate statement')
+      return
+    }
+    const html = await res.text()
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const tab = window.open(url, '_blank')
+    if (!tab) {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `flowlink-statement-${new Date().toISOString().split('T')[0]}.html`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 30000)
+    toast.success('Account statement opened — use Print / Save as PDF to export.')
+  } catch (e) {
+    console.error('Statement failed:', e)
+    toast.error('Failed to generate statement.')
+  } finally {
+    setExporting(false)
+  }
+}
+
 async function downloadReport(
   type: 'payments' | 'invoices' | 'payroll',
   setExporting: (v: boolean) => void,
@@ -310,15 +340,19 @@ export function DashboardOverview() {
               <ChevronDown className="h-3.5 w-3.5 ml-1.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-[#1e293b] border-white/10 text-slate-300">
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payments', setExporting)}>
-              Payments CSV
+          <DropdownMenuContent align="end" className="bg-[#1e293b] border-white/10 text-slate-300 w-52">
+            <DropdownMenuItem className="hover:bg-emerald-500/10 cursor-pointer text-emerald-400 font-medium gap-2" onClick={() => openStatement(setExporting)}>
+              <FileText className="h-3.5 w-3.5" /> Account Statement
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('invoices', setExporting)}>
-              Invoices CSV
+            <div className="h-px bg-white/[0.06] my-1" />
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('payments', setExporting)}>
+              <Download className="h-3 w-3" /> Payments CSV
             </DropdownMenuItem>
-            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer" onClick={() => downloadReport('payroll', setExporting)}>
-              Payroll CSV
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('invoices', setExporting)}>
+              <Download className="h-3 w-3" /> Invoices CSV
+            </DropdownMenuItem>
+            <DropdownMenuItem className="hover:bg-white/10 cursor-pointer gap-2 text-slate-400 text-xs" onClick={() => downloadReport('payroll', setExporting)}>
+              <Download className="h-3 w-3" /> Payroll CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
