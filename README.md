@@ -199,13 +199,13 @@ DIRECT_URL=postgresql://...            # Direct connection (port 5432, for migra
 
 # ── Auth ──────────────────────────────────────────────────
 NEXTAUTH_SECRET=<random string>
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://flowlink.ink           # http://localhost:3000 for local dev
 GOOGLE_CLIENT_ID=<your google client id>
 GOOGLE_CLIENT_SECRET=<your google client secret>
 
 # ── App ───────────────────────────────────────────────────
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://flowlink.ink    # http://localhost:3000 for local dev
+NEXT_PUBLIC_API_URL=https://flowlink.ink    # http://localhost:3000 for local dev
 
 # ── HashKey Chain ─────────────────────────────────────────
 NEXT_PUBLIC_HASHKEY_MAINNET_RPC=https://mainnet.hsk.xyz
@@ -228,7 +228,7 @@ ANTHROPIC_API_KEY=<your anthropic api key>
 
 # ── Email (Resend) ────────────────────────────────────────
 RESEND_API_KEY=<your resend api key>
-RESEND_FROM=noreply@yourdomain.com    # Must be a verified Resend domain
+RESEND_FROM=noreply@flowlink.ink
 ```
 
 > **Note:** `HSP_*` variables are optional. The app runs fully without them — HSP features activate automatically once credentials are provided.
