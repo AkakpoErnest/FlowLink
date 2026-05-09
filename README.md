@@ -208,7 +208,6 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3000
 
 # ── HashKey Chain ─────────────────────────────────────────
-NEXT_PUBLIC_HASHKEY_TESTNET_RPC=https://testnet.hsk.xyz
 NEXT_PUBLIC_HASHKEY_MAINNET_RPC=https://mainnet.hsk.xyz
 NEXT_PUBLIC_FLOWLINK_CONTRACT_HASHKEY_MAINNET=0x5E0B5320F93C92032B2cEaBd05019D89cF9bddF7
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<your walletconnect project id>
