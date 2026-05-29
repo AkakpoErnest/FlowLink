@@ -82,17 +82,23 @@ export async function PUT(request: NextRequest) {
   const userId = session.user.id
 
   const body = await request.json()
-  const { id, ...updates } = body
+  const { id } = body
 
   const existing = await prisma.payrollBatch.findFirst({ where: { id, userId } })
   if (!existing) {
     return NextResponse.json({ success: false, error: "Batch not found" }, { status: 404 })
   }
 
-  const data: Record<string, unknown> = { ...updates }
-  if (updates.scheduledAt) data.scheduledAt = new Date(updates.scheduledAt)
-  if (updates.completedAt) data.completedAt = new Date(updates.completedAt)
-  if (updates.totalAmount) data.totalAmount = parseFloat(updates.totalAmount)
+  // Allow-list of client-mutable fields — never spread the raw body into the
+  // update (that let a caller reassign userId or inject arbitrary columns).
+  const data: Record<string, unknown> = {}
+  if (typeof body.name === "string") data.name = body.name
+  if (typeof body.status === "string") data.status = body.status
+  if (typeof body.network === "string") data.network = body.network
+  if (typeof body.currency === "string") data.currency = body.currency
+  if (body.scheduledAt) data.scheduledAt = new Date(body.scheduledAt)
+  if (body.completedAt) data.completedAt = new Date(body.completedAt)
+  if (body.totalAmount !== undefined) data.totalAmount = parseFloat(body.totalAmount)
 
   const batch = await prisma.payrollBatch.update({ where: { id }, data })
   return NextResponse.json({ success: true, data: batch })

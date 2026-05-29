@@ -9,13 +9,13 @@ interface Params {
   params: { id: string }
 }
 
-// Public GET — no auth required, used by the payment page
+// Public GET — returns invoice details for the payment page.
+// Does NOT include the owner's user record: exposing name/email/walletAddress
+// here leaked PII for every invoice to any unauthenticated caller. The pay page
+// (app/pay/invoice/[id]/page.tsx) reads what it needs via Prisma server-side.
 export async function GET(_req: NextRequest, { params }: Params) {
   const invoice = await prisma.invoice.findUnique({
     where: { id: params.id },
-    include: {
-      user: { select: { name: true, email: true, walletAddress: true } },
-    },
   })
 
   if (!invoice) {
