@@ -99,14 +99,14 @@ export default function LoginPage() {
     <div className="relative min-h-screen bg-gradient-to-br from-[#071a1a]/95 via-[#0a2420]/90 to-[#0d2d2d]/95 flex flex-col">
       <ShaderBackground />
       {/* Top nav — same as landing */}
-      <header className="border-b border-slate-100 px-6 h-16 flex items-center justify-between">
+      <header className="border-b border-white/10 px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <img src="/flowlink-logo-final.png" alt="FlowLink" className="w-9 h-9 rounded-xl object-cover" />
           <span className="font-bold text-xl tracking-tight">
-            <span className="text-slate-900">Flow</span><span className="text-emerald-600">Link</span>
+            <span className="text-white">Flow</span><span className="text-emerald-400">Link</span>
           </span>
         </Link>
-        <Link href="/" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+        <Link href="/" className="text-sm text-white/60 hover:text-white transition-colors">
           ← Back to home
         </Link>
       </header>
@@ -154,10 +154,10 @@ export default function LoginPage() {
           <div className="w-full max-w-md">
 
             <div className="mb-8">
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-3xl font-black text-white tracking-tight">
                 {mode === "login" ? "Welcome back" : "Create account"}
               </h1>
-              <p className="text-slate-500 mt-1">
+              <p className="text-slate-400 mt-1">
                 {mode === "login"
                   ? "Sign in to your FlowLink account"
                   : "Get started with compliant crypto payments"}
@@ -165,13 +165,13 @@ export default function LoginPage() {
             </div>
 
             {/* Method tabs */}
-            <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-6">
+            <div className="flex gap-1 p-1 bg-white/5 border border-white/10 rounded-xl mb-6">
               {(["email", "google", "wallet"] as const).map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
                   className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
-                    tab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                    tab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-white"
                   }`}
                 >
                   {t}
@@ -184,22 +184,22 @@ export default function LoginPage() {
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 {mode === "register" && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">Name</Label>
-                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="mt-1.5" />
+                    <Label className="text-sm font-medium text-slate-300">Name</Label>
+                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                   </div>
                 )}
                 <div>
-                  <Label className="text-sm font-medium text-slate-700">Email</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required className="mt-1.5" />
+                  <Label className="text-sm font-medium text-slate-300">Email</Label>
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-slate-700">Password</Label>
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5" />
+                  <Label className="text-sm font-medium text-slate-300">Password</Label>
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                 </div>
                 {mode === "register" && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-700">Confirm Password</Label>
-                    <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5" />
+                    <Label className="text-sm font-medium text-slate-300">Confirm Password</Label>
+                    <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                   </div>
                 )}
                 <Button type="submit" disabled={emailLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 font-semibold" size="lg">
@@ -209,14 +209,14 @@ export default function LoginPage() {
                     : (mode === "register" ? "Create Account" : "Sign In")}
                 </Button>
 
-                <p className="text-center text-sm text-slate-500 pt-1">
+                <p className="text-center text-sm text-slate-400 pt-1">
                   {mode === "login" ? (
                     <>Don&apos;t have an account?{" "}
-                      <button type="button" onClick={() => { setMode("register"); setPassword(""); setConfirmPassword("") }} className="text-emerald-600 font-medium hover:underline">Register</button>
+                      <button type="button" onClick={() => { setMode("register"); setPassword(""); setConfirmPassword("") }} className="text-emerald-400 font-medium hover:underline">Register</button>
                     </>
                   ) : (
                     <>Already have an account?{" "}
-                      <button type="button" onClick={() => { setMode("login"); setPassword(""); setConfirmPassword("") }} className="text-emerald-600 font-medium hover:underline">Sign in</button>
+                      <button type="button" onClick={() => { setMode("login"); setPassword(""); setConfirmPassword("") }} className="text-emerald-400 font-medium hover:underline">Sign in</button>
                     </>
                   )}
                 </p>
@@ -254,7 +254,7 @@ export default function LoginPage() {
             )}
 
             {/* Trust row */}
-            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-slate-100">
+            <div className="flex items-center justify-center gap-6 mt-8 pt-6 border-t border-white/10">
               <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <Shield className="h-3.5 w-3.5 text-emerald-500" /> KYC / AML
               </div>
