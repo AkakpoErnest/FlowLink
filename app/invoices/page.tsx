@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { InvoiceModule } from '@/components/invoice-module'
-import { ThemeProvider } from '@/components/theme-provider'
 
 export default function InvoicesPage() {
   const { data: session, status } = useSession()
@@ -31,10 +30,8 @@ export default function InvoicesPage() {
   if (!session) return null
 
   return (
-    <ThemeProvider>
-      <DashboardLayout>
-        <InvoiceModule />
-      </DashboardLayout>
-    </ThemeProvider>
+    <DashboardLayout>
+      <InvoiceModule />
+    </DashboardLayout>
   )
 }
