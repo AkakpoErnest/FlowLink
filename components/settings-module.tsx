@@ -703,8 +703,6 @@ function ComingSoonPanel({ title, icon: Icon, onBack }: { title: string; icon: R
 
 function ExportsPanel({ onBack }: { onBack: () => void }) {
   const [loading, setLoading] = useState<string | null>(null)
-  const { toast } = require('sonner')
-
   const download = async (type: string, filename: string, isHtml = false) => {
     setLoading(type)
     try {
