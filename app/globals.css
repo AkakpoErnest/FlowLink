@@ -146,3 +146,17 @@
   }
 }
 
+/* Respect users who prefer reduced motion — neutralize decorative
+   animations (float, glow, spin, bounce, pulse) and instant transitions.
+   The particle canvas additionally short-circuits its loop in JS. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
