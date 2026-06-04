@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Shield, CheckCircle, Link2, FileText, Wallet, TrendingUp, ArrowUpRight, ArrowRight, Plus } from "lucide-react"
+import { Shield, CheckCircle, Link2, FileText, Wallet, TrendingUp, ArrowRight, Plus } from "lucide-react"
 import { AgentPaymentWidget } from "@/components/agent-payment-widget"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
@@ -96,8 +96,7 @@ function StatCard({ title, value, icon, trend, sub }: { title: string; value: st
       </div>
       {trend && (
         <div className="flex items-center gap-1">
-          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="text-xs text-emerald-400 font-medium">{trend}</span>
+          <span className="text-xs text-slate-500 font-medium">{trend}</span>
           {sub && <span className="text-xs text-slate-600 ml-1">{sub}</span>}
         </div>
       )}
