@@ -184,22 +184,22 @@ export default function LoginPage() {
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 {mode === "register" && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-300">Name</Label>
-                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
+                    <Label htmlFor="name" className="text-sm font-medium text-slate-300">Name</Label>
+                    <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                   </div>
                 )}
                 <div>
-                  <Label className="text-sm font-medium text-slate-300">Email</Label>
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
+                  <Label htmlFor="email" className="text-sm font-medium text-slate-300">Email</Label>
+                  <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                 </div>
                 <div>
-                  <Label className="text-sm font-medium text-slate-300">Password</Label>
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
+                  <Label htmlFor="password" className="text-sm font-medium text-slate-300">Password</Label>
+                  <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                 </div>
                 {mode === "register" && (
                   <div>
-                    <Label className="text-sm font-medium text-slate-300">Confirm Password</Label>
-                    <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
+                    <Label htmlFor="confirm-password" className="text-sm font-medium text-slate-300">Confirm Password</Label>
+                    <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required className="mt-1.5 bg-white/[0.04] border-white/10 text-white placeholder:text-slate-500 focus:border-emerald-500/50" />
                   </div>
                 )}
                 <Button type="submit" disabled={emailLoading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11 font-semibold" size="lg">

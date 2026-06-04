@@ -51,6 +51,7 @@ export default async function PaymentLinkPage({ params }: Props) {
         </div>
       </header>
       <div className="max-w-lg mx-auto px-4 py-10 space-y-4">
+        <h1 className="sr-only">Payment to {ownerName}</h1>
         {/* HSP hosted checkout — shown when available */}
         {link.hspCheckoutUrl && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-3">

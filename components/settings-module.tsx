@@ -236,7 +236,7 @@ function PersonalDetailsPanel({ onBack }: { onBack: () => void }) {
           <div className="relative group">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center overflow-hidden">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt="Your profile photo" className="w-full h-full object-cover" />
               ) : (
                 <span className="text-emerald-400 font-bold text-xl">{initials}</span>
               )}

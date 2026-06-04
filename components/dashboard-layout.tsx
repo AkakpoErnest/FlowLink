@@ -315,7 +315,7 @@ function ProfileDialog({ open, onClose }: { open: boolean; onClose: () => void }
             <div className="relative group">
               <div className="w-20 h-20 rounded-full overflow-hidden bg-emerald-900/40 flex items-center justify-center border border-white/[0.08] shadow-lg shadow-black/40 ring-2 ring-emerald-500/10">
                 {currentAvatar ? (
-                  <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={currentAvatar} alt="Your profile photo" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-emerald-400 font-bold text-2xl">{initials}</span>
                 )}
@@ -592,7 +592,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <div className="w-9 h-9 rounded-full bg-emerald-900/40 flex items-center justify-center text-emerald-400 font-semibold text-sm shrink-0 overflow-hidden ring-1 ring-emerald-500/20">
                 {session?.user?.image ? (
-                  <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={session.user.image} alt="Your profile photo" className="w-full h-full object-cover" />
                 ) : initials}
               </div>
               <div className="flex-1 min-w-0">
@@ -635,7 +635,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             >
               <div className="w-7 h-7 rounded-full bg-emerald-900/40 flex items-center justify-center text-emerald-400 font-semibold text-xs ring-1 ring-emerald-500/20 overflow-hidden">
                 {session?.user?.image ? (
-                  <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={session.user.image} alt="Your profile photo" className="w-full h-full object-cover" />
                 ) : initials}
               </div>
               <span className="text-sm font-medium text-slate-400 hidden md:block">{session?.user?.name}</span>
