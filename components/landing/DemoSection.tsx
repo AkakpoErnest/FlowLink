@@ -38,7 +38,7 @@ const steps = [
     label: "Compliance",
     icon: Shield,
     content: {
-      title: "ProofLink Engine Running",
+      title: "Compliance Checks Running",
       body: (
         <div className="space-y-3">
           {[
@@ -111,8 +111,8 @@ const steps = [
             <span className="text-white text-sm">12,500 USDC</span>
           </div>
           <div className="flex items-center justify-between py-2.5 border-b border-white/8">
-            <span className="text-white/50 text-sm">ProofLink ID</span>
-            <span className="text-emerald-400 text-xs font-mono">PL-20260113</span>
+            <span className="text-white/50 text-sm">Compliance ID</span>
+            <span className="text-emerald-400 text-xs font-mono">FL-20260113</span>
           </div>
           <div className="flex items-center justify-between py-2.5">
             <span className="text-white/50 text-sm">Audit Trail</span>
@@ -207,8 +207,9 @@ export function DemoSection() {
           {/* Progress bar */}
           <div className="h-0.5 bg-white/8 rounded-full mb-8 overflow-hidden">
             <motion.div
-              className="h-full bg-emerald-400 rounded-full"
-              animate={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+              className="h-full w-full bg-emerald-400 rounded-full origin-left"
+              initial={false}
+              animate={{ scaleX: (activeStep + 1) / steps.length }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
             />
           </div>
