@@ -20,8 +20,8 @@ const features = [
   {
     num: "03",
     icon: Globe,
-    title: "ProofLink Reputation",
-    desc: "Every transaction generates a verifiable on-chain proof. Payment history builds a reputation score that follows your agent across the ecosystem.",
+    title: "Payment Links",
+    desc: "Shareable payment links with custom amounts, token choice, and expiry. Payers check out in one click — no account or crypto experience required.",
   },
   {
     num: "04",
@@ -66,7 +66,7 @@ export function FeaturesSection() {
         <div className="max-w-5xl w-full mx-auto">
           <motion.div style={{ y: headerY, opacity: headerOp }} className="mb-12">
             <p className="text-xs font-mono text-emerald-400/70 tracking-[0.2em] uppercase mb-5">
-              / ProofLink Engine Capabilities
+              / FlowLink Capabilities
             </p>
             <h2 className="text-5xl md:text-6xl font-light text-white tracking-tight">
               Core Features

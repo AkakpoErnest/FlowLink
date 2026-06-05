@@ -22,9 +22,12 @@ export function ShaderBackground() {
     const isMobile = width < 768
     // Fewer, smaller particles on mobile for performance
     const particleCount = isMobile ? 60 : 130
+    const prefersReduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
     const mouse = { x: -9999, y: -9999 }
-    let animId: number
+    let animId = 0
     let time = 0
 
     const particles: {
@@ -52,15 +55,17 @@ export function ShaderBackground() {
       )
     }
 
-    window.addEventListener("mousemove", (e) => { mouse.x = e.clientX; mouse.y = e.clientY })
-    window.addEventListener("resize", () => {
+    function handleMouse(e: MouseEvent) { mouse.x = e.clientX; mouse.y = e.clientY }
+    function handleResize() {
       width = window.innerWidth
       height = window.innerHeight
       cv.width = width
       cv.height = height
-    })
+    }
+    window.addEventListener("mousemove", handleMouse)
+    window.addEventListener("resize", handleResize)
 
-    function draw() {
+    function renderFrame() {
       time += 0.002
       cx.clearRect(0, 0, width, height)
 
@@ -124,12 +129,36 @@ export function ShaderBackground() {
         cx.fillStyle = `rgba(167,243,208,${p.alpha})`
         cx.fill()
       }
-
-      animId = requestAnimationFrame(draw)
     }
 
-    draw()
-    return () => cancelAnimationFrame(animId)
+    function loop() {
+      renderFrame()
+      animId = requestAnimationFrame(loop)
+    }
+
+    // Pause the loop while the tab is hidden to save CPU/battery.
+    function handleVisibility() {
+      if (document.hidden) {
+        cancelAnimationFrame(animId)
+      } else {
+        animId = requestAnimationFrame(loop)
+      }
+    }
+
+    if (prefersReduced) {
+      // Honor the motion preference: paint a single static frame, no loop.
+      renderFrame()
+    } else {
+      document.addEventListener("visibilitychange", handleVisibility)
+      loop()
+    }
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener("mousemove", handleMouse)
+      window.removeEventListener("resize", handleResize)
+      document.removeEventListener("visibilitychange", handleVisibility)
+    }
   }, [])
 
   return (

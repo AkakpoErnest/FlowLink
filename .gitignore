@@ -3,9 +3,17 @@
 # dependencies
 /node_modules
 
-# next.js
+# next.js (match nested too, e.g. apps/web/.next/ — the original cause of repo bloat)
 /.next/
+.next/
 /out/
+
+# turbo
+.turbo
+
+# macOS
+.DS_Store
+**/.DS_Store
 
 # production
 /build

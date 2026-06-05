@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   useAccount,
   useSendTransaction,
@@ -112,9 +112,14 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
     }
   }
 
-  if ((nativeTxHash || erc20TxHash) && isConfirmed && !txSubmitted) {
-    handleConfirmed((nativeTxHash ?? erc20TxHash) as string)
-  }
+  useEffect(() => {
+    const hash = nativeTxHash ?? erc20TxHash
+    if (hash && isConfirmed && !txSubmitted) {
+      handleConfirmed(hash as string)
+    }
+    // re-run only when on-chain confirmation state changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConfirmed, nativeTxHash, erc20TxHash, txSubmitted])
 
   const handlePay = async () => {
     if (!recipientAddress || !targetChain) {
@@ -183,6 +188,7 @@ export function InvoicePaymentClient({ invoice, senderName, recipientAddress }: 
       </header>
 
       <div className="max-w-lg mx-auto px-4 py-10 space-y-5">
+        <h1 className="sr-only">Invoice {invoice.invoiceNumber} from {senderName}</h1>
 
         {/* Invoice card */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

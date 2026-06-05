@@ -90,13 +90,35 @@ export const authOptions: NextAuthOptions = {
         message: { label: "Message", type: "text" },
         signature: { label: "Signature", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.message || !credentials?.signature) return null
 
-        const siwe = new SiweMessage(JSON.parse(credentials.message))
-        const result = await siwe.verify({ signature: credentials.signature })
+        // Single-use nonce: the signed message's nonce must match the httpOnly
+        // cookie issued by GET /api/auth/nonce. Without this, a captured
+        // (message, signature) pair could be replayed to log in indefinitely.
+        const cookieHeader = (req as any)?.headers?.cookie as string | undefined
+        const nonce = cookieHeader
+          ?.split(";")
+          .map((c) => c.trim())
+          .find((c) => c.startsWith("siwe-nonce="))
+          ?.slice("siwe-nonce=".length)
+        if (!nonce) return null
 
-        if (!result.success) return null
+        // Domain binding: reject signatures produced for any other origin (phishing).
+        const headers = (req as any)?.headers ?? {}
+        const expectedDomain = (headers["x-forwarded-host"] ?? headers.host) as string | undefined
+
+        const siwe = new SiweMessage(JSON.parse(credentials.message))
+        try {
+          const result = await siwe.verify({
+            signature: credentials.signature,
+            nonce,
+            ...(expectedDomain ? { domain: expectedDomain } : {}),
+          })
+          if (!result.success) return null
+        } catch {
+          return null
+        }
 
         const address = siwe.address.toLowerCase()
 

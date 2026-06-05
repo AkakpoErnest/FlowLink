@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react"
 const stats = [
   { label: "Built on HashKey Chain" },
   { label: "Agent-to-Agent Ready" },
-  { label: "ProofLink Verified" },
+  { label: "Compliance Built In" },
 ]
 
 export function AboutSection() {

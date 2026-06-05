@@ -53,9 +53,14 @@ export async function POST(request: NextRequest) {
       console.error('[HSP webhook] Invalid signature — rejecting delivery')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    // Fail closed: never accept unsigned webhooks in production. Otherwise anyone
+    // who knows a cart_mandate_id (returned to clients) could mark invoices paid.
+    console.error('[HSP webhook] Rejected: HSP signing not configured in production')
+    return NextResponse.json({ error: 'Webhook signing not configured' }, { status: 503 })
   } else {
-    // Accept unsigned webhooks when HSP isn't configured (dev / testing)
-    console.warn('[HSP webhook] HSP not configured — skipping signature verification')
+    // Accept unsigned webhooks only outside production (local dev / testing)
+    console.warn('[HSP webhook] HSP not configured — skipping signature verification (non-production only)')
   }
 
   let payload: HSPWebhookPayload

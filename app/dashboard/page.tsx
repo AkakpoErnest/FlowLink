@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { DashboardLayout } from "@/components/dashboard-layout"
 import { DashboardOverview } from "@/components/dashboard-overview"
-import { ThemeProvider } from "@/components/theme-provider"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -31,10 +30,8 @@ export default function DashboardPage() {
   if (!session) return null
 
   return (
-    <ThemeProvider>
-      <DashboardLayout>
-        <DashboardOverview />
-      </DashboardLayout>
-    </ThemeProvider>
+    <DashboardLayout>
+      <DashboardOverview />
+    </DashboardLayout>
   )
 }

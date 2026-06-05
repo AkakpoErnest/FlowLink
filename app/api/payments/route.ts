@@ -184,15 +184,15 @@ export async function PUT(request: NextRequest) {
   const existing = await prisma.payment.findFirst({ where: { id, userId } })
   if (!existing) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
 
+  // Compliance verdicts (complianceScore / kycPassed / sanctionsChecked) are set
+  // server-side by the compliance engine only — never accept them from the client,
+  // or a user could launder a flagged payment into "kycPassed: true".
   const payment = await prisma.payment.update({
     where: { id },
     data: {
       ...(updates.status && { status: updates.status }),
       ...(updates.txHash && { txHash: updates.txHash }),
       ...(updates.gasUsed && { gasUsed: updates.gasUsed }),
-      ...(updates.complianceScore !== undefined && { complianceScore: updates.complianceScore }),
-      ...(updates.kycPassed !== undefined && { kycPassed: updates.kycPassed }),
-      ...(updates.sanctionsChecked !== undefined && { sanctionsChecked: updates.sanctionsChecked }),
     },
   })
 

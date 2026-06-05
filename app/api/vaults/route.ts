@@ -56,13 +56,21 @@ export async function PUT(request: NextRequest) {
   const userId = session.user.id
 
   const body = await request.json()
-  const { id, ...updates } = body
+  const { id } = body
 
   const existing = await prisma.complianceVault.findFirst({ where: { id, userId } })
   if (!existing) {
     return NextResponse.json({ success: false, error: "Vault not found" }, { status: 404 })
   }
 
-  const vault = await prisma.complianceVault.update({ where: { id }, data: updates })
+  // Allow-list of client-mutable fields. riskScore / totalVolume /
+  // monthlyTransactions are computed server-side and must never be set by the
+  // client (forging your own compliance score), and userId must not be reassignable.
+  const data: Record<string, unknown> = {}
+  if (typeof body.name === "string") data.name = body.name
+  if (typeof body.status === "string") data.status = body.status
+  if (body.policies !== undefined) data.policies = body.policies
+
+  const vault = await prisma.complianceVault.update({ where: { id }, data })
   return NextResponse.json({ success: true, data: vault })
 }
